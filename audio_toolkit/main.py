@@ -9,7 +9,7 @@ from pathlib import Path
 def parse_args():
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Small Audio Toolkit - Scientific audio signal analysis"
+        description="Small Audio Toolkit - audio signal analysis"
     )
     
     parser.add_argument(

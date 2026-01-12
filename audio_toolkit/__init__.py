@@ -1,7 +1,7 @@
 """
 Small Audio Toolkit
 
-A configurable scientific audio analysis tool for detecting
+A configurable audio analysis tool for detecting
 informational structures in audio signals.
 """
 

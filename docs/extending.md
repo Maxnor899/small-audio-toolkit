@@ -332,7 +332,7 @@ Verify the JSON output contains your method's results.
 
 When contributing new methods to the project:
 
-1. Ensure scientific validity
+1. Ensure validity
 2. Provide references where applicable
 3. Include comprehensive documentation
 4. Add appropriate default parameters

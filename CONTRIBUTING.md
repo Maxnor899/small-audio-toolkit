@@ -4,7 +4,7 @@ Thank you for your interest in contributing to this project.
 
 ## Core Principles
 
-This project maintains strict scientific rigor:
+This project aims at mintaining rigor:
 
 1. No semantic interpretation - only objective measurements
 2. Full reproducibility and traceability
@@ -59,11 +59,11 @@ Before submitting:
 3. Ensure results are reproducible
 4. Check JSON export is valid
 
-## Scientific Validity
+## Proven Validity
 
 New analysis methods should:
 
-- Be based on established scientific principles
+- Be based on established principles
 - Include references to papers/standards where applicable
 - Produce measurements, not interpretations
 - Handle numerical edge cases appropriately

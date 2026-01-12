@@ -1,10 +1,10 @@
 # Small Audio Toolkit
 
-A configurable, scientific audio analysis toolkit designed to detect non-trivial informational structures in audio files through objective measurements.
+A configurable audio analysis toolkit designed to detect non-trivial informational structures in audio files through objective measurements.
 
 ## Overview
 
-This toolkit provides a reproducible framework for analyzing audio signals using proven scientific methods. It is particularly suited for exploring intentionally designed audio signals (game design, ARGs, steganography) without automatic semantic interpretation.
+This toolkit provides a reproducible framework for analyzing audio signals using proven methods. It is particularly suited for exploring intentionally designed audio signals (game design, ARGs, steganography) without automatic semantic interpretation.
 
 ## Key Principles
 
@@ -17,7 +17,7 @@ This toolkit provides a reproducible framework for analyzing audio signals using
 ## Features
 
 - Multi-channel audio support (mono, stereo, multi-channel)
-- 9 categories of scientific analyses:
+- 9 categories of analyses:
   - Preprocessing
   - Temporal analysis
   - Frequency analysis

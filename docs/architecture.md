@@ -63,7 +63,7 @@ The engine is responsible for:
 4. Executing declared methods
 5. Collecting and exporting results
 
-It **contains no scientific logic**.
+It **contains no sound processing logic**.
 
 ### Flow
 
@@ -90,7 +90,7 @@ All methods are registered in a global registry.
 Each registry entry associates:
 
 - A unique identifier
-- A scientific category
+- A category
 - An analysis function
 
 The engine calls methods **by their identifier**, as defined in the configuration file.
@@ -99,7 +99,7 @@ The engine calls methods **by their identifier**, as defined in the configuratio
 
 ### Principle
 
-Each module groups methods sharing the same scientific intent.
+Each module groups methods sharing the same intent.
 
 Methods:
 
@@ -187,4 +187,4 @@ The engine should never be modified to add an analysis.
 
 ## Design Philosophy
 
-This architecture is designed to produce a **scientific audio analysis tool**, reproducible and shareable, suitable for exploring intentionally designed artificial signals (game design, ARG, steganography).
+This architecture is designed to produce an ** audio analysis tool**, reproducible and shareable, suitable for exploring intentionally designed artificial signals (game design, ARG, steganography).

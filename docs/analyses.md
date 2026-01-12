@@ -1,6 +1,6 @@
 # Analysis Catalog
 
-This document describes **all envisioned analyses**, grouped by **scientific analysis class**. It serves as a methodological reference and configuration base for the audio analysis pipeline.
+This document describes **all envisioned analyses**, grouped by **analysis class**. It serves as a methodological reference and configuration base for the audio analysis pipeline.
 
 No analysis listed here performs semantic or narrative interpretation. All produce only **objective measurements**.
 
@@ -188,7 +188,7 @@ Each method has:
 - A unique identifier used in configuration
 - Clear input parameters
 - Well-defined output format
-- Scientific references where applicable
+- References where applicable
 
 ## Implementation Notes
 

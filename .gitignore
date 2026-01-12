@@ -53,3 +53,15 @@ htmlcov/
 # Documentation build
 docs/api/
 site/
+audio_toolkit.zip
+results/config_used.json
+results/results.json
+results/visualizations/multi_channel_overview.png
+results/visualizations/spectrum_difference.png
+results/visualizations/spectrum_left.png
+results/visualizations/spectrum_right.png
+results/visualizations/spectrum_sum.png
+results/visualizations/waveform_difference.png
+results/visualizations/waveform_left.png
+results/visualizations/waveform_right.png
+results/visualizations/waveform_sum.png

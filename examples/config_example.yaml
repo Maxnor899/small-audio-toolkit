@@ -1,0 +1,209 @@
+# Example Configuration for Audio Analysis Pipeline
+# This configuration demonstrates common analysis patterns
+
+version: "1.0"
+
+# Preprocessing steps applied before analysis
+preprocessing:
+  normalize:
+    enabled: true
+    method: "rms"  # Options: "rms", "lufs"
+    target_level: -20.0  # dB
+  
+  silence_detection:
+    enabled: true
+    threshold_db: -40.0
+    min_duration: 0.1  # seconds
+  
+  segmentation:
+    enabled: false
+    method: "energy"
+    segment_duration: 1.0
+
+# Channels to analyze
+channels:
+  analyze: ["left", "right", "sum", "difference"]
+  # Options: "left", "right", "mono", "sum", "difference"
+
+# Analysis methods organized by category
+analyses:
+  
+  # Temporal domain analysis
+  temporal:
+    enabled: true
+    methods:
+      - name: "envelope"
+        params:
+          method: "hilbert"
+      
+      - name: "autocorrelation"
+        params:
+          max_lag: 1000
+          normalize: true
+      
+      - name: "pulse_detection"
+        params:
+          threshold: 0.5
+          min_distance: 100
+  
+  # Frequency domain analysis
+  spectral:
+    enabled: true
+    methods:
+      - name: "fft_global"
+        params:
+          window: "hann"
+      
+      - name: "peak_detection"
+        params:
+          prominence: 10.0
+          distance: 100
+          height: null
+      
+      - name: "harmonic_analysis"
+        params:
+          fundamental_range: [80.0, 400.0]
+          max_harmonics: 10
+      
+      - name: "cepstrum"
+        params: {}
+      
+      - name: "spectral_centroid"
+        params: {}
+      
+      - name: "spectral_bandwidth"
+        params: {}
+      
+      - name: "spectral_flatness"
+        params: {}
+  
+  # Time-frequency analysis
+  time_frequency:
+    enabled: true
+    methods:
+      - name: "stft"
+        params:
+          n_fft: 2048
+          hop_length: 512
+          window: "hann"
+      
+      - name: "cqt"
+        params:
+          n_bins: 84
+          bins_per_octave: 12
+      
+      - name: "wavelet"
+        params:
+          wavelet: "morlet"
+          scales: [1, 2, 4, 8, 16, 32, 64]
+      
+      - name: "band_stability"
+        params:
+          frequency_bands: 
+            - [100, 500]
+            - [500, 2000]
+            - [2000, 8000]
+  
+  # Modulation analysis
+  modulation:
+    enabled: true
+    methods:
+      - name: "am_detection"
+        params:
+          carrier_range: [1000.0, 10000.0]
+      
+      - name: "fm_detection"
+        params:
+          method: "hilbert"
+      
+      - name: "phase_analysis"
+        params: {}
+      
+      - name: "modulation_index"
+        params: {}
+  
+  # Information theory analysis
+  information:
+    enabled: true
+    methods:
+      - name: "shannon_entropy"
+        params:
+          window_size: 1024
+          normalize: true
+      
+      - name: "local_entropy"
+        params:
+          window_size: 1024
+          hop_length: 512
+      
+      - name: "compression_ratio"
+        params:
+          algorithm: "gzip"
+      
+      - name: "approximate_complexity"
+        params: {}
+  
+  # Inter-channel analysis (requires stereo/multi-channel audio)
+  inter_channel:
+    enabled: true
+    methods:
+      - name: "cross_correlation"
+        params:
+          max_lag: 100
+      
+      - name: "lr_difference"
+        params: {}
+      
+      - name: "phase_difference"
+        params:
+          frequency_bands:
+            - [100, 500]
+            - [500, 2000]
+            - [2000, 8000]
+            - [8000, 16000]
+      
+      - name: "time_delay"
+        params: {}
+  
+  # Steganography exploration (experimental)
+  steganography:
+    enabled: false
+    methods:
+      - name: "lsb_analysis"
+        params:
+          bit_depth: 16
+      
+      - name: "quantization_noise"
+        params: {}
+      
+      - name: "signal_residual"
+        params:
+          filter_type: "lowpass"
+          cutoff: 1000.0
+  
+  # Meta-analysis
+  meta_analysis:
+    enabled: false
+    methods:
+      - name: "segment_comparison"
+        params: {}
+      
+      - name: "clustering"
+        params:
+          n_clusters: 5
+      
+      - name: "stability_scores"
+        params: {}
+
+# Visualization options
+visualization:
+  enabled: true
+  formats: ["png"]  # Options: "png", "svg", "pdf"
+  dpi: 300
+  figsize: [12, 8]
+
+# Output configuration
+output:
+  save_raw_data: true
+  save_config: true
+  export_formats: ["json"]  # Options: "json", "csv"

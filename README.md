@@ -1,3 +1,11 @@
+## A Note on This Project's Development
+
+Yes, this project was built with extensive assistance from Claude AI to compensate for the author's chronic lack of development skills. 
+Even worse, Claude and the author share an equal talent for wild hallucinations, which is probably why they work so well together.
+If you think this makes the author a monster, a fraud, an illusionist, or a coding muggle, feel free to move along.
+However, if you're willing to give this project the benefit of curiosity, you'll have the opportunity to judge its relevance for yourself. 
+Who knows, you might even want to contribute.
+
 # Small Audio Toolkit
 
 A configurable, audio analysis toolkit designed to detect non-trivial informational structures in audio files through objective measurements.

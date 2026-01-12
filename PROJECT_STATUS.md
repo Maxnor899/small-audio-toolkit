@@ -98,17 +98,6 @@ small-audio-toolkit/
 - [x] Contributing guide - Complete
 - [ ] API documentation - Pending (requires code)
 
-## Ready for Local Use
-
-The toolkit structure is ready to be initialized as a git repository:
-
-```bash
-cd small-audio-toolkit
-git init
-git add .
-git commit -m "Initial commit: project structure and documentation"
-```
-
 ## Usage Notes
 
 This is a command-line tool. No web deployment or hosting required.
@@ -123,11 +112,3 @@ Documentation files are in `docs/` directory and can be read directly.
 4. Generate API documentation
 5. Create sample outputs
 
-## Notes
-
-- All documentation is in English
-- Code follows PEP8 standards
-- Type hints will be used throughout
-- No unnecessary abstractions
-- Configuration-driven design maintained
-- CLI-focused tool (no web interface)

@@ -3,9 +3,13 @@ Multi-channel audio file loading.
 """
 
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Dict, Any
 import numpy as np
 import soundfile as sf
+
+from ..utils.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class AudioLoader:
@@ -29,10 +33,27 @@ class AudioLoader:
             FileNotFoundError: If audio file doesn't exist
             RuntimeError: If file format is unsupported
         """
-        pass
+        audio_path = Path(audio_path)
+        
+        if not audio_path.exists():
+            raise FileNotFoundError(f"Audio file not found: {audio_path}")
+        
+        if not audio_path.is_file():
+            raise ValueError(f"Path is not a file: {audio_path}")
+        
+        try:
+            logger.info(f"Loading audio file: {audio_path}")
+            audio_data, sample_rate = sf.read(str(audio_path), dtype='float32')
+            
+            logger.info(f"Loaded: {audio_data.shape}, {sample_rate} Hz")
+            
+            return audio_data, sample_rate
+            
+        except RuntimeError as e:
+            raise RuntimeError(f"Failed to load audio file {audio_path}: {e}")
     
     @staticmethod
-    def get_audio_info(audio_path: Path) -> dict:
+    def get_audio_info(audio_path: Path) -> Dict[str, Any]:
         """
         Get audio file information without loading data.
         
@@ -40,6 +61,27 @@ class AudioLoader:
             audio_path: Path to audio file
             
         Returns:
-            Dictionary with: sample_rate, channels, duration, format
+            Dictionary with: sample_rate, channels, duration, format, subtype
+            
+        Raises:
+            FileNotFoundError: If audio file doesn't exist
         """
-        pass
+        audio_path = Path(audio_path)
+        
+        if not audio_path.exists():
+            raise FileNotFoundError(f"Audio file not found: {audio_path}")
+        
+        try:
+            info = sf.info(str(audio_path))
+            
+            return {
+                'sample_rate': info.samplerate,
+                'channels': info.channels,
+                'duration': info.duration,
+                'frames': info.frames,
+                'format': info.format,
+                'subtype': info.subtype
+            }
+            
+        except RuntimeError as e:
+            raise RuntimeError(f"Failed to read audio info from {audio_path}: {e}")

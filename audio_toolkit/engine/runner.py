@@ -4,7 +4,7 @@ Main orchestrator for the analysis pipeline.
 
 from pathlib import Path
 from typing import Dict, Any
-import shutil
+import numpy as np
 
 from .context import AnalysisContext
 from .results import ResultsAggregator, AnalysisResult
@@ -13,6 +13,7 @@ from ..audio.loader import AudioLoader
 from ..audio.channels import ChannelProcessor
 from ..audio.preprocessing import Preprocessor
 from ..config.loader import ConfigLoader
+from ..visualization.plots import Visualizer
 from ..utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -35,6 +36,12 @@ class AnalysisRunner:
         self.config = config
         self.registry = get_registry()
         self.results = ResultsAggregator()
+        
+        viz_config = config.get('visualization', {})
+        if viz_config.get('enabled', False):
+            self.visualizer = Visualizer(viz_config)
+        else:
+            self.visualizer = None
     
     def run(self, audio_path: Path, output_path: Path) -> None:
         """
@@ -52,6 +59,9 @@ class AnalysisRunner:
         output_path.mkdir(parents=True, exist_ok=True)
         
         context = self._load_audio(audio_path)
+        
+        if self.visualizer is not None:
+            self._generate_basic_visualizations(context, output_path)
         
         self._execute_analyses(context)
         
@@ -159,6 +169,59 @@ class AnalysisRunner:
         segments = Preprocessor.segment_audio(first_channel, sample_rate, method, duration)
         
         return segments
+    
+    def _generate_basic_visualizations(
+        self,
+        context: AnalysisContext,
+        output_path: Path
+    ) -> None:
+        """
+        Generate basic visualizations for all channels.
+        
+        Args:
+            context: Analysis context
+            output_path: Output directory
+        """
+        viz_dir = output_path / "visualizations"
+        viz_dir.mkdir(exist_ok=True)
+        
+        logger.info("Generating basic visualizations...")
+        
+        for channel_name, audio_data in context.audio_data.items():
+            
+            waveform_path = viz_dir / f"waveform_{channel_name}"
+            max_samples = min(len(audio_data), 100000)
+            self.visualizer.plot_waveform(
+                audio_data[:max_samples],
+                context.sample_rate,
+                waveform_path,
+                f"Waveform - {channel_name}"
+            )
+            
+            spectrum = np.fft.rfft(audio_data)
+            freqs = np.fft.rfftfreq(len(audio_data), 1 / context.sample_rate)
+            spectrum_path = viz_dir / f"spectrum_{channel_name}"
+            self.visualizer.plot_spectrum(
+                freqs,
+                np.abs(spectrum),
+                spectrum_path,
+                f"Spectrum - {channel_name}"
+            )
+        
+        if len(context.audio_data) > 1:
+            multi_path = viz_dir / "multi_channel_overview"
+            sample_data = {
+                name: audio[:min(len(audio), 50000)]
+                for name, audio in context.audio_data.items()
+            }
+            self.visualizer.plot_multi_channel(
+                sample_data,
+                context.sample_rate,
+                multi_path,
+                "All Channels Overview"
+            )
+        
+        logger.info(f"Basic visualizations saved to: {viz_dir}")
     
     def _execute_analyses(self, context: AnalysisContext) -> None:
         """

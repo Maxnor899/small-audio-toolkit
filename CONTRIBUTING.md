@@ -86,4 +86,4 @@ For questions about:
 
 ## Code of Conduct
 
-Be professional, respectful, and constructive. This is a scientific tool meant for exploration and discovery.
+Be respectful, and constructive. This is a hopefully cool tool meant for exploration and discovery.

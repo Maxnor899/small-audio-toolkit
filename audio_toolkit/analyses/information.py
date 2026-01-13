@@ -175,11 +175,13 @@ def approximate_complexity(context: AnalysisContext, params: Dict[str, Any]) -> 
     
     for channel_name, audio_data in context.audio_data.items():
         
-        # Limit for performance
-        max_samples = 50000
+        # CRITICAL: O(n²) complexity - must use very small sample size
+        # 5000 samples = 25M comparisons (~5 seconds)
+        # 50000 samples = 2.5B comparisons (~8 minutes)
+        max_samples = 5000
         if len(audio_data) > max_samples:
             audio_subset = audio_data[:max_samples]
-            logger.warning(f"Approximate complexity: using first {max_samples} samples")
+            logger.warning(f"Approximate complexity: using first {max_samples} samples (O(n²) algorithm)")
         else:
             audio_subset = audio_data
         

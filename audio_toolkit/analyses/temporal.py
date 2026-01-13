@@ -75,19 +75,27 @@ def autocorrelation_analysis(context: AnalysisContext, params: Dict[str, Any]) -
     
     Args:
         context: Analysis context
-        params: max_lag, normalize
+        params: max_lag, normalize, max_samples
         
     Returns:
         AnalysisResult with autocorrelation data
     """
     max_lag = params.get('max_lag', 1000)
     normalize = params.get('normalize', True)
+    max_samples = params.get('max_samples', 50000)  # CRITICAL: limit samples for performance
     
     measurements = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
-        autocorr = np.correlate(audio_data, audio_data, mode='full')
+        # CRITICAL OPTIMIZATION: limit samples to avoid 4+ hour computation
+        if len(audio_data) > max_samples:
+            audio_subset = audio_data[:max_samples]
+            logger.warning(f"Autocorrelation: using first {max_samples} samples (out of {len(audio_data)}) for {channel_name}")
+        else:
+            audio_subset = audio_data
+        
+        autocorr = np.correlate(audio_subset, audio_subset, mode='full')
         autocorr = autocorr[len(autocorr) // 2:]
         
         autocorr = autocorr[:max_lag]
@@ -110,7 +118,7 @@ def autocorrelation_analysis(context: AnalysisContext, params: Dict[str, Any]) -
     return AnalysisResult(
         method='autocorrelation',
         measurements=measurements,
-        metrics={'max_lag': max_lag, 'normalized': normalize}
+        metrics={'max_lag': max_lag, 'normalized': normalize, 'max_samples': max_samples}
     )
 
 

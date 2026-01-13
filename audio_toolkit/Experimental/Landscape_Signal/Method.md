@@ -8,7 +8,7 @@ The approach followed a progressive funnel, starting from classical modulation a
 
 ---
 
-## Step 1 – Classical Signal Analysis (Unsuccessful by Design)
+## Step 1 – Classical Signal Analysis (Unsuccessful)
 
 The investigation began with conventional signal-processing methods:
 

@@ -243,9 +243,90 @@ def spectral_flatness(context: AnalysisContext, params: Dict[str, Any]) -> Analy
     )
 
 
+def cepstrum_analysis(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResult:
+    """
+    Cepstrum analysis.
+    """
+    measurements = {}
+    
+    for channel_name, audio_data in context.audio_data.items():
+        
+        max_samples = 100000
+        if len(audio_data) > max_samples:
+            audio_subset = audio_data[:max_samples]
+            logger.warning(f"Cepstrum: using first {max_samples} samples")
+        else:
+            audio_subset = audio_data
+        
+        spectrum = np.fft.fft(audio_subset)
+        log_spectrum = np.log(np.abs(spectrum) + 1e-10)
+        cepstrum = np.fft.ifft(log_spectrum).real
+        
+        quefrency = np.arange(len(cepstrum)) / context.sample_rate
+        
+        cepstrum_magnitude = np.abs(cepstrum[:len(cepstrum)//2])
+        quefrency_axis = quefrency[:len(cepstrum)//2]
+        
+        peak_idx = np.argmax(cepstrum_magnitude[1:]) + 1
+        peak_quefrency = quefrency_axis[peak_idx]
+        peak_magnitude = cepstrum_magnitude[peak_idx]
+        
+        measurements[channel_name] = {
+            'peak_quefrency': float(peak_quefrency),
+            'peak_magnitude': float(peak_magnitude),
+            'cepstrum_mean': float(np.mean(cepstrum_magnitude)),
+            'cepstrum_std': float(np.std(cepstrum_magnitude)),
+            'samples_analyzed': len(audio_subset)
+        }
+    
+    logger.info(f"Cepstrum for {len(context.audio_data)} channels")
+    
+    return AnalysisResult(
+        method='cepstrum',
+        measurements=measurements
+    )
+
+
+def spectral_bandwidth(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResult:
+    """
+    Spectral bandwidth.
+    """
+    measurements = {}
+    
+    for channel_name, audio_data in context.audio_data.items():
+        
+        spectrum = np.fft.rfft(audio_data)
+        magnitude = np.abs(spectrum)
+        freqs = np.fft.rfftfreq(len(audio_data), 1/context.sample_rate)
+        
+        power = magnitude ** 2
+        total_power = np.sum(power)
+        
+        if total_power > 0:
+            centroid = np.sum(freqs * power) / total_power
+            bandwidth = np.sqrt(np.sum(((freqs - centroid) ** 2) * power) / total_power)
+        else:
+            centroid = 0
+            bandwidth = 0
+        
+        measurements[channel_name] = {
+            'spectral_bandwidth': float(bandwidth),
+            'spectral_centroid_Hz': float(centroid)
+        }
+    
+    logger.info(f"Spectral bandwidth for {len(context.audio_data)} channels")
+    
+    return AnalysisResult(
+        method='spectral_bandwidth',
+        measurements=measurements
+    )
+
+
 # Register methods
 register_method("fft_global", "spectral", fft_global, "Global FFT spectrum")
 register_method("peak_detection", "spectral", peak_detection, "Spectral peak detection")
 register_method("harmonic_analysis", "spectral", harmonic_analysis, "Harmonic structure analysis")
 register_method("spectral_centroid", "spectral", spectral_centroid, "Spectral centroid")
 register_method("spectral_flatness", "spectral", spectral_flatness, "Spectral flatness")
+register_method("cepstrum", "spectral", cepstrum_analysis, "Cepstrum analysis")
+register_method("spectral_bandwidth", "spectral", spectral_bandwidth, "Spectral bandwidth")

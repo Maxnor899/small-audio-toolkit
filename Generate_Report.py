@@ -45,30 +45,76 @@ REFERENCE_THRESHOLDS = {
         'moderate': 0.6,
         'high': 0.8,
         'note': 'Inter-channel phase consistency (0-1)'
+    },
+    'shannon_entropy': {
+        'low': 3.0,
+        'moderate': 5.0,
+        'high': 7.0,
+        'note': 'Information entropy in bits (higher = more random/complex)'
+    },
+    'compression_ratio': {
+        'high_compressibility': 0.3,
+        'moderate': 0.5,
+        'low_compressibility': 0.7,
+        'note': 'Compressed size / original size (lower = more compressible/structured)'
+    },
+    'spectral_bandwidth': {
+        'narrow': 1000,
+        'moderate': 5000,
+        'wide': 10000,
+        'note': 'Spectral bandwidth in Hz'
     }
 }
 
 # Key metrics to observe for each method
 KEY_METRICS_PER_METHOD = {
+    # TEMPORAL
     'envelope': ['envelope_mean', 'envelope_max', 'envelope_std'],
     'autocorrelation': ['periodicity_score', 'first_peak_lag', 'num_peaks'],
     'pulse_detection': ['num_pulses', 'interval_mean', 'regularity_score'],
+    'duration_ratios': ['num_events', 'ratio_mean', 'ratio_std'],
+    
+    # SPECTRAL
     'fft_global': ['peak_frequency', 'peak_magnitude', 'spectral_energy'],
     'peak_detection': ['num_peaks', 'dominant_frequency', 'frequency_spread'],
     'harmonic_analysis': ['fundamental_frequency', 'harmonicity_score', 'harmonics_detected'],
     'spectral_centroid': ['spectral_centroid', 'normalized_centroid'],
     'spectral_flatness': ['spectral_flatness', 'tonality'],
+    'cepstrum': ['peak_quefrency', 'peak_magnitude', 'cepstrum_mean'],
+    'spectral_bandwidth': ['spectral_bandwidth', 'spectral_centroid_Hz'],
+    
+    # TIME-FREQUENCY
     'stft': ['temporal_stability', 'dominant_freq_mean', 'spectral_flux_mean'],
     'band_stability': ['stability_score', 'mean_energy', 'variation_coefficient'],
     'wavelet': ['mean_magnitude', 'max_magnitude', 'energy_concentration'],
+    
+    # MODULATION
     'am_detection': ['modulation_detected', 'modulation_index', 'modulation_depth'],
     'fm_detection': ['fm_detected', 'frequency_deviation', 'carrier_frequency_mean'],
     'phase_analysis': ['phase_coherence', 'num_phase_jumps', 'phase_std'],
     'modulation_index': ['modulation_index', 'modulation_depth', 'peak_to_average_ratio'],
+    
+    # INFORMATION
+    'shannon_entropy': ['entropy', 'normalized_entropy'],
+    'local_entropy': ['mean_local_entropy', 'std_local_entropy', 'max_local_entropy'],
+    'compression_ratio': ['compression_ratio', 'original_size', 'compressed_size'],
+    'approximate_complexity': ['complexity_score', 'normalized_complexity'],
+    
+    # INTER-CHANNEL
     'cross_correlation': ['max_correlation', 'peak_lag', 'correlation_at_zero'],
     'lr_difference': ['energy_ratio', 'difference_peak_freq', 'contains_unique_info'],
     'phase_difference': ['phase_diff_mean', 'phase_coherence', 'in_phase'],
-    'time_delay': ['delay_samples', 'delay_ms', 'is_synchronized']
+    'time_delay': ['delay_samples', 'delay_ms', 'is_synchronized'],
+    
+    # STEGANOGRAPHY
+    'lsb_analysis': ['lsb_entropy', 'lsb_randomness', 'chi_square_stat'],
+    'quantization_noise': ['noise_periodicity', 'noise_energy', 'autocorr_peak'],
+    'signal_residual': ['residual_energy', 'residual_to_signal_ratio', 'residual_peaks'],
+    
+    # META-ANALYSIS
+    'inter_segment_comparison': ['num_segments', 'similarity_mean', 'similarity_std'],
+    'segment_clustering': ['num_clusters', 'silhouette_score', 'cluster_sizes'],
+    'stability_scores': ['temporal_stability', 'spectral_stability', 'overall_stability']
 }
 
 
@@ -148,7 +194,7 @@ def _preprocessing_lines(results: dict) -> List[str]:
 
 
 # ---------------------------------------------------------------------
-# Extract key metrics (same spirit as your original)
+# Extract key metrics (extended for all methods)
 # ---------------------------------------------------------------------
 def extract_key_metrics(results: dict) -> List[Dict[str, Any]]:
     """Extract key metrics for summary section."""
@@ -250,11 +296,61 @@ def extract_key_metrics(results: dict) -> List[Dict[str, Any]]:
             'unit': 'normalized (0-1)'
         })
 
+    # Shannon Entropy
+    entropy_values = {}
+    for method in results.get('results', {}).get('information', []):
+        if method.get('method') == 'shannon_entropy':
+            for channel, data in method.get('measurements', {}).items():
+                if isinstance(data, dict) and 'entropy' in data:
+                    entropy_values[channel] = data['entropy']
+
+    if entropy_values:
+        ref = REFERENCE_THRESHOLDS['shannon_entropy']
+        metrics.append({
+            'name': 'Shannon Entropy',
+            'values': entropy_values,
+            'reference': f"low < {ref['low']}, moderate < {ref['moderate']}, high > {ref['high']}",
+            'unit': 'bits'
+        })
+
+    # Compression Ratio
+    compression_values = {}
+    for method in results.get('results', {}).get('information', []):
+        if method.get('method') == 'compression_ratio':
+            for channel, data in method.get('measurements', {}).items():
+                if isinstance(data, dict) and 'compression_ratio' in data:
+                    compression_values[channel] = data['compression_ratio']
+
+    if compression_values:
+        ref = REFERENCE_THRESHOLDS['compression_ratio']
+        metrics.append({
+            'name': 'Compression Ratio',
+            'values': compression_values,
+            'reference': f"high_compressibility < {ref['high_compressibility']}, low_compressibility > {ref['low_compressibility']}",
+            'unit': 'ratio (compressed/original)'
+        })
+
+    # L-R Difference Energy Ratio
+    lr_values = {}
+    for method in results.get('results', {}).get('inter_channel', []):
+        if method.get('method') == 'lr_difference':
+            for key, data in method.get('measurements', {}).items():
+                if isinstance(data, dict) and 'energy_ratio' in data:
+                    lr_values[key] = data['energy_ratio']
+
+    if lr_values:
+        metrics.append({
+            'name': 'L-R Energy Ratio',
+            'values': lr_values,
+            'reference': 'higher values indicate more unique information in stereo field',
+            'unit': 'ratio'
+        })
+
     return metrics
 
 
 # ---------------------------------------------------------------------
-# Observations: factual, cautious, non-conclusive
+# Observations: factual, cautious, non-conclusive (EXTENDED)
 # ---------------------------------------------------------------------
 def generate_observations(results: dict) -> List[Dict[str, Any]]:
     """
@@ -316,6 +412,30 @@ def generate_observations(results: dict) -> List[Dict[str, Any]]:
                     reference=f"high > {high}, very_high > {very_high}",
                     observation="One or more channels show high periodicity relative to reference thresholds.",
                     possible_indication="High periodicity can be consistent with highly regular or synthetic patterns; further checks are needed to rule out natural periodic sources (e.g., sustained tones)."
+                )
+
+        elif mname == "pulse_detection":
+            lines = []
+            flagged = False
+            for ch, data in meas.items():
+                if not isinstance(data, dict):
+                    continue
+                num = data.get("num_pulses")
+                reg = data.get("regularity_score")
+                if num is None:
+                    continue
+                lines.append(f"{ch}: num_pulses={num}, regularity_score={format_value(reg)}")
+                if isinstance(reg, (int, float)) and reg >= 0.9 and isinstance(num, int) and num >= 10:
+                    flagged = True
+
+            if flagged:
+                add_obs(
+                    category="Regular Pulse Pattern",
+                    description="Pulse detection identifies discrete impulse-like events in the signal.",
+                    measurements=lines,
+                    reference="high regularity (>0.9) with many pulses suggests systematic events",
+                    observation="At least one channel shows highly regular pulse patterns.",
+                    possible_indication="Regular pulses can be consistent with clock signals or discrete state transitions; verify temporal context and modulation patterns."
                 )
 
     # SPECTRAL
@@ -387,6 +507,32 @@ def generate_observations(results: dict) -> List[Dict[str, Any]]:
                     possible_indication="High tonality can be consistent with discrete carriers or synthetic tones; check for modulation or discrete state changes to assess data-bearing hypotheses."
                 )
 
+        elif mname == "spectral_bandwidth":
+            ref = REFERENCE_THRESHOLDS.get("spectral_bandwidth", {})
+            narrow = ref.get("narrow")
+            
+            lines = []
+            flagged = False
+            for ch, data in meas.items():
+                if not isinstance(data, dict):
+                    continue
+                bw = data.get("spectral_bandwidth")
+                if bw is None:
+                    continue
+                lines.append(f"{ch}: spectral_bandwidth={format_value(bw)} Hz")
+                if isinstance(bw, (int, float)) and narrow is not None and bw < narrow:
+                    flagged = True
+
+            if flagged:
+                add_obs(
+                    category="Narrow Spectral Bandwidth",
+                    description="Spectral bandwidth measures the concentration of spectral energy.",
+                    measurements=lines,
+                    reference=f"narrow < {narrow} Hz",
+                    observation="At least one channel shows narrow spectral bandwidth.",
+                    possible_indication="Narrow bandwidth can indicate concentrated carrier frequency; typical of synthesized or modulated signals."
+                )
+
     # TIME-FREQUENCY
     for method in iter_methods("time_frequency"):
         mname = method.get("method", "")
@@ -414,6 +560,30 @@ def generate_observations(results: dict) -> List[Dict[str, Any]]:
                     reference="high temporal_stability suggests low variation across frames",
                     observation="At least one channel shows high time-frequency stability.",
                     possible_indication="Unusually stable spectral content can be consistent with engineered carriers; validate against natural sustained tones and check modulation signatures."
+                )
+
+        elif mname == "band_stability":
+            lines = []
+            flagged = False
+            for ch, data in meas.items():
+                if not isinstance(data, dict):
+                    continue
+                # data is actually a dict of bands
+                for band_name, band_data in data.items():
+                    if isinstance(band_data, dict):
+                        stab = band_data.get("stability_score")
+                        if isinstance(stab, (int, float)) and stab >= 0.9:
+                            lines.append(f"{ch}/{band_name}: stability_score={format_value(stab)}")
+                            flagged = True
+
+            if flagged:
+                add_obs(
+                    category="High Band Stability",
+                    description="Band stability measures how constant energy remains in specific frequency bands over time.",
+                    measurements=lines,
+                    reference="stability_score > 0.9 indicates very stable energy",
+                    observation="One or more frequency bands show very high stability over time.",
+                    possible_indication="High band stability can indicate sustained carrier or tonal component; verify with harmonic and modulation analysis."
                 )
 
     # MODULATION
@@ -453,6 +623,28 @@ def generate_observations(results: dict) -> List[Dict[str, Any]]:
                     possible_indication="Consistent AM patterns can be compatible with envelope-based encoding hypotheses; verify with time-frequency and periodicity context."
                 )
 
+        elif mname == "fm_detection":
+            lines = []
+            flagged = False
+            for ch, data in meas.items():
+                if not isinstance(data, dict):
+                    continue
+                fm_det = data.get("fm_detected")
+                freq_dev = data.get("frequency_deviation")
+                if fm_det is True and freq_dev is not None:
+                    lines.append(f"{ch}: fm_detected={fm_det}, frequency_deviation={format_value(freq_dev)} Hz")
+                    flagged = True
+
+            if flagged:
+                add_obs(
+                    category="Frequency Modulation Detected (FM)",
+                    description="FM detection identifies significant variations in instantaneous frequency.",
+                    measurements=lines,
+                    reference="fm_detected=True indicates non-trivial frequency modulation",
+                    observation="At least one channel shows frequency modulation.",
+                    possible_indication="FM can be consistent with FSK or frequency-based encoding; examine STFT for discrete frequency states."
+                )
+
         elif mname == "phase_analysis":
             ref = REFERENCE_THRESHOLDS.get("phase_coherence", {})
             low = ref.get("low")
@@ -483,6 +675,117 @@ def generate_observations(results: dict) -> List[Dict[str, Any]]:
                     reference=f"low coherence < {low}, moderate < {moderate}; many jumps can suggest discrete switching",
                     observation="At least one channel shows low/moderate phase coherence and/or numerous phase jumps.",
                     possible_indication="This can be compatible with phase-based switching hypotheses (e.g., PSK-like behavior), but requires corroboration from other indicators."
+                )
+
+    # INFORMATION
+    for method in iter_methods("information"):
+        mname = method.get("method", "")
+        meas = method.get("measurements", {})
+
+        if mname == "shannon_entropy":
+            ref = REFERENCE_THRESHOLDS.get("shannon_entropy", {})
+            low = ref.get("low")
+            
+            lines = []
+            flagged = False
+            for ch, data in meas.items():
+                if not isinstance(data, dict):
+                    continue
+                ent = data.get("entropy")
+                if ent is None:
+                    continue
+                lines.append(f"{ch}: entropy={format_value(ent)} bits")
+                if isinstance(ent, (int, float)) and low is not None and ent < low:
+                    flagged = True
+
+            if flagged:
+                add_obs(
+                    category="Low Information Entropy",
+                    description="Shannon entropy measures the unpredictability/randomness of the signal.",
+                    measurements=lines,
+                    reference=f"low entropy < {low} bits indicates high structure/predictability",
+                    observation="At least one channel shows low entropy relative to reference.",
+                    possible_indication="Low entropy suggests high structure or repetition; can be consistent with encoded data or synthetic patterns."
+                )
+
+        elif mname == "compression_ratio":
+            ref = REFERENCE_THRESHOLDS.get("compression_ratio", {})
+            high_comp = ref.get("high_compressibility")
+            
+            lines = []
+            flagged = False
+            for ch, data in meas.items():
+                if not isinstance(data, dict):
+                    continue
+                ratio = data.get("compression_ratio")
+                if ratio is None:
+                    continue
+                lines.append(f"{ch}: compression_ratio={format_value(ratio)}")
+                if isinstance(ratio, (int, float)) and high_comp is not None and ratio < high_comp:
+                    flagged = True
+
+            if flagged:
+                add_obs(
+                    category="High Compressibility",
+                    description="Compression ratio indicates how much redundancy/structure exists in the signal.",
+                    measurements=lines,
+                    reference=f"high compressibility < {high_comp} (lower = more compressible)",
+                    observation="At least one channel shows high compressibility.",
+                    possible_indication="High compressibility suggests redundant structure; natural audio typically compresses less efficiently than structured data."
+                )
+
+    # INTER-CHANNEL
+    for method in iter_methods("inter_channel"):
+        mname = method.get("method", "")
+        meas = method.get("measurements", {})
+
+        if mname == "lr_difference":
+            lines = []
+            flagged = False
+            for key, data in meas.items():
+                if not isinstance(data, dict):
+                    continue
+                unique = data.get("contains_unique_info")
+                ratio = data.get("energy_ratio")
+                if unique is True:
+                    lines.append(f"{key}: contains_unique_info=True, energy_ratio={format_value(ratio)}")
+                    flagged = True
+
+            if flagged:
+                add_obs(
+                    category="L-R Stereo Field Contains Unique Information",
+                    description="L-R difference analysis reveals information not present in left or right channels alone.",
+                    measurements=lines,
+                    reference="contains_unique_info=True indicates non-redundant stereo content",
+                    observation="Stereo difference channel contains unique information.",
+                    possible_indication="Unique L-R content can indicate stereo-encoded data or spatial modulation; examine L-R spectrum and phase relationships."
+                )
+
+    # STEGANOGRAPHY
+    for method in iter_methods("steganography"):
+        mname = method.get("method", "")
+        meas = method.get("measurements", {})
+
+        if mname == "lsb_analysis":
+            lines = []
+            flagged = False
+            for ch, data in meas.items():
+                if not isinstance(data, dict):
+                    continue
+                lsb_ent = data.get("lsb_entropy")
+                chi = data.get("chi_square_stat")
+                if lsb_ent is not None and isinstance(lsb_ent, (int, float)) and lsb_ent > 0.9:
+                    lines.append(f"{ch}: lsb_entropy={format_value(lsb_ent)}, chi_square={format_value(chi)}")
+                    flagged = True
+
+            if flagged:
+                add_obs(
+                    category="LSB Anomaly Detected",
+                    description="LSB analysis examines the least significant bits for non-random patterns.",
+                    measurements=lines,
+                    reference="high LSB entropy (>0.9) can indicate data in lower bits",
+                    observation="At least one channel shows high LSB entropy.",
+                    possible_indication="LSB anomalies can be consistent with steganographic encoding in uncompressed audio; verify with other steganography tests."
                 )
 
     return observations
@@ -562,7 +865,7 @@ def generate_appendices_ab_report(results: dict) -> str:
             lines.append(f"| {level} | {value} |")
         lines.append("")
 
-    # Appendix B (kept close to your content but cleaner)
+    # Appendix B
     lines.append("## Appendix B: Interpretation Guide (Context Only)")
     lines.append("")
     lines.append("This section provides general context to assist human interpretation of measured values.")
@@ -577,6 +880,7 @@ def generate_appendices_ab_report(results: dict) -> str:
     lines.append("- High tonality (> 0.9): discrete components, not broadband")
     lines.append("- Temporal stability: constant spectral content over time")
     lines.append("- Low entropy/complexity: more predictable structure")
+    lines.append("- High compressibility: structured/redundant data")
     lines.append("")
     lines.append("**Natural signals** (speech, music, environmental sounds) typically exhibit:")
     lines.append("- Moderate periodicity (0.3–0.7): repetition with variation")
@@ -584,6 +888,7 @@ def generate_appendices_ab_report(results: dict) -> str:
     lines.append("- Mixed tonality (0.4–0.8): tonal + noise components")
     lines.append("- Temporal variation: evolving spectral content")
     lines.append("- Higher entropy/complexity: less predictable")
+    lines.append("- Lower compressibility: less structured")
     lines.append("")
 
     lines.append("### Indicators of Encoded Data (Examples)")
@@ -594,6 +899,8 @@ def generate_appendices_ab_report(results: dict) -> str:
     lines.append("**FM/FSK (Frequency behavior):** non-trivial deviation, discrete states, switching patterns visible in STFT")
     lines.append("**PSK (Phase behavior):** many phase jumps with reduced coherence, systematic transitions")
     lines.append("**Stereo-field:** non-redundant L-R content, systematic phase/time relationships")
+    lines.append("**Information theory:** low entropy, high compressibility indicate structure/redundancy")
+    lines.append("**Steganography:** LSB anomalies, quantization noise patterns, signal residuals")
     lines.append("")
 
     lines.append("### Analysis Strategy (Practical Checklist)")
@@ -602,7 +909,9 @@ def generate_appendices_ab_report(results: dict) -> str:
     lines.append("2. Inspect time-frequency stability (STFT/bands)")
     lines.append("3. Check modulation family indicators (AM/FM/phase)")
     lines.append("4. Compare channels (correlation, differences, delays)")
-    lines.append("5. Prefer converging evidence over single metrics")
+    lines.append("5. Examine information-theoretic measures (entropy, compression)")
+    lines.append("6. Look for steganographic indicators if applicable")
+    lines.append("7. Prefer converging evidence over single metrics")
     lines.append("")
 
     return "\n".join(lines)
@@ -613,11 +922,11 @@ def generate_appendices_ab_report(results: dict) -> str:
 # ---------------------------------------------------------------------
 def _funnel_stage_for_observation(category: str) -> str:
     c = (category or "").lower()
-    if any(k in c for k in ["periodicity", "harmonic", "tonality", "stability"]):
+    if any(k in c for k in ["periodicity", "harmonic", "tonality", "stability", "bandwidth", "pulse"]):
         return "Stage 1 - Natural vs Artificial Indicators"
     if any(k in c for k in ["entropy", "compression", "complexity", "residual", "quantization", "lsb", "stegan"]):
         return "Stage 2 - Data-Bearing Likelihood Indicators"
-    if any(k in c for k in ["modulation", "fm", "am", "phase", "correlation", "stereo", "delay"]):
+    if any(k in c for k in ["modulation", "fm", "am", "phase", "correlation", "stereo", "delay", "lr"]):
         return "Stage 3 - Plausible Encoding Families"
     return "Other / Unmapped"
 
@@ -694,6 +1003,7 @@ def generate_funnel_report(results: dict) -> str:
     lines.append("")
     lines.append("- If Stage 1 flags artificiality indicators, inspect Stage 2 and Stage 3 items with plots/time-frequency views.")
     lines.append("- If Stage 3 suggests a modulation family, examine spectrograms for discrete states or stable carriers.")
+    lines.append("- If Stage 2 shows information-theoretic anomalies, cross-check with steganography and modulation tests.")
     lines.append("- Prefer multiple converging indicators over any single metric.")
     lines.append("")
     lines.append("**Reminder:** These are workflow suggestions, not conclusions.")
@@ -745,6 +1055,7 @@ def main():
     print(f"Wrote: {f1}")
     print(f"Wrote: {f2}")
     print(f"Wrote: {f3}")
+    print("\n✅ Report generation complete!")
 
 
 if __name__ == "__main__":

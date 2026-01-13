@@ -23,9 +23,10 @@ def am_detection(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisRe
         params: analysis parameters
         
     Returns:
-        AnalysisResult with AM detection data
+        AnalysisResult with AM detection data and visualization_data
     """
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -67,12 +68,22 @@ def am_detection(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisRe
             'envelope_mean': float(np.mean(envelope)),
             'envelope_std': float(np.std(envelope))
         }
+        
+        # Add visualization data
+        time = np.arange(len(envelope)) / context.sample_rate
+        visualization_data[channel_name] = {
+            'time': time,
+            'envelope': envelope,
+            'modulation_frequencies': envelope_freqs,
+            'modulation_spectrum': envelope_magnitude
+        }
     
     logger.info(f"AM detection for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='am_detection',
-        measurements=measurements
+        measurements=measurements,
+        visualization_data=visualization_data
     )
 
 
@@ -85,9 +96,10 @@ def fm_detection(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisRe
         params: analysis parameters
         
     Returns:
-        AnalysisResult with FM detection data
+        AnalysisResult with FM detection data and visualization_data
     """
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -132,12 +144,21 @@ def fm_detection(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisRe
             'fm_modulation_frequencies': fm_mod_frequencies,
             'modulation_index_fm': float(frequency_deviation / (freq_mean + 1e-10))
         }
+        
+        # Add visualization data
+        time = np.arange(len(instantaneous_frequency)) / context.sample_rate
+        visualization_data[channel_name] = {
+            'time': time,
+            'instantaneous_frequency': instantaneous_frequency,
+            'carrier_frequency': freq_mean
+        }
     
     logger.info(f"FM detection for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='fm_detection',
-        measurements=measurements
+        measurements=measurements,
+        visualization_data=visualization_data
     )
 
 
@@ -150,9 +171,10 @@ def phase_analysis(context: AnalysisContext, params: Dict[str, Any]) -> Analysis
         params: analysis parameters
         
     Returns:
-        AnalysisResult with phase data
+        AnalysisResult with phase data and visualization_data
     """
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -173,7 +195,8 @@ def phase_analysis(context: AnalysisContext, params: Dict[str, Any]) -> Analysis
         
         # Detect phase jumps
         phase_jump_threshold = np.pi / 2
-        phase_jumps = np.sum(np.abs(np.diff(instantaneous_phase)) > phase_jump_threshold)
+        phase_jump_indices = np.where(np.abs(np.diff(instantaneous_phase)) > phase_jump_threshold)[0]
+        phase_jumps = len(phase_jump_indices)
         
         measurements[channel_name] = {
             'phase_mean': float(phase_mean),
@@ -184,12 +207,21 @@ def phase_analysis(context: AnalysisContext, params: Dict[str, Any]) -> Analysis
             'num_phase_jumps': int(phase_jumps),
             'phase_jump_rate': float(phase_jumps / len(audio_data) * context.sample_rate)
         }
+        
+        # Add visualization data
+        time = np.arange(len(unwrapped_phase)) / context.sample_rate
+        visualization_data[channel_name] = {
+            'time': time,
+            'phase': unwrapped_phase,
+            'jumps': phase_jump_indices
+        }
     
     logger.info(f"Phase analysis for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='phase_analysis',
-        measurements=measurements
+        measurements=measurements,
+        visualization_data=visualization_data
     )
 
 

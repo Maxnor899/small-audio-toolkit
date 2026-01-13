@@ -200,6 +200,7 @@ def band_stability(context: AnalysisContext, params: Dict[str, Any]) -> Analysis
     ])
     
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -215,6 +216,7 @@ def band_stability(context: AnalysisContext, params: Dict[str, Any]) -> Analysis
         magnitude = np.abs(stft_matrix)
         
         band_stability_data = {}
+        bands_data = {}
         
         for i, (low, high) in enumerate(bands):
             band_mask = (frequencies >= low) & (frequencies < high)
@@ -226,20 +228,31 @@ def band_stability(context: AnalysisContext, params: Dict[str, Any]) -> Analysis
             
             stability = 1.0 - (np.std(band_energy) / (np.mean(band_energy) + 1e-10))
             
-            band_stability_data[f'{low}-{high}Hz'] = {
+            band_name = f'{low}-{high}Hz'
+            band_stability_data[band_name] = {
                 'mean_energy': float(np.mean(band_energy)),
                 'stability_score': float(np.clip(stability, 0, 1)),
                 'variation_coefficient': float(np.std(band_energy) / (np.mean(band_energy) + 1e-10))
             }
+            
+            # Store for visualization
+            bands_data[band_name] = band_energy
         
         measurements[channel_name] = band_stability_data
+        
+        # Add visualization data
+        visualization_data[channel_name] = {
+            'times': times,
+            'bands_data': bands_data
+        }
     
     logger.info(f"Computed band stability for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='band_stability',
         measurements=measurements,
-        metrics={'num_bands': len(bands), 'bands': bands}
+        metrics={'num_bands': len(bands), 'bands': bands},
+        visualization_data=visualization_data
     )
 
 

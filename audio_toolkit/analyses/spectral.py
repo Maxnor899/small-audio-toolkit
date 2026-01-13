@@ -24,11 +24,12 @@ def fft_global(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResu
         params: window type
         
     Returns:
-        AnalysisResult with frequency spectrum
+        AnalysisResult with frequency spectrum and visualization_data
     """
     window_type = params.get('window', 'hann')
     
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -48,13 +49,20 @@ def fft_global(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResu
             'peak_magnitude': float(np.max(magnitude)),
             'spectral_energy': float(np.sum(magnitude ** 2))
         }
+        
+        # Add visualization data
+        visualization_data[channel_name] = {
+            'frequencies': freqs,
+            'magnitudes': magnitude
+        }
     
     logger.info(f"Computed global FFT for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='fft_global',
         measurements=measurements,
-        metrics={'window': window_type, 'sample_rate': context.sample_rate}
+        metrics={'window': window_type, 'sample_rate': context.sample_rate},
+        visualization_data=visualization_data
     )
 
 
@@ -67,13 +75,14 @@ def peak_detection(context: AnalysisContext, params: Dict[str, Any]) -> Analysis
         params: prominence, distance, height
         
     Returns:
-        AnalysisResult with peak frequencies and amplitudes
+        AnalysisResult with peak frequencies and amplitudes and visualization_data
     """
     prominence = params.get('prominence', 10.0)
     distance = params.get('distance', 100)
     height = params.get('height', None)
     
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -99,13 +108,20 @@ def peak_detection(context: AnalysisContext, params: Dict[str, Any]) -> Analysis
             'dominant_frequency': float(freqs[peaks[0]]) if len(peaks) > 0 else 0.0,
             'frequency_spread': float(np.std(freqs[peaks])) if len(peaks) > 0 else 0.0
         }
+        
+        # Add visualization data
+        visualization_data[channel_name] = {
+            'spectrum': magnitude,
+            'peaks': peaks
+        }
     
     logger.info(f"Detected spectral peaks for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='peak_detection',
         measurements=measurements,
-        metrics={'prominence': prominence, 'distance': distance}
+        metrics={'prominence': prominence, 'distance': distance},
+        visualization_data=visualization_data
     )
 
 

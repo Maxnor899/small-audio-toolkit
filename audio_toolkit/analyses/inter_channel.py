@@ -104,9 +104,10 @@ def lr_difference(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisR
         params: analysis parameters
         
     Returns:
-        AnalysisResult with L-R analysis
+        AnalysisResult with L-R analysis and visualization_data
     """
     measurements = {}
+    visualization_data = {}
     
     # Check if we have left and right
     if 'left' not in context.audio_data or 'right' not in context.audio_data:
@@ -143,11 +144,19 @@ def lr_difference(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisR
         'contains_unique_info': diff_energy > (left_energy + right_energy) * 0.01
     }
     
+    # Add visualization data
+    visualization_data['lr_difference'] = {
+        'waveform': difference,
+        'frequencies': freqs,
+        'spectrum': diff_magnitude
+    }
+    
     logger.info("L-R difference analysis complete")
     
     return AnalysisResult(
         method='lr_difference',
-        measurements=measurements
+        measurements=measurements,
+        visualization_data=visualization_data
     )
 
 

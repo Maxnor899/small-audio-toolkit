@@ -49,10 +49,7 @@ pip install -r requirements.txt
 ## Usage
 
 ```bash
-python -m audio_toolkit.main \
-  --audio signal.wav \
-  --config examples/config_example.yaml \
-  --output outputs/
+python run_analysis.py audio_file.ext --config examples/config_example.yaml --output outputs/
 ```
 
 ## Configuration

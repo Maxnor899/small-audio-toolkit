@@ -103,3 +103,4 @@ seg393_diff/quantized/duration_scatter.png
 seg393_diff/quantized/QUANTIZATION_REPORT.md
 seg393_diff/quantized/symbols_runs.txt
 seg393_diff/quantized/symbols_sequence.txt
+export_chatgpt_project.py

@@ -20,12 +20,13 @@ def cross_correlation(context: AnalysisContext, params: Dict[str, Any]) -> Analy
     
     Args:
         context: Analysis context
-        params: max_lag
+        params: max_lag, max_samples
         
     Returns:
         AnalysisResult with cross-correlation data
     """
     max_lag = params.get('max_lag', 1000)
+    max_samples = params.get('max_samples', 50000)  # CRITICAL: limit samples for performance
     
     measurements = {}
     
@@ -47,6 +48,13 @@ def cross_correlation(context: AnalysisContext, params: Dict[str, Any]) -> Analy
             
             audio_a = context.audio_data[channel_a]
             audio_b = context.audio_data[channel_b]
+            
+            # CRITICAL OPTIMIZATION: limit samples to avoid long computation
+            if len(audio_a) > max_samples:
+                audio_a = audio_a[:max_samples]
+                logger.warning(f"Cross-correlation: using first {max_samples} samples for {channel_a}")
+            if len(audio_b) > max_samples:
+                audio_b = audio_b[:max_samples]
             
             # Compute cross-correlation
             correlation = np.correlate(audio_a, audio_b, mode='full')
@@ -74,7 +82,7 @@ def cross_correlation(context: AnalysisContext, params: Dict[str, Any]) -> Analy
     return AnalysisResult(
         method='cross_correlation',
         measurements=measurements,
-        metrics={'max_lag': max_lag}
+        metrics={'max_lag': max_lag, 'max_samples': max_samples}
     )
 
 
@@ -209,12 +217,13 @@ def time_delay(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResu
     
     Args:
         context: Analysis context
-        params: max_delay_samples
+        params: max_delay_samples, max_samples
         
     Returns:
         AnalysisResult with time delay data
     """
     max_delay = params.get('max_delay_samples', 100)
+    max_samples = params.get('max_samples', 50000)  # CRITICAL: limit samples for performance
     
     measurements = {}
     
@@ -235,6 +244,13 @@ def time_delay(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResu
             
             audio_a = context.audio_data[channel_a]
             audio_b = context.audio_data[channel_b]
+            
+            # CRITICAL OPTIMIZATION: limit samples
+            if len(audio_a) > max_samples:
+                audio_a = audio_a[:max_samples]
+                logger.warning(f"Time delay: using first {max_samples} samples")
+            if len(audio_b) > max_samples:
+                audio_b = audio_b[:max_samples]
             
             # Cross-correlation to find delay
             correlation = np.correlate(audio_a, audio_b, mode='full')
@@ -261,7 +277,7 @@ def time_delay(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResu
     return AnalysisResult(
         method='time_delay',
         measurements=measurements,
-        metrics={'max_delay': max_delay}
+        metrics={'max_delay': max_delay, 'max_samples': max_samples}
     )
 
 

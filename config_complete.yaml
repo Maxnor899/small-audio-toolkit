@@ -121,6 +121,7 @@ analyses:
     methods:
       - name: "cross_correlation"
         params:
+          max_samples: 50000
           max_lag: 1000
       
       - name: "lr_difference"
@@ -132,6 +133,7 @@ analyses:
       
       - name: "time_delay"
         params:
+          max_samples: 50000
           max_delay: 100
   
   # INFORMATION

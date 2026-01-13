@@ -76,7 +76,7 @@ def quantization_noise(context: AnalysisContext, params: Dict[str, Any]) -> Anal
     
     for channel_name, audio_data in context.audio_data.items():
         
-        max_samples = 100000
+        max_samples = 50000  # Reduced for faster autocorrelation
         if len(audio_data) > max_samples:
             audio_subset = audio_data[:max_samples]
             logger.warning(f"Quantization noise: using first {max_samples} samples")

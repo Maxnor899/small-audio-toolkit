@@ -23,12 +23,13 @@ def envelope_analysis(context: AnalysisContext, params: Dict[str, Any]) -> Analy
         params: method ('hilbert' or 'rms'), window_size (for rms)
         
     Returns:
-        AnalysisResult with envelope data
+        AnalysisResult with envelope data and visualization_data
     """
     method = params.get('method', 'hilbert')
     
     measurements = {}
     metrics = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -57,6 +58,9 @@ def envelope_analysis(context: AnalysisContext, params: Dict[str, Any]) -> Analy
             'envelope_std': float(np.std(envelope)),
             'envelope_length': len(envelope)
         }
+        
+        # Add visualization data
+        visualization_data[channel_name] = envelope
     
     metrics['method'] = method
     
@@ -65,7 +69,8 @@ def envelope_analysis(context: AnalysisContext, params: Dict[str, Any]) -> Analy
     return AnalysisResult(
         method='envelope',
         measurements=measurements,
-        metrics=metrics
+        metrics=metrics,
+        visualization_data=visualization_data
     )
 
 
@@ -78,13 +83,14 @@ def autocorrelation_analysis(context: AnalysisContext, params: Dict[str, Any]) -
         params: max_lag, normalize, max_samples
         
     Returns:
-        AnalysisResult with autocorrelation data
+        AnalysisResult with autocorrelation data and visualization_data
     """
     max_lag = params.get('max_lag', 1000)
     normalize = params.get('normalize', True)
     max_samples = params.get('max_samples', 50000)  # CRITICAL: limit samples for performance
     
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -112,13 +118,17 @@ def autocorrelation_analysis(context: AnalysisContext, params: Dict[str, Any]) -
             'num_peaks': len(peaks),
             'periodicity_score': float(np.max(autocorr[1:])) if len(autocorr) > 1 else 0.0
         }
+        
+        # Add visualization data
+        visualization_data[channel_name] = autocorr
     
     logger.info(f"Computed autocorrelation (max_lag={max_lag}) for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='autocorrelation',
         measurements=measurements,
-        metrics={'max_lag': max_lag, 'normalized': normalize, 'max_samples': max_samples}
+        metrics={'max_lag': max_lag, 'normalized': normalize, 'max_samples': max_samples},
+        visualization_data=visualization_data
     )
 
 

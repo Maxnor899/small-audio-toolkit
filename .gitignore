@@ -104,3 +104,12 @@ seg393_diff/quantized/QUANTIZATION_REPORT.md
 seg393_diff/quantized/symbols_runs.txt
 seg393_diff/quantized/symbols_sequence.txt
 export_chatgpt_project.py
+output/fuelscoop/visualizations/multi_channel_overview.png
+output/fuelscoop/visualizations/spectrum_difference.png
+output/fuelscoop/visualizations/spectrum_left.png
+output/fuelscoop/visualizations/spectrum_right.png
+output/fuelscoop/visualizations/spectrum_sum.png
+output/fuelscoop/visualizations/waveform_difference.png
+output/fuelscoop/visualizations/waveform_left.png
+output/fuelscoop/visualizations/waveform_right.png
+output/fuelscoop/visualizations/waveform_sum.png

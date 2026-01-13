@@ -123,12 +123,13 @@ def cqt_analysis(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisRe
 
 def wavelet_analysis(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResult:
     """
-    Wavelet transform analysis.
+    Wavelet transform analysis with visualization_data.
     """
     wavelet_type = params.get('wavelet', 'morlet')
     num_scales = params.get('num_scales', 64)
     
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -166,13 +167,20 @@ def wavelet_analysis(context: AnalysisContext, params: Dict[str, Any]) -> Analys
             'scale_of_max': int(np.unravel_index(np.argmax(magnitude), magnitude.shape)[0]),
             'energy_concentration': float(np.max(magnitude) / (np.mean(magnitude) + 1e-10))
         }
+        
+        # Add visualization data
+        visualization_data[channel_name] = {
+            'scalogram': magnitude,
+            'scales': scales
+        }
     
     logger.info(f"Computed wavelet for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='wavelet',
         measurements=measurements,
-        metrics={'wavelet': wavelet_type, 'num_scales': num_scales}
+        metrics={'wavelet': wavelet_type, 'num_scales': num_scales},
+        visualization_data=visualization_data
     )
 
 

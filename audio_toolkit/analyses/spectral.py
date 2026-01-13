@@ -118,12 +118,13 @@ def harmonic_analysis(context: AnalysisContext, params: Dict[str, Any]) -> Analy
         params: fundamental_range, max_harmonics
         
     Returns:
-        AnalysisResult with harmonic structure
+        AnalysisResult with harmonic structure and visualization_data
     """
     fundamental_range = params.get('fundamental_range', [80.0, 400.0])
     max_harmonics = params.get('max_harmonics', 10)
     
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -138,6 +139,7 @@ def harmonic_analysis(context: AnalysisContext, params: Dict[str, Any]) -> Analy
         
         harmonics_found = []
         harmonic_ratios = []
+        harmonic_frequencies = []
         
         for n in range(1, max_harmonics + 1):
             target_freq = fundamental_freq * n
@@ -148,6 +150,7 @@ def harmonic_analysis(context: AnalysisContext, params: Dict[str, Any]) -> Analy
             if np.any(harmonic_mask):
                 harmonic_magnitude = np.max(magnitude[harmonic_mask])
                 harmonics_found.append(n)
+                harmonic_frequencies.append(target_freq)
                 
                 if len(harmonics_found) == 1:
                     harmonic_ratios.append(1.0)
@@ -161,13 +164,22 @@ def harmonic_analysis(context: AnalysisContext, params: Dict[str, Any]) -> Analy
             'harmonic_ratios': harmonic_ratios,
             'harmonicity_score': len(harmonics_found) / max_harmonics
         }
+        
+        # Add visualization data
+        visualization_data[channel_name] = {
+            'frequencies': freqs,
+            'spectrum': magnitude,
+            'fundamental': fundamental_freq,
+            'harmonics': harmonic_frequencies
+        }
     
     logger.info(f"Analyzed harmonics for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='harmonic_analysis',
         measurements=measurements,
-        metrics={'fundamental_range': fundamental_range, 'max_harmonics': max_harmonics}
+        metrics={'fundamental_range': fundamental_range, 'max_harmonics': max_harmonics},
+        visualization_data=visualization_data
     )
 
 
@@ -245,9 +257,10 @@ def spectral_flatness(context: AnalysisContext, params: Dict[str, Any]) -> Analy
 
 def cepstrum_analysis(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResult:
     """
-    Cepstrum analysis.
+    Cepstrum analysis with visualization_data.
     """
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -278,12 +291,20 @@ def cepstrum_analysis(context: AnalysisContext, params: Dict[str, Any]) -> Analy
             'cepstrum_std': float(np.std(cepstrum_magnitude)),
             'samples_analyzed': len(audio_subset)
         }
+        
+        # Add visualization data
+        visualization_data[channel_name] = {
+            'quefrency': quefrency_axis,
+            'cepstrum': cepstrum_magnitude,
+            'peak_quefrency': peak_quefrency
+        }
     
     logger.info(f"Cepstrum for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='cepstrum',
-        measurements=measurements
+        measurements=measurements,
+        visualization_data=visualization_data
     )
 
 

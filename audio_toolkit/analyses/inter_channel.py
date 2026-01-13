@@ -23,12 +23,13 @@ def cross_correlation(context: AnalysisContext, params: Dict[str, Any]) -> Analy
         params: max_lag, max_samples
         
     Returns:
-        AnalysisResult with cross-correlation data
+        AnalysisResult with cross-correlation data and visualization_data
     """
     max_lag = params.get('max_lag', 1000)
     max_samples = params.get('max_samples', 50000)  # CRITICAL: limit samples for performance
     
     measurements = {}
+    visualization_data = {}
     
     # Need at least 2 channels
     channels = list(context.audio_data.keys())
@@ -76,13 +77,21 @@ def cross_correlation(context: AnalysisContext, params: Dict[str, Any]) -> Analy
                 'mean_correlation': float(np.mean(correlation)),
                 'correlation_at_zero': float(correlation[0])
             }
+            
+            # Add visualization data
+            lags = np.arange(len(correlation))
+            visualization_data[pair_key] = {
+                'lags': lags,
+                'correlation': correlation
+            }
     
     logger.info(f"Cross-correlation for {len(measurements)} channel pairs")
     
     return AnalysisResult(
         method='cross_correlation',
         measurements=measurements,
-        metrics={'max_lag': max_lag, 'max_samples': max_samples}
+        metrics={'max_lag': max_lag, 'max_samples': max_samples},
+        visualization_data=visualization_data
     )
 
 

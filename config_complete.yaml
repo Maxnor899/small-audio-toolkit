@@ -1,211 +1,201 @@
-# Complete configuration - ALL analysis methods enabled
 version: "1.0"
 
 # Channels to analyze
 channels:
-  - left
-  - right
-  - sum
-  - difference
+  analyze: ["left", "right", "sum", "difference"]
 
-# Analysis configuration
+# Preprocessing
+preprocessing:
+  normalize:
+    enabled: true
+    method: "rms"
+    target_level: -20.0
+  
+  silence_detection:
+    enabled: true
+    threshold_db: -40.0
+    min_duration: 0.1
+  
+  segmentation:
+    enabled: false
+
+# Analyses to run
 analyses:
-  # ========================================
-  # PREPROCESSING
-  # ========================================
-  preprocessing:
-    normalize:
-      enabled: true
-      method: rms
-      target_level: -20.0
-    
-    silence_detection:
-      enabled: true
-      threshold_db: -40.0
-      min_duration: 0.1
-
-  # ========================================
-  # TEMPORAL ANALYSES
-  # ========================================
+  # TEMPORAL
   temporal:
-    envelope:
-      enabled: true
-      method: hilbert
-    
-    autocorrelation:
-      enabled: true
-      max_samples: 50000
-      max_lag: 1000
-      normalized: true
-    
-    pulse_detection:
-      enabled: true
-      threshold: 0.5
-    
-    duration_ratios:
-      enabled: true
-      threshold: 0.5
-
-  # ========================================
-  # SPECTRAL ANALYSES
-  # ========================================
+    enabled: true
+    methods:
+      - name: "envelope"
+        params:
+          method: "hilbert"
+      
+      - name: "autocorrelation"
+        params:
+          max_samples: 50000
+          max_lag: 1000
+          normalize: true
+      
+      - name: "pulse_detection"
+        params:
+          threshold: 0.5
+      
+      - name: "duration_ratios"
+        params:
+          threshold: 0.5
+  
+  # SPECTRAL
   spectral:
-    fft_global:
-      enabled: true
-    
-    peak_detection:
-      enabled: true
-      prominence: 0.01
-    
-    harmonic_analysis:
-      enabled: true
-      fundamental_range: [50, 500]
-      max_harmonics: 10
-    
-    spectral_centroid:
-      enabled: true
-    
-    spectral_flatness:
-      enabled: true
-    
-    cepstrum:
-      enabled: true
-    
-    spectral_bandwidth:
-      enabled: true
-
-  # ========================================
-  # TIME-FREQUENCY ANALYSES
-  # ========================================
+    enabled: true
+    methods:
+      - name: "fft_global"
+        params: {}
+      
+      - name: "peak_detection"
+        params:
+          prominence: 0.01
+      
+      - name: "harmonic_analysis"
+        params:
+          fundamental_range: [50, 500]
+          max_harmonics: 10
+      
+      - name: "spectral_centroid"
+        params: {}
+      
+      - name: "spectral_flatness"
+        params: {}
+      
+      - name: "cepstrum"
+        params: {}
+      
+      - name: "spectral_bandwidth"
+        params: {}
+  
+  # TIME-FREQUENCY
   time_frequency:
-    stft:
-      enabled: true
-      window_size: 2048
-      hop_length: 512
-      window_type: hann
-    
-    band_stability:
-      enabled: true
-      bands:
-        - [0, 100]
-        - [100, 500]
-        - [500, 2000]
-        - [2000, 8000]
-        - [8000, 20000]
-      window_size: 2048
-      hop_length: 1024
-    
-    wavelet:
-      enabled: true
-      wavelet_type: morlet
-      scales: 64
-
-  # ========================================
-  # MODULATION ANALYSES
-  # ========================================
+    enabled: true
+    methods:
+      - name: "stft"
+        params:
+          window_size: 2048
+          hop_length: 512
+          window_type: "hann"
+      
+      - name: "band_stability"
+        params:
+          bands:
+            - [0, 100]
+            - [100, 500]
+            - [500, 2000]
+            - [2000, 8000]
+            - [8000, 20000]
+          window_size: 2048
+          hop_length: 1024
+      
+      - name: "wavelet"
+        params:
+          wavelet_type: "morlet"
+          scales: 64
+  
+  # MODULATION
   modulation:
-    am_detection:
-      enabled: true
-      threshold: 0.1
-    
-    fm_detection:
-      enabled: true
-      threshold: 0.1
-    
-    phase_analysis:
-      enabled: true
-    
-    modulation_index:
-      enabled: true
-
-  # ========================================
-  # INTER-CHANNEL ANALYSES
-  # ========================================
+    enabled: true
+    methods:
+      - name: "am_detection"
+        params:
+          threshold: 0.1
+      
+      - name: "fm_detection"
+        params:
+          threshold: 0.1
+      
+      - name: "phase_analysis"
+        params: {}
+      
+      - name: "modulation_index"
+        params: {}
+  
+  # INTER-CHANNEL
   inter_channel:
-    cross_correlation:
-      enabled: true
-      max_lag: 1000
-    
-    lr_difference:
-      enabled: true
-      threshold: 0.05
-    
-    phase_difference:
-      enabled: true
-    
-    time_delay:
-      enabled: true
-      max_delay: 100
-
-  # ========================================
-  # INFORMATION ANALYSES
-  # ========================================
+    enabled: true
+    methods:
+      - name: "cross_correlation"
+        params:
+          max_lag: 1000
+      
+      - name: "lr_difference"
+        params:
+          threshold: 0.05
+      
+      - name: "phase_difference"
+        params: {}
+      
+      - name: "time_delay"
+        params:
+          max_delay: 100
+  
+  # INFORMATION
   information:
-    shannon_entropy:
-      enabled: true
-      num_bins: 256
-    
-    local_entropy:
-      enabled: true
-      window_size: 2048
-      hop_length: 512
-      num_bins: 64
-    
-    compression_ratio:
-      enabled: true
-    
-    approximate_complexity:
-      enabled: true
-      m: 2
-      r_factor: 0.2
-
-  # ========================================
-  # STEGANOGRAPHY ANALYSES
-  # ========================================
+    enabled: true
+    methods:
+      - name: "shannon_entropy"
+        params:
+          num_bins: 256
+      
+      - name: "local_entropy"
+        params:
+          window_size: 2048
+          hop_length: 512
+          num_bins: 64
+      
+      - name: "compression_ratio"
+        params: {}
+      
+      - name: "approximate_complexity"
+        params:
+          m: 2
+          r_factor: 0.2
+  
+  # STEGANOGRAPHY
   steganography:
-    lsb_analysis:
-      enabled: true
-    
-    quantization_noise:
-      enabled: true
-    
-    signal_residual:
-      enabled: true
-      cutoff_freq: 1000
-
-  # ========================================
-  # META-ANALYSES
-  # ========================================
+    enabled: true
+    methods:
+      - name: "lsb_analysis"
+        params: {}
+      
+      - name: "quantization_noise"
+        params: {}
+      
+      - name: "signal_residual"
+        params:
+          cutoff_freq: 1000
+  
+  # META-ANALYSIS
   meta_analysis:
-    inter_segment_comparison:
-      enabled: true
-      num_segments: 10
-    
-    segment_clustering:
-      enabled: true
-      num_segments: 20
-    
-    stability_scores:
-      enabled: true
-      window_size: 2048
-      hop_length: 512
+    enabled: true
+    methods:
+      - name: "inter_segment_comparison"
+        params:
+          num_segments: 10
+      
+      - name: "segment_clustering"
+        params:
+          num_segments: 20
+      
+      - name: "stability_scores"
+        params:
+          window_size: 2048
+          hop_length: 512
 
-# ========================================
-# VISUALIZATION
-# ========================================
+# Visualization
 visualization:
   enabled: true
-  format: png
+  formats: ["png"]
   dpi: 150
-  
-  plots:
-    waveform: true
-    spectrum: true
-    spectrogram: true
+  figsize: [12, 8]
 
-# ========================================
-# OUTPUT
-# ========================================
+# Output
 output:
-  format: json
+  save_raw_data: true
   save_config: true
+  export_formats: ["json"]

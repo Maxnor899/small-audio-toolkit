@@ -504,4 +504,3 @@ def save_figure(fig: plt.Figure, output_path: Path, formats: list, dpi: int) -> 
         file_path = output_path.with_suffix(f'.{fmt}')
         fig.savefig(file_path, dpi=dpi, bbox_inches='tight')
     
-    

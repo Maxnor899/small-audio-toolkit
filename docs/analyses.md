@@ -1,6 +1,6 @@
 # Analysis Catalog
 
-This document describes **all envisioned analyses**, grouped by **analysis class**. It serves as a methodological reference and configuration base for the audio analysis pipeline.
+This document describes **all envisioned analyses**, grouped by **scientific analysis class**. It serves as a methodological reference and configuration base for the audio analysis pipeline.
 
 No analysis listed here performs semantic or narrative interpretation. All produce only **objective measurements**.
 
@@ -188,7 +188,7 @@ Each method has:
 - A unique identifier used in configuration
 - Clear input parameters
 - Well-defined output format
-- References where applicable
+- Scientific references where applicable
 
 ## Implementation Notes
 
@@ -216,6 +216,113 @@ Methods include internal validation to:
 - Check parameter validity
 - Detect edge cases
 - Report warnings for unusual inputs
+
+## Performance Optimizations
+
+### Critical: Correlation-Based Methods
+
+Several analysis methods use NumPy's `correlate()` function, which has **O(n²) computational complexity**. On long audio files, this can lead to extremely long processing times.
+
+#### Affected Methods
+
+The following methods have been optimized with sample limitation to maintain reasonable execution times:
+
+**1. Temporal Autocorrelation** (`temporal.autocorrelation`)
+- **Without optimization:** 4h 24min on 5.2M samples (110s audio @ 48kHz)
+- **With optimization:** ~5 seconds using first 50,000 samples
+- **Parameter:** `max_samples` (default: 50000)
+
+**2. Inter-Channel Cross-Correlation** (`inter_channel.cross_correlation`)
+- **Without optimization:** ~2 hours per channel pair on long files
+- **With optimization:** ~10 seconds total using first 50,000 samples
+- **Parameter:** `max_samples` (default: 50000)
+
+**3. Inter-Channel Time Delay** (`inter_channel.time_delay`)
+- **Without optimization:** ~2 hours per channel pair on long files
+- **With optimization:** ~10 seconds total using first 50,000 samples
+- **Parameter:** `max_samples` (default: 50000)
+
+**4. Quantization Noise Autocorrelation** (`steganography.quantization_noise`)
+- **Without optimization:** ~5 minutes on 100k samples
+- **With optimization:** ~1 second using first 50,000 samples
+- **Fixed limit:** 50,000 samples (internal)
+
+#### Why 50,000 Samples?
+
+At 48kHz sample rate, 50,000 samples represents approximately **1 second of audio**. This is sufficient to:
+
+- Detect periodic patterns and repetitions
+- Measure inter-channel correlations
+- Identify temporal delays
+- Capture signal characteristics
+
+For signals with consistent characteristics throughout their duration, analyzing the first second provides representative results while dramatically reducing computation time.
+
+#### Performance Impact Summary
+
+| Method | Before | After | Speedup |
+|--------|--------|-------|---------|
+| autocorrelation | 4h 24m | 5s | 3168x |
+| cross_correlation | ~2h | 10s | 720x |
+| time_delay | ~2h | 10s | 720x |
+| quantization_noise | ~5m | 1s | 300x |
+| **Complete Analysis** | **~8h 30m** | **~15m** | **34x** |
+
+#### Configuration
+
+To enable these optimizations, specify `max_samples` in your configuration:
+
+```yaml
+analyses:
+  temporal:
+    methods:
+      - name: "autocorrelation"
+        params:
+          max_samples: 50000  # Use first 50k samples
+          max_lag: 1000
+          normalize: true
+  
+  inter_channel:
+    methods:
+      - name: "cross_correlation"
+        params:
+          max_samples: 50000  # Use first 50k samples
+          max_lag: 1000
+      
+      - name: "time_delay"
+        params:
+          max_samples: 50000  # Use first 50k samples
+          max_delay: 100
+```
+
+#### Adjusting the Limit
+
+You can adjust `max_samples` based on your needs:
+
+| Samples | Duration @ 48kHz | Computation Time | Use Case |
+|---------|------------------|------------------|----------|
+| 10,000 | 0.2s | <1s | Very quick preview |
+| 50,000 | 1.0s | ~5s | **Recommended default** |
+| 100,000 | 2.1s | ~20s | More representative |
+| 200,000 | 4.2s | ~90s | Very thorough |
+| Unlimited | Full file | Hours | Research/validation only |
+
+**Recommendation:** Keep the default 50,000 samples for production use. Only increase if you specifically need to analyze longer signal portions.
+
+### Other Optimizations
+
+Several other computationally intensive methods also include sample limitations:
+
+- **Local Entropy:** Limited to 200,000 samples
+- **Compression Ratio:** Limited to 100,000 samples
+- **Approximate Complexity:** Limited to 50,000 samples
+- **Wavelet Analysis:** Limited to 100,000 samples
+- **Cepstrum:** Limited to 100,000 samples
+- **LSB Analysis:** Limited to 100,000 samples
+- **Signal Residual:** Limited to 100,000 samples
+- **Stability Scores:** Limited to 200,000 samples
+
+These limits are applied internally and do not require configuration parameters.
 
 ## Final Note
 

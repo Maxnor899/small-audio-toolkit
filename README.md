@@ -51,6 +51,68 @@ pip install -r requirements.txt
 ```bash
 python run_analysis.py audio_file.ext --config examples/config_example.yaml --output outputs/
 ```
+## Report Generation
+
+After running the analysis, generate human-readable reports from the JSON results:
+
+```bash
+python Generate_Report.py output_folder/results.json
+```
+
+Or simply provide the output directory:
+
+```bash
+python Generate_Report.py output_folder
+```
+
+### Generated Reports
+
+Three complementary Markdown reports are created:
+
+**1. `01_MEASUREMENT_SUMMARY.md`**
+- Key measured values across all channels
+- Reference thresholds for context
+- No interpretation, just measurements
+
+**2. `02_APPENDICES_AB.md`**
+- Appendix A: Reference thresholds from signal processing literature
+- Appendix B: Interpretation guide for understanding measured values
+- Distinguishing characteristics of natural vs artificial signals
+
+**3. `03_FUNNEL_HYPOTHESIS.md`**
+- Factual observations organized by analysis stage
+- Stage 1: Natural vs Artificial indicators
+- Stage 2: Data-bearing likelihood indicators  
+- Stage 3: Plausible encoding families
+- Suggested next steps for investigation
+
+### Important Notes
+
+- Reports provide **factual observations** based on measured values
+- **No automated classification** or definitive conclusions
+- Reference thresholds are for **context only**, not automated decision-making
+- Designed to assist human interpretation, not replace it
+- Multiple converging indicators are more significant than single metrics
+
+### Example Workflow
+
+```bash
+# Run complete analysis
+python run_analysis.py audio.flac --config config.yaml --output output_audio
+
+# Generate reports
+python Generate_Report.py output_audio
+
+# Review reports
+cat output_audio/01_MEASUREMENT_SUMMARY.md
+cat output_audio/02_APPENDICES_AB.md  
+cat output_audio/03_FUNNEL_HYPOTHESIS.md
+
+# Examine visualizations (if enabled)
+ls output_audio/visualizations/
+```
+
+The approach whishes to help prioritizing which analysis results deserve closer inspection based on converging evidence across multiple measurement categories.
 
 ## Configuration
 

@@ -19,6 +19,7 @@ from .plots import (
     plot_fm_detection,
     plot_phase_analysis,
     plot_band_stability,
+    plot_stft_spectrogram,
 )
 
 from .plots_extended import (
@@ -189,6 +190,20 @@ class VisualizationEngine:
                     d["times"],
                     d["bands_data"],
                     viz_dir / f"band_stability_{ch}",
+                    self.figsize,
+                    self.dpi,
+                    self.formats,
+                )
+
+        elif method == "stft":
+            for ch, d in viz_data.items():
+                plot_stft_spectrogram(
+                    d["frequencies"],
+                    d["times"],
+                    d["stft_matrix"],
+                    context.sample_rate,
+                    viz_dir / f"stft_{ch}",
+                    f"STFT Spectrogram - {ch}",
                     self.figsize,
                     self.dpi,
                     self.formats,

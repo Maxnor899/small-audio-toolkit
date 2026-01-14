@@ -201,17 +201,16 @@ class AnalysisRunner:
                 continue
 
             if not category_config.get("enabled", False):
-                logger.info(f"Category '{category}' is disabled, skipping")
                 continue
 
             methods = category_config.get("methods", [])
-            logger.info(f"Executing {len(methods)} methods in category '{category}'")
+            if not methods:
+                continue
 
             for method_config in methods:
-                self._execute_method(category, method_config, context)
+                self._execute_method(context, category, method_config)
 
-    def _execute_method(self, category: str, method_config: Dict[str, Any], context: AnalysisContext) -> None:
-        """Execute a single analysis method."""
+    def _execute_method(self, context: AnalysisContext, category: str, method_config: Dict) -> None:
         method_name = method_config.get("name")
         if not method_name:
             logger.warning(f"Method in '{category}' missing 'name', skipping")
@@ -273,7 +272,10 @@ class AnalysisRunner:
 
     def _generate_method_visualization(self, method: str, viz_data: Dict, viz_dir: Path) -> None:
         """Generate visualization for a specific method."""
+        
+        # ========================================
         # TEMPORAL
+        # ========================================
         if method == "envelope":
             for channel, envelope in viz_data.items():
                 self.visualizer.plot_envelope(
@@ -292,7 +294,21 @@ class AnalysisRunner:
                     f"Autocorrelation - {channel}",
                 )
 
+        # ========================================
         # SPECTRAL
+        # ========================================
+        
+        # 🔧 CORRECTION #1 : Ajout de fft_global
+        elif method == "fft_global":
+            for channel, data in viz_data.items():
+                if "frequencies" in data and "magnitudes" in data:
+                    self.visualizer.plot_spectrum(
+                        np.asarray(data["frequencies"]),
+                        np.asarray(data["magnitudes"]),
+                        viz_dir / f"fft_global_{channel}",
+                        f"FFT Spectrum - {channel}",
+                    )
+        
         elif method == "peak_detection":
             for channel, data in viz_data.items():
                 if "spectrum" in data and "peaks" in data:
@@ -326,14 +342,35 @@ class AnalysisRunner:
                         viz_dir / f"cepstrum_{channel}",
                     )
 
+        # ========================================
         # TIME-FREQUENCY
+        # ========================================
+        
+        # 🔧 CORRECTION #2 : Ajout de stft
+        elif method == "stft":
+            for channel, data in viz_data.items():
+                if all(k in data for k in ["frequencies", "times", "stft_matrix"]):
+                    from ..visualization.plots import plot_stft_spectrogram
+                    plot_stft_spectrogram(
+                        np.asarray(data["frequencies"]),
+                        np.asarray(data["times"]),
+                        np.asarray(data["stft_matrix"]),
+                        self.context.sample_rate,
+                        viz_dir / f"stft_{channel}",
+                        f"STFT Spectrogram - {channel}",
+                        figsize=self.visualizer.figsize,
+                        dpi=self.visualizer.dpi,
+                        formats=self.visualizer.formats,
+                    )
+        
+        # 🔧 CORRECTION #3 : Correction de band_stability (clé 'bands_data' au lieu de 'bands')
         elif method == "band_stability":
             for channel, data in viz_data.items():
-                if "times" in data and "bands" in data:
+                if "times" in data and "bands_data" in data:  # ← CORRECTION ICI
                     from ..visualization.plots import plot_band_stability
                     plot_band_stability(
                         np.asarray(data["times"]),
-                        data["bands"],
+                        data["bands_data"],  # ← CORRECTION ICI
                         viz_dir / f"band_stability_{channel}",
                         figsize=self.visualizer.figsize,
                         dpi=self.visualizer.dpi,
@@ -350,25 +387,30 @@ class AnalysisRunner:
                         viz_dir / f"wavelet_{channel}",
                     )
 
+        # ========================================
         # MODULATION
+        # ========================================
+        
+        # 🔧 CORRECTION #4 : Correction de am_detection (clés 'modulation_frequencies'/'modulation_spectrum')
         elif method == "am_detection":
             for channel, data in viz_data.items():
-                if all(k in data for k in ["time", "envelope", "mod_freqs", "mod_spectrum"]):
+                if all(k in data for k in ["time", "envelope", "modulation_frequencies", "modulation_spectrum"]):  # ← CORRECTION ICI
                     self.visualizer.plot_am_detection(
                         np.asarray(data["time"]),
                         np.asarray(data["envelope"]),
-                        np.asarray(data["mod_freqs"]),
-                        np.asarray(data["mod_spectrum"]),
+                        np.asarray(data["modulation_frequencies"]),  # ← CORRECTION ICI
+                        np.asarray(data["modulation_spectrum"]),      # ← CORRECTION ICI
                         viz_dir / f"am_{channel}",
                     )
 
+        # 🔧 CORRECTION #5 : Correction de fm_detection (clés 'instantaneous_frequency'/'carrier_frequency')
         elif method == "fm_detection":
             for channel, data in viz_data.items():
-                if all(k in data for k in ["time", "inst_freq", "carrier"]):
+                if all(k in data for k in ["time", "instantaneous_frequency", "carrier_frequency"]):  # ← CORRECTION ICI
                     self.visualizer.plot_fm_detection(
                         np.asarray(data["time"]),
-                        np.asarray(data["inst_freq"]),
-                        float(data["carrier"]),
+                        np.asarray(data["instantaneous_frequency"]),  # ← CORRECTION ICI
+                        float(data["carrier_frequency"]),             # ← CORRECTION ICI
                         viz_dir / f"fm_{channel}",
                     )
 
@@ -382,7 +424,9 @@ class AnalysisRunner:
                         viz_dir / f"phase_{channel}",
                     )
 
+        # ========================================
         # INTER-CHANNEL
+        # ========================================
         elif method == "cross_correlation":
             for pair_key, data in viz_data.items():
                 if "lags" in data and "correlation" in data:
@@ -391,6 +435,29 @@ class AnalysisRunner:
                         np.asarray(data["correlation"]),
                         pair_key,
                         viz_dir / f"cross_corr_{pair_key}",
+                    )
+        
+        # 🔧 CORRECTION #6 : Ajout de lr_difference
+        elif method == "lr_difference":
+            data = viz_data.get("lr_difference", {})
+            if data:
+                # Waveform
+                if "waveform" in data:
+                    max_samples = min(len(data["waveform"]), 100_000)
+                    self.visualizer.plot_waveform(
+                        np.asarray(data["waveform"][:max_samples]),
+                        self.context.sample_rate,
+                        viz_dir / "lr_difference_waveform",
+                        "L-R Difference Waveform",
+                    )
+                
+                # Spectrum
+                if "frequencies" in data and "spectrum" in data:
+                    self.visualizer.plot_spectrum(
+                        np.asarray(data["frequencies"]),
+                        np.asarray(data["spectrum"]),
+                        viz_dir / "lr_difference_spectrum",
+                        "L-R Difference Spectrum",
                     )
 
     def _export_results(self, output_path: Path, audio_path: Path) -> None:

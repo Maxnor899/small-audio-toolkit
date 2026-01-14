@@ -286,6 +286,62 @@ def plot_band_stability(
     save_figure(fig, output_path, formats, dpi)
     plt.close(fig)
 
+def plot_stft_spectrogram(
+    frequencies: np.ndarray,
+    times: np.ndarray,
+    stft_matrix: np.ndarray,
+    sample_rate: int,
+    output_path: Path,
+    title: str,
+    figsize: tuple = (12, 8),
+    dpi: int = 150,
+    formats: list = ["png"],
+) -> None:
+    """
+    Plot STFT spectrogram.
+    
+    Args:
+        frequencies: Frequency bins (Hz)
+        times: Time frames (s)
+        stft_matrix: Complex STFT matrix (freq x time)
+        sample_rate: Sample rate
+        output_path: Output file path (without extension)
+        title: Plot title
+        figsize: Figure size
+        dpi: Resolution
+        formats: Output formats
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+    
+    # Convert to magnitude (dB)
+    magnitude = np.abs(stft_matrix)
+    magnitude_db = 20 * np.log10(magnitude + 1e-10)
+    
+    # Create mesh
+    im = ax.pcolormesh(
+        times,
+        frequencies,
+        magnitude_db,
+        shading='auto',
+        cmap='viridis',
+        vmin=np.percentile(magnitude_db, 5),
+        vmax=np.percentile(magnitude_db, 95)
+    )
+    
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("Frequency (Hz)")
+    ax.set_title(title)
+    
+    # Limit y-axis to meaningful frequencies
+    ax.set_ylim([0, min(sample_rate / 2, 10000)])
+    
+    # Colorbar
+    cbar = fig.colorbar(im, ax=ax)
+    cbar.set_label("Magnitude (dB)")
+    
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
 
 def plot_wavelet_scalogram(
     scalogram: np.ndarray,
@@ -437,8 +493,73 @@ def plot_cross_correlation(
     plt.close(fig)
 
 
-# (… ton fichier continue avec plot_lr_difference, plot_phase_difference, etc.
-#  Tu peux garder le reste tel quel, rien à changer.)
+def plot_stft_spectrogram(
+    frequencies: np.ndarray,
+    times: np.ndarray,
+    stft_matrix: np.ndarray,
+    sample_rate: int,
+    output_path: Path,
+    title: str = "STFT Spectrogram",
+    figsize: tuple = (14, 8),
+    dpi: int = 150,
+    formats: list = ["png"],
+    vmin: float = -80,
+    vmax: float = 0,
+) -> None:
+    """
+    Plot STFT spectrogram (time-frequency representation).
+    
+    Args:
+        frequencies: Frequency bins (Hz)
+        times: Time frames (seconds)
+        stft_matrix: Complex STFT matrix (freq x time)
+        sample_rate: Audio sample rate
+        output_path: Output file path (without extension)
+        title: Plot title
+        figsize: Figure size
+        dpi: Resolution
+        formats: Output formats
+        vmin: Minimum dB value for colormap
+        vmax: Maximum dB value for colormap
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+    
+    # Compute magnitude and convert to dB
+    magnitude = np.abs(stft_matrix)
+    magnitude_db = 20 * np.log10(magnitude + 1e-12)
+    
+    # Create spectrogram
+    im = ax.pcolormesh(
+        times,
+        frequencies,
+        magnitude_db,
+        shading='auto',
+        cmap='viridis',
+        vmin=vmin,
+        vmax=vmax
+    )
+    
+    ax.set_xlabel("Time")
+    ax.set_ylabel("Hz")
+    ax.set_title(title)
+    
+    # Format time axis
+    if times[-1] > 120:  # More than 2 minutes
+        # Format as MM:SS
+        def format_time(x, p):
+            minutes = int(x // 60)
+            seconds = int(x % 60)
+            return f"{minutes}:{seconds:02d}"
+        from matplotlib.ticker import FuncFormatter
+        ax.xaxis.set_major_formatter(FuncFormatter(format_time))
+    
+    # Colorbar
+    cbar = plt.colorbar(im, ax=ax)
+    cbar.set_label("Magnitude (dB)")
+    
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
 
 
 # ----------------------------
@@ -503,3 +624,6 @@ class Visualizer:
 
     def plot_cross_correlation(self, lags, corr, pair_key, output_path):
         plot_cross_correlation(lags, corr, pair_key, output_path, self.figsize, self.dpi, self.formats)
+    
+    def plot_stft_spectrogram(self, frequencies, times, stft_matrix, sample_rate, output_path, title="STFT Spectrogram"):
+        plot_stft_spectrogram(frequencies, times, stft_matrix, sample_rate, output_path, title, self.figsize, self.dpi, self.formats)

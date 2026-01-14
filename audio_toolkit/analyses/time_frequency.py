@@ -73,7 +73,7 @@ def stft_analysis(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisR
             'temporal_stability': float(1.0 - np.std(spectral_mean) / (np.mean(spectral_mean) + 1e-10))
         }
         
-        # Store for visualization (downsample if too large)
+        # Store for visualization (keep as numpy arrays for plotting)
         max_time_frames = 500
         if stft_matrix.shape[1] > max_time_frames:
             downsample_factor = stft_matrix.shape[1] // max_time_frames
@@ -84,9 +84,9 @@ def stft_analysis(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisR
             times_vis = times
         
         visualization_data[channel_name] = {
-            'stft_matrix': stft_vis.tolist(),
-            'frequencies': frequencies.tolist()[:100],
-            'times': times_vis.tolist()
+            'stft_matrix': stft_vis,  # Keep as numpy array
+            'frequencies': frequencies,  # Keep as numpy array
+            'times': times_vis  # Keep as numpy array
         }
     
     logger.info(f"Computed STFT for {len(context.audio_data)} channels")

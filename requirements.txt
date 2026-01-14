@@ -1,6 +1,10 @@
+# Core dependencies
 numpy>=1.24.0
 scipy>=1.10.0
-librosa>=0.10.0
 soundfile>=0.12.0
 pyyaml>=6.0
 matplotlib>=3.7.0
+# Wavelet analysis (REQUIRED for wavelet method)
+PyWavelets>=1.4.0
+# Optional but recommended
+# librosa>=0.10.0  # For CQT (currently not implemented - stub only)

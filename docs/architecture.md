@@ -41,6 +41,7 @@ pipeline_audio/
 │
 ├── visualization/
 │   └── plots.py             # Graph generation
+│   └── plots_extended.py    # Advanced / experimental visualizations
 │
 ├── utils/
 │   ├── math.py              # Common math functions
@@ -71,6 +72,18 @@ It **contains no sound processing logic**.
 Configuration → Audio Loading → Channel Preparation →
 Method Execution → Results Aggregation → Export
 ```
+## Configuration as a Contract
+
+The configuration file is treated as a **strict execution contract**.
+
+Only configuration keys explicitly consumed by the engine have an effect on execution.
+Unknown or undocumented keys are ignored or may trigger validation warnings.
+
+The project distinguishes between:
+- **Contractual configuration** (`configuration.md`), which documents options actively consumed by the code
+- **Conceptual configuration notes** (`configuration_schema.md`), which document design ideas or future extensions with no runtime effect
+
+This separation ensures reproducibility and prevents implicit or undocumented behavior.
 
 ## Analysis Context
 
@@ -121,6 +134,15 @@ No method calls another method.
 - **Steganography**: LSB analysis, structured quantization noise
 - **Meta-Analysis**: Segment comparison, clustering
 
+Note : Meta-analysis methods provide **structural indicators only**.
+
+They operate on previously computed measurements and do not perform
+classification, labeling, or interpretation of signal meaning.
+
+Meta-analysis outputs are intended to guide further human inspection,
+not to produce conclusions.
+
+
 ## Results
 
 Each method returns:
@@ -154,8 +176,15 @@ Results are exported as:
 ## Visualization
 
 Graphs are produced **optionally**, driven by configuration.
-
 No visualization is required for analytical functionality.
+
+Visualization is an optional, non-intrusive layer.
+
+Not all analyses guarantee associated visual output.
+Visualizations are generated only when explicitly supported by the analysis method
+and enabled through configuration.
+
+Visualization does not influence analytical results and must remain purely descriptive.
 
 ## Command Line Interface
 

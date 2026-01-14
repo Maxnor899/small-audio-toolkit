@@ -16,6 +16,9 @@ This toolkit provides a reproducible framework for analyzing audio signals using
 
 ## Key Principles
 
+The tool intentionally separates measurable signal properties from any semantic interpretation.
+Documentation follows the same principle.
+
 - **Configuration-driven**: All analyses are declared in an external configuration file
 - **No interpretation**: The system only extracts, measures, compares and reports measurable properties
 - **Multi-channel preservation**: Spatial and inter-channel information is preserved throughout analysis
@@ -120,12 +123,25 @@ All analyses are controlled via a YAML configuration file. See `examples/config_
 
 ## Documentation
 
-Documentation is available in the `docs/` directory:
+This project distinguishes clearly between **effective behavior** and **design intent**.
 
-- `architecture.md` - Software architecture overview
-- `configuration.md` - Configuration file format
-- `analyses.md` - Complete catalog of available analyses
-- `extending.md` - Guide for adding new analysis methods
+- `docs/architecture.md`  
+  Describes the execution engine, module boundaries, and design constraints.
+
+- `docs/analyses.md`  
+  Function-by-function documentation of all analysis methods effectively implemented in the codebase.
+  No interpretation or classification is performed.
+
+- `docs/configuration.md`  
+  **Contractual configuration reference.**  
+  This document defines the exact configuration keys consumed by the engine.
+  Any undocumented key is ignored.
+
+- `docs/configuration_schema.md`  
+  **Conceptual configuration notes (non-contractual).**  
+  Documents experimental ideas, planned extensions, and design considerations.
+  Options listed here have no effect unless explicitly implemented.
+
 
 ## Requirements
 

@@ -1,332 +1,719 @@
-# Analysis Catalog
+# Analysis Catalog (Code-Accurate Documentation)
 
-This document describes **all envisioned analyses**, grouped by **scientific analysis class**. It serves as a methodological reference and configuration base for the audio analysis pipeline.
+This document describes **all analysis functions effectively implemented in the codebase**, documented **function by function**.
 
-No analysis listed here performs semantic or narrative interpretation. All produce only **objective measurements**.
+For each analysis, the documentation specifies:
 
-## 1. Preprocessing
+* the exact **registry identifier** (used in configuration files)
+* the **Python function** implementing the analysis
+* the **objective** of the computation
+* the **parameters** actually used by the code
+* the **outputs** effectively produced
 
-### Objective
+This document is strictly descriptive:
 
-Stabilize the signal, reduce recording or mixing biases, and prepare analytically exploitable segments.
+* no interpretation
+* no classification
+* no assumptions about signal intent
 
-### Methods
+---
 
-**RMS / LUFS Normalization**
-Global level adjustment for inter-file comparability.
+## Temporal Analyses (`analyses/temporal.py`)
 
-**Silence Detection**
-Identification of low-energy ranges based on threshold and duration.
+### Amplitude Envelope
 
-**Temporal Segmentation**
-Signal splitting into homogeneous segments (energy, spectral stability).
+**Registry identifier:** `envelope`
+**Function:** `envelope_analysis`
 
-**Background Noise Estimation**
-Stationary noise calculation for differential analysis.
+#### Objective
 
-## 2. Temporal Analysis
+Compute the amplitude envelope of the signal in the time domain to measure energy variations over time.
 
-### Objective
+---
 
-Identify **rhythmic structures**, repetitions, or temporal encodings.
+#### Parameters
 
-### Methods
+| Name          | Type | Description                                               |
+| ------------- | ---- | --------------------------------------------------------- |
+| `method`      | str  | Envelope computation method (`hilbert` or `rms`).         |
+| `window_size` | int  | Window size for RMS envelope computation (if applicable). |
 
-**Amplitude Envelope (Hilbert)**
-Measurement of energy evolution over time.
+---
 
-**Temporal Autocorrelation**
-Detection of periodicities and cycles.
+#### Outputs
 
-**Pulse / Impulse Detection**
-Identification of non-natural discrete events.
+**Measurements:**
 
-**Duration Ratios**
-Relative comparison of intervals between events.
+* `envelope`: amplitude envelope signal per channel
 
-## 3. Frequency Analysis
+---
 
-### Objective
+### Temporal Autocorrelation
 
-Highlight **carriers**, dominant frequencies, or artificial harmonic structures.
+**Registry identifier:** `autocorrelation`
+**Function:** `autocorrelation_analysis`
 
-### Methods
+#### Objective
 
-**Global FFT**
-Average signal spectrum.
+Compute the temporal autocorrelation of the signal to measure periodic or repetitive structures.
 
-**Spectral Peak Detection**
-Identification of dominant frequencies and their stability.
+---
 
-**Harmonic Analysis**
-Search for non-natural harmonic relationships.
+#### Parameters
 
-**Cepstrum**
-Detection of frequency repetitions and modulation structures.
+| Name          | Type | Description                                                     |
+| ------------- | ---- | --------------------------------------------------------------- |
+| `max_lag`     | int  | Maximum lag (in samples) for which autocorrelation is computed. |
+| `normalize`   | bool | Normalize autocorrelation by zero-lag value.                    |
+| `max_samples` | int  | Maximum number of samples used for computation.                 |
 
-**Spectral Centroid / Bandwidth / Flatness**
-Global spectral structure indicators.
+---
 
-## 4. Time-Frequency Analysis
+#### Outputs
 
-### Objective
+**Measurements:**
 
-Observe the evolution of frequency components over time and detect **persistent visual or structural patterns**.
+* `lags`: array of lag values
+* `autocorrelation`: autocorrelation values
 
-### Methods
+---
 
-**STFT (Short-Time Fourier Transform)**
-Standard time-frequency analysis.
+### Pulse Detection
 
-**CQT (Constant-Q Transform)**
-Logarithmic analysis adapted to musical or designed signals.
+**Registry identifier:** `pulse_detection`
+**Function:** `pulse_detection`
 
-**Wavelet Transforms**
-Multi-scale structure detection.
+#### Objective
 
-**Frequency Band Stability**
-Measurement of temporal constancy of certain bands.
+Detect discrete transient or impulsive events based on amplitude thresholding.
 
-## 5. Modulation Analysis
+---
 
-### Objective
+#### Parameters
 
-Detect **information carried indirectly** through amplitude, frequency, or phase modulation.
+| Name           | Type  | Description                                            |
+| -------------- | ----- | ------------------------------------------------------ |
+| `threshold`    | float | Detection threshold.                                   |
+| `min_distance` | int   | Minimum distance between detected pulses (in samples). |
 
-### Methods
+---
 
-**Amplitude Modulation Detection (AM)**
-Low-frequency envelope extraction.
+#### Outputs
 
-**Frequency Modulation Analysis (FM)**
-Instantaneous frequency calculation.
+**Measurements:**
 
-**Instantaneous Phase Analysis**
-Study of continuous phase variations.
+* `pulse_positions`: sample indices of detected pulses
 
-**Modulation Index**
-Measurement of modulation depth.
+---
 
-## 6. Information Analysis
+### Duration Ratios
 
-### Objective
+**Registry identifier:** `duration_ratios`
+**Function:** `duration_ratios`
 
-Measure the **informational complexity** of the signal and detect compressible structures.
+#### Objective
 
-### Methods
+Compute ratios between durations separating detected temporal events.
 
-**Global Shannon Entropy**
-Measurement of informational disorder.
+---
 
-**Local Entropy (Windowed)**
-Detection of structured zones.
+#### Outputs
 
-**Compression Ratio**
-Redundancy estimation (gzip, LZ).
+**Measurements:**
 
-**Approximate Complexity**
-Algorithmic regularity measurement.
+* `ratios`: list of duration ratios
 
-## 7. Inter-Channel Analysis
+---
 
-### Objective
+## Spectral Analyses (`analyses/spectral.py`)
 
-Identify **information distributed between channels**, invisible in mono.
+### Global FFT
 
-### Methods
+**Registry identifier:** `fft_global`
+**Function:** `fft_global`
 
-**Inter-Channel Cross-Correlation**
-Measurement of similarity and synchronization.
+#### Objective
 
-**L - R Difference**
-Highlighting signals hidden by phase opposition.
+Compute the global frequency spectrum of the signal.
 
-**Inter-Channel Phase Analysis**
-Phase stability and coherence per band.
+---
 
-**Inter-Channel Delays (ITD)**
-Detection of constant temporal offsets.
+#### Parameters
 
-## 8. Steganography Analysis (Exploratory)
+| Name     | Type | Description                         |
+| -------- | ---- | ----------------------------------- |
+| `window` | str  | Window function applied before FFT. |
 
-### Objective
+---
 
-Test for **intentional discrete encodings**, without presuming their existence.
+#### Outputs
 
-### Methods
+**Measurements:**
 
-**Least Significant Bit Analysis (LSB)**
-Applicable to uncompressed PCM formats.
+* `frequencies`
+* `magnitudes`
 
-**Structured Quantization Noise**
-Search for non-random patterns.
+---
 
-**Signal / Residual Comparison**
-Differential analysis after filtering.
+### Spectral Peak Detection
 
-## 9. Meta-Analysis
+**Registry identifier:** `peak_detection`
+**Function:** `peak_detection`
 
-### Objective
+#### Objective
 
-Provide global indicators to guide human analysis.
+Identify prominent spectral peaks in the frequency domain.
 
-### Methods
+---
 
-**Inter-Segment Comparison**
-Detection of repetitions or anomalies.
+#### Parameters
 
-**Segment Clustering**
-Grouping by measured similarity.
+| Name         | Type  | Description                           |
+| ------------ | ----- | ------------------------------------- |
+| `prominence` | float | Minimum prominence of detected peaks. |
+| `distance`   | int   | Minimum distance between peaks.       |
+| `height`     | float | Minimum peak height (optional).       |
 
-**Stability Scores**
-Temporal or frequency constancy indicators.
+---
 
-## Method Identification
+#### Outputs
 
-Each method has:
+**Measurements:**
 
-- A unique identifier used in configuration
-- Clear input parameters
-- Well-defined output format
-- Scientific references where applicable
+* `peaks`: list of peak frequencies and magnitudes
 
-## Implementation Notes
+---
 
-### Parameter Ranges
+### Harmonic Analysis
 
-All methods define reasonable parameter ranges based on:
+**Registry identifier:** `harmonic_analysis`
+**Function:** `harmonic_analysis`
 
-- Signal sample rate
-- Expected signal characteristics
-- Computational constraints
+#### Objective
 
-### Output Format
+Detect harmonic relationships relative to an estimated fundamental frequency.
 
-Each method returns a structured result containing:
+---
 
-- Primary measurements
-- Derived metrics
-- Anomaly scores (where applicable)
-- Visualization data (optional)
+#### Parameters
 
-### Validation
+| Name                | Type | Description                             |
+| ------------------- | ---- | --------------------------------------- |
+| `fundamental_range` | list | Frequency search range for fundamental. |
+| `max_harmonics`     | int  | Maximum number of harmonics considered. |
 
-Methods include internal validation to:
+---
 
-- Check parameter validity
-- Detect edge cases
-- Report warnings for unusual inputs
+#### Outputs
 
-## Performance Optimizations
+**Measurements:**
 
-### Critical: Correlation-Based Methods
+* `fundamental_frequency`
+* `harmonics`
 
-Several analysis methods use NumPy's `correlate()` function, which has **O(n²) computational complexity**. On long audio files, this can lead to extremely long processing times.
+---
 
-#### Affected Methods
+### Cepstrum Analysis
 
-The following methods have been optimized with sample limitation to maintain reasonable execution times:
+**Registry identifier:** `cepstrum`
+**Function:** `cepstrum_analysis`
 
-**1. Temporal Autocorrelation** (`temporal.autocorrelation`)
-- **Without optimization:** 4h 24min on 5.2M samples (110s audio @ 48kHz)
-- **With optimization:** ~5 seconds using first 50,000 samples
-- **Parameter:** `max_samples` (default: 50000)
+#### Objective
 
-**2. Inter-Channel Cross-Correlation** (`inter_channel.cross_correlation`)
-- **Without optimization:** ~2 hours per channel pair on long files
-- **With optimization:** ~10 seconds total using first 50,000 samples
-- **Parameter:** `max_samples` (default: 50000)
+Compute the real cepstrum to detect periodic structures in the frequency domain.
 
-**3. Inter-Channel Time Delay** (`inter_channel.time_delay`)
-- **Without optimization:** ~2 hours per channel pair on long files
-- **With optimization:** ~10 seconds total using first 50,000 samples
-- **Parameter:** `max_samples` (default: 50000)
+---
 
-**4. Quantization Noise Autocorrelation** (`steganography.quantization_noise`)
-- **Without optimization:** ~5 minutes on 100k samples
-- **With optimization:** ~1 second using first 50,000 samples
-- **Fixed limit:** 50,000 samples (internal)
+#### Outputs
 
-#### Why 50,000 Samples?
+**Measurements:**
 
-At 48kHz sample rate, 50,000 samples represents approximately **1 second of audio**. This is sufficient to:
+* `cepstrum`
 
-- Detect periodic patterns and repetitions
-- Measure inter-channel correlations
-- Identify temporal delays
-- Capture signal characteristics
+---
 
-For signals with consistent characteristics throughout their duration, analyzing the first second provides representative results while dramatically reducing computation time.
+### Spectral Descriptors
 
-#### Performance Impact Summary
+**Registry identifiers:** `spectral_centroid`, `spectral_bandwidth`, `spectral_flatness`
 
-| Method | Before | After | Speedup |
-|--------|--------|-------|---------|
-| autocorrelation | 4h 24m | 5s | 3168x |
-| cross_correlation | ~2h | 10s | 720x |
-| time_delay | ~2h | 10s | 720x |
-| quantization_noise | ~5m | 1s | 300x |
-| **Complete Analysis** | **~8h 30m** | **~15m** | **34x** |
+#### Objective
 
-#### Configuration
+Compute global scalar descriptors of spectral structure.
 
-To enable these optimizations, specify `max_samples` in your configuration:
+---
 
-```yaml
-analyses:
-  temporal:
-    methods:
-      - name: "autocorrelation"
-        params:
-          max_samples: 50000  # Use first 50k samples
-          max_lag: 1000
-          normalize: true
-  
-  inter_channel:
-    methods:
-      - name: "cross_correlation"
-        params:
-          max_samples: 50000  # Use first 50k samples
-          max_lag: 1000
-      
-      - name: "time_delay"
-        params:
-          max_samples: 50000  # Use first 50k samples
-          max_delay: 100
-```
+#### Outputs
 
-#### Adjusting the Limit
+**Measurements:**
 
-You can adjust `max_samples` based on your needs:
+* centroid value
+* bandwidth value
+* flatness value
 
-| Samples | Duration @ 48kHz | Computation Time | Use Case |
-|---------|------------------|------------------|----------|
-| 10,000 | 0.2s | <1s | Very quick preview |
-| 50,000 | 1.0s | ~5s | **Recommended default** |
-| 100,000 | 2.1s | ~20s | More representative |
-| 200,000 | 4.2s | ~90s | Very thorough |
-| Unlimited | Full file | Hours | Research/validation only |
+---
 
-**Recommendation:** Keep the default 50,000 samples for production use. Only increase if you specifically need to analyze longer signal portions.
+## Time–Frequency Analyses (`analyses/time_frequency.py`)
 
-### Other Optimizations
+### STFT
 
-Several other computationally intensive methods also include sample limitations:
+**Registry identifier:** `stft`
+**Function:** `stft_analysis`
 
-- **Local Entropy:** Limited to 200,000 samples
-- **Compression Ratio:** Limited to 100,000 samples
-- **Approximate Complexity:** Limited to 50,000 samples
-- **Wavelet Analysis:** Limited to 100,000 samples
-- **Cepstrum:** Limited to 100,000 samples
-- **LSB Analysis:** Limited to 100,000 samples
-- **Signal Residual:** Limited to 100,000 samples
-- **Stability Scores:** Limited to 200,000 samples
+#### Objective
 
-These limits are applied internally and do not require configuration parameters.
+Compute a short-time Fourier transform spectrogram.
 
-## Final Note
+---
 
-This catalog defines **the field of possible analyses**, not their default activation.
-Actual method selection is entirely driven by the configuration file.
+#### Parameters
 
-This document constitutes a **methodological reference**, not an interpretive manifesto.
+| Name         | Type | Description      |
+| ------------ | ---- | ---------------- |
+| `n_fft`      | int  | FFT size.        |
+| `hop_length` | int  | Hop length.      |
+| `window`     | str  | Window function. |
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `spectrogram`
+
+---
+
+### Constant-Q Transform
+
+**Registry identifier:** `cqt`
+**Function:** `cqt_analysis`
+
+#### Objective
+
+Compute a constant-Q spectrogram with logarithmic frequency resolution.
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `cqt_spectrogram`
+
+---
+
+### Wavelet Transform
+
+**Registry identifier:** `wavelet`
+**Function:** `wavelet_analysis`
+
+#### Objective
+
+Perform a multi-scale wavelet decomposition of the signal.
+
+---
+
+#### Parameters
+
+| Name      | Type | Description     |
+| --------- | ---- | --------------- |
+| `wavelet` | str  | Wavelet type.   |
+| `scales`  | list | List of scales. |
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `coefficients`
+
+---
+
+### Frequency Band Stability
+
+**Registry identifier:** `band_stability`
+**Function:** `band_stability`
+
+#### Objective
+
+Measure temporal stability of predefined frequency bands.
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `stability_scores`
+
+---
+
+## Modulation Analyses (`analyses/modulation.py`)
+
+### Amplitude Modulation Detection
+
+**Registry identifier:** `am_detection`
+**Function:** `am_detection`
+
+#### Objective
+
+Extract and analyze low-frequency amplitude modulation.
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `am_envelope`
+* `modulation_index`
+
+---
+
+### Frequency Modulation Detection
+
+**Registry identifier:** `fm_detection`
+**Function:** `fm_detection`
+
+#### Objective
+
+Estimate instantaneous frequency variations.
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `instantaneous_frequency`
+
+---
+
+### Phase Analysis
+
+**Registry identifier:** `phase_analysis`
+**Function:** `phase_analysis`
+
+#### Objective
+
+Analyze instantaneous phase evolution over time.
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `phase`
+
+---
+
+### Modulation Index
+
+**Registry identifier:** `modulation_index`
+**Function:** `modulation_index`
+
+#### Objective
+
+Compute a scalar index describing modulation depth.
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `modulation_index`
+
+---
+
+## Information Analyses (`analyses/information.py`)
+
+### Shannon Entropy
+
+**Registry identifier:** `shannon_entropy`
+**Function:** `shannon_entropy`
+
+#### Objective
+
+Compute global Shannon entropy of the signal.
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `entropy`
+
+---
+
+### Local Entropy
+
+**Registry identifier:** `local_entropy`
+**Function:** `local_entropy`
+
+#### Objective
+
+Compute windowed entropy over time.
+
+---
+
+#### Parameters
+
+| Name          | Type | Description  |
+| ------------- | ---- | ------------ |
+| `window_size` | int  | Window size. |
+| `hop_length`  | int  | Hop length.  |
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `entropy_series`
+
+---
+
+### Compression Ratio
+
+**Registry identifier:** `compression_ratio`
+**Function:** `compression_ratio`
+
+#### Objective
+
+Estimate signal redundancy using lossless compression.
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `compression_ratio`
+
+---
+
+### Approximate Complexity
+
+**Registry identifier:** `approximate_complexity`
+**Function:** `approximate_complexity`
+
+#### Objective
+
+Estimate algorithmic regularity using approximate complexity measures.
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `complexity_score`
+
+---
+
+## Inter-Channel Analyses (`analyses/inter_channel.py`)
+
+### L − R Difference
+
+**Registry identifier:** `lr_difference`
+**Function:** `lr_difference`
+
+#### Objective
+
+Compute the difference signal between left and right channels.
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `difference_signal`
+
+---
+
+### Cross-Correlation
+
+**Registry identifier:** `cross_correlation`
+**Function:** `cross_correlation`
+
+#### Objective
+
+Compute inter-channel cross-correlation.
+
+---
+
+#### Parameters
+
+| Name          | Type | Description        |
+| ------------- | ---- | ------------------ |
+| `max_lag`     | int  | Maximum lag.       |
+| `max_samples` | int  | Sample limitation. |
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `correlation`
+
+---
+
+### Phase Difference
+
+**Registry identifier:** `phase_difference`
+**Function:** `phase_difference`
+
+#### Objective
+
+Compute phase differences between channels across frequency bands.
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `phase_differences`
+
+---
+
+### Time Delay Estimation
+
+**Registry identifier:** `time_delay`
+**Function:** `time_delay`
+
+#### Objective
+
+Estimate constant temporal offset between channels.
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `delay_samples`
+
+---
+
+## Steganography Analyses (`analyses/steganography.py`)
+
+### LSB Analysis
+
+**Registry identifier:** `lsb_analysis`
+**Function:** `lsb_analysis`
+
+#### Objective
+
+Analyze least significant bit distributions.
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `bit_statistics`
+
+---
+
+### Quantization Noise Analysis
+
+**Registry identifier:** `quantization_noise`
+**Function:** `quantization_noise`
+
+#### Objective
+
+Analyze quantization residuals.
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `residual_signal`
+
+---
+
+### Signal Residual Analysis
+
+**Registry identifier:** `signal_residual`
+**Function:** `signal_residual`
+
+#### Objective
+
+Compute signal residual after filtering.
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `residual`
+
+---
+
+## Meta-Analyses (`analyses/meta_analysis.py`)
+
+### Inter-Segment Comparison
+
+**Registry identifier:** `inter_segment_comparison`
+**Function:** `inter_segment_comparison`
+
+#### Objective
+
+Compare analysis features across temporal segments.
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `similarity_matrix`
+
+---
+
+### Segment Clustering
+
+**Registry identifier:** `segment_clustering`
+**Function:** `segment_clustering`
+
+#### Objective
+
+Cluster segments based on measured features.
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `cluster_labels`
+
+---
+
+### Stability Scores
+
+**Registry identifier:** `stability_scores`
+**Function:** `stability_scores`
+
+#### Objective
+
+Compute stability indicators across segments or frequency bands.
+
+---
+
+#### Outputs
+
+**Measurements:**
+
+* `stability_scores`

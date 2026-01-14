@@ -13,6 +13,7 @@ A configurable, audio analysis toolkit designed to detect non-trivial informatio
 ## Overview
 
 This toolkit provides a reproducible framework for analyzing audio signals using proven methods. It is particularly suited for exploring intentionally designed audio signals (game design, ARGs, steganography) without automatic semantic interpretation.
+i hope most questions are answered in this project's wiki, so please read it !
 
 ## Key Principles
 

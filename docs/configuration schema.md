@@ -1,18 +1,18 @@
-# Configuration Schema and Extension Notes
+# Configuration Schema and Extension Notes 
 
 This document describes **conceptual, experimental, or planned configuration options**.
 
-Options documented here:
+Anything listed here:
 
 * may not be implemented
 * may have no effect if used
-* are provided for design clarity only
+* is provided for design clarity only
 
-This document has **no contractual value**.
+When an option becomes active and has a measurable effect, it should be moved to `configuration.md`.
 
 ---
 
-## Visualization Extensions
+## Visualization extensions
 
 ### visualization.backend (conceptual)
 
@@ -27,32 +27,14 @@ visualization:
 
 Status:
 
-* Not currently consumed by the engine
+* Not currently consumed by the runner
 * Intended to route plots between standard and advanced backends
 
 ---
 
-### visualization.per_channel (conceptual)
+### visualization.per_channel / per_method (conceptual)
 
-Enable per-channel visualization control.
-
-Status:
-
-* Not implemented
-
----
-
-## Analysis Extensions
-
-### meta_analysis.clustering (conceptual)
-
-Potential clustering configuration options.
-
-Examples:
-
-* distance metric
-* number of clusters
-* dimensionality reduction method
+Fine-grained visualization toggles.
 
 Status:
 
@@ -60,23 +42,32 @@ Status:
 
 ---
 
-### steganography.advanced (conceptual)
+## Preprocessing extensions
 
-Potential advanced steganographic detection options.
+### preprocessing.silence_detection (future integration idea)
 
-Examples:
+The silence detector implementation exists, but the runner does not call it.
+A future integration could:
 
-* adaptive LSB analysis
-* structured noise metrics
+* compute silence ranges per channel
+* expose them in metadata/results
+* optionally segment around non-silent regions
 
-Status:
+---
 
-* Not implemented
+## Output extensions
+
+### output.export_formats (future integration idea)
+
+The validator accepts `json` and `csv`, but the runner currently exports JSON only.
+A future implementation could:
+
+* add CSV export for selected metrics
+* add structured tables per method
 
 ---
 
 ## Notes
 
 * This file documents design intent only.
-* No option listed here affects execution.
-* Future implementations should be moved to configuration.md when activated.
+* No option listed here is relied upon by execution.

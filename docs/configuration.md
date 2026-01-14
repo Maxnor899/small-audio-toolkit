@@ -1,328 +1,217 @@
-# Configuration Format
+# Configuration Reference 
 
-## Overview
+This document defines the **configuration contract** as implemented by the current codebase.
 
-The pipeline is entirely driven by a YAML configuration file that declares:
+It documents:
 
-- Preprocessing steps to apply
-- Channels to analyze
-- Analysis categories to activate
-- Methods to execute in each category
-- Method-specific parameters
+* required keys
+* keys that have a **direct effect** on execution
+* keys that are **accepted/validated but currently unused** (explicitly marked)
 
-The configuration file is versioned and saved with results to ensure reproducibility.
+No undocumented key is relied upon by the engine.
 
-## File Structure
+---
+
+## Root structure
+
+```yaml
+version: "1.0"
+channels:
+analyses:
+preprocessing:   # optional
+visualization:   # optional
+output:          # optional
+```
+
+### Required root keys
+
+| Key        | Type   | Required | Notes                                                               |
+| ---------- | ------ | -------- | ------------------------------------------------------------------- |
+| `version`  | string | ✅        | Required by validation. Stored in run metadata as `config_version`. |
+| `channels` | dict   | ✅        | Must contain `channels.analyze`.                                    |
+| `analyses` | dict   | ✅        | May be empty, but must be a dictionary.                             |
+
+---
+
+## channels
+
+### channels.analyze
+
+Select channels to analyze.
+
+| Key       | Type         | Required | Description                              |
+| --------- | ------------ | -------- | ---------------------------------------- |
+| `analyze` | list[string] | ✅        | List of channels to extract and analyze. |
+
+Allowed values:
+
+* `left`
+* `right`
+* `mono`
+* `sum`
+* `difference`
+
+---
+
+## preprocessing (optional)
+
+### preprocessing.normalize
+
+Global level normalization applied **before** analysis.
+
+| Key            | Type   | Default | Effect                                                            |
+| -------------- | ------ | ------: | ----------------------------------------------------------------- |
+| `enabled`      | bool   | `false` | If true, normalization is applied per channel.                    |
+| `method`       | string | `"rms"` | `"rms"` or `"lufs"` (LUFS uses simplified RMS approximation).     |
+| `target_level` | float  | `-20.0` | Target level in dB (or LUFS target for the simplified LUFS path). |
+
+---
+
+### preprocessing.segmentation
+
+Temporal segmentation used to define `context.segments`.
+
+| Key                | Type   |    Default | Effect                                                                             |
+| ------------------ | ------ | ---------: | ---------------------------------------------------------------------------------- |
+| `enabled`          | bool   |    `false` | If false, a single segment covering the whole signal is used.                      |
+| `method`           | string | `"energy"` | `"energy"` or `"spectral"` (both are fixed-duration segmentation in current code). |
+| `segment_duration` | float  |      `1.0` | Segment size in seconds.                                                           |
+
+---
+
+### preprocessing.silence_detection (accepted but currently unused)
+
+| Key            | Type  | Default | Effect                                            |
+| -------------- | ----- | ------: | ------------------------------------------------- |
+| `enabled`      | bool  | `false` | **No effect in the current runner** (not called). |
+| `threshold_db` | float | `-40.0` | Validated only.                                   |
+| `min_duration` | float |   `0.1` | Validated only.                                   |
+
+Notes:
+
+* The silence detection implementation exists (`Preprocessor.detect_silence`) but is not invoked by the current pipeline.
+* If provided, this block is preserved in metadata (`metadata.preprocessing`).
+
+---
+
+## analyses (required)
+
+`analyses` is a dictionary of categories. Each category follows the same structure:
+
+```yaml
+analyses:
+  <category_name>:
+    enabled: true|false
+    methods:
+      - name: <registry_identifier>
+        params: { ... }
+```
+
+### Category behavior
+
+* If `enabled` is false or missing → the category is skipped.
+* If `enabled` is true → `methods` must be a list.
+* Each method entry must be a dict containing `name`.
+* `params` is optional and defaults to `{}`.
+* Runtime parameters are computed as:
+
+  * `merged_params = {**registry.default_params, **params}`
+
+### Validated categories
+
+The validator knows these categories:
+
+* `preprocessing`
+* `temporal`
+* `spectral`
+* `time_frequency`
+* `modulation`
+* `information`
+* `inter_channel`
+* `steganography`
+* `meta_analysis`
+
+Unknown categories are not rejected; they trigger a warning during validation.
+
+---
+
+## visualization (optional)
+
+### visualization.enabled
+
+| Key       | Type | Default | Effect                                                            |
+| --------- | ---- | ------: | ----------------------------------------------------------------- |
+| `enabled` | bool | `false` | If true, the runner generates images in `output/visualizations/`. |
+
+### visualization.formats
+
+| Key       | Type         |   Default | Effect                                            |
+| --------- | ------------ | --------: | ------------------------------------------------- |
+| `formats` | list[string] | `["png"]` | Output formats for figures (`png`, `svg`, `pdf`). |
+
+### visualization.dpi
+
+| Key   | Type | Default | Effect                                 |
+| ----- | ---- | ------: | -------------------------------------- |
+| `dpi` | int  |   `150` | Raster resolution when saving figures. |
+
+### visualization.figsize
+
+| Key       | Type         |   Default | Effect                                              |
+| --------- | ------------ | --------: | --------------------------------------------------- |
+| `figsize` | list[number] | `[12, 8]` | Matplotlib figure size in inches `[width, height]`. |
+
+---
+
+## output (optional)
+
+### output.save_raw_data
+
+| Key             | Type | Default | Effect                                                      |
+| --------------- | ---- | ------: | ----------------------------------------------------------- |
+| `save_raw_data` | bool |  `true` | If true, saves `results.json` (without visualization data). |
+
+### output.save_config
+
+| Key           | Type | Default | Effect                                                       |
+| ------------- | ---- | ------: | ------------------------------------------------------------ |
+| `save_config` | bool |  `true` | If true, saves `config_used.json` (the full config as used). |
+
+### output.export_formats (accepted but currently unused)
+
+| Key              | Type         |  Default | Effect                                                |
+| ---------------- | ------------ | -------: | ----------------------------------------------------- |
+| `export_formats` | list[string] | *(none)* | **No effect in the current runner** (validated only). |
+
+Notes:
+
+* The validator checks `export_formats` values (`json`, `csv`), but the runner always writes JSON only.
+
+---
+
+## Minimal working configuration example
 
 ```yaml
 version: "1.0"
 
-preprocessing:
-  normalize:
-    enabled: true
-    method: "rms"  # or "lufs"
-    target_level: -20.0
-  
-  silence_detection:
-    enabled: true
-    threshold_db: -40.0
-    min_duration: 0.1
-
-  segmentation:
-    enabled: false
-
 channels:
-  analyze: ["left", "right", "sum", "difference"]
-  # Options: "left", "right", "mono", "sum", "difference"
+  analyze: ["left", "right", "difference"]
 
 analyses:
   temporal:
     enabled: true
     methods:
-      - name: "envelope"
-        params:
-          method: "hilbert"
-      
       - name: "autocorrelation"
         params:
-          max_lag: 1000
-  
-  spectral:
-    enabled: true
-    methods:
-      - name: "fft_global"
-        params:
-          window: "hann"
-      
-      - name: "peak_detection"
-        params:
-          prominence: 10.0
-          distance: 100
-  
-  time_frequency:
-    enabled: true
-    methods:
-      - name: "stft"
-        params:
-          n_fft: 2048
-          hop_length: 512
-          window: "hann"
-      
-      - name: "cqt"
-        params:
-          n_bins: 84
-          bins_per_octave: 12
-  
-  modulation:
-    enabled: false
-  
-  information:
-    enabled: true
-    methods:
-      - name: "shannon_entropy"
-        params:
-          window_size: 1024
-      
-      - name: "compression_ratio"
-        params:
-          algorithm: "gzip"
-  
-  inter_channel:
-    enabled: true
-    methods:
-      - name: "cross_correlation"
-        params: {}
-      
-      - name: "phase_difference"
-        params:
-          frequency_bands: [[100, 500], [500, 2000], [2000, 8000]]
-  
-  steganography:
-    enabled: false
-  
-  meta_analysis:
-    enabled: false
+          max_lag: 2000
+          max_samples: 50000
 
 visualization:
   enabled: true
   formats: ["png"]
-  dpi: 300
+  dpi: 150
 
 output:
   save_raw_data: true
   save_config: true
-  export_formats: ["json"]
 ```
-
-## Configuration Sections
-
-### Preprocessing
-
-Optional preprocessing steps applied before analysis.
-
-```yaml
-preprocessing:
-  normalize:
-    enabled: bool
-    method: "rms" | "lufs"
-    target_level: float
-  
-  silence_detection:
-    enabled: bool
-    threshold_db: float
-    min_duration: float  # seconds
-  
-  segmentation:
-    enabled: bool
-    method: "energy" | "spectral"
-    segment_duration: float  # seconds
-```
-
-### Channels
-
-Defines which channels to analyze.
-
-```yaml
-channels:
-  analyze: list[str]
-  # Options:
-  # - "left": left channel
-  # - "right": right channel
-  # - "mono": average of all channels
-  # - "sum": L + R
-  # - "difference": L - R
-```
-
-### Analyses
-
-Each analysis category can be enabled/disabled and configured independently.
-
-#### Temporal Analysis
-
-```yaml
-temporal:
-  enabled: bool
-  methods:
-    - name: "envelope"
-      params:
-        method: "hilbert" | "rms"
-        window_size: int  # for rms
-    
-    - name: "autocorrelation"
-      params:
-        max_lag: int
-        normalize: bool
-    
-    - name: "pulse_detection"
-      params:
-        threshold: float
-        min_distance: int
-```
-
-#### Spectral Analysis
-
-```yaml
-spectral:
-  enabled: bool
-  methods:
-    - name: "fft_global"
-      params:
-        window: "hann" | "hamming" | "blackman"
-    
-    - name: "peak_detection"
-      params:
-        prominence: float
-        distance: int
-        height: float
-    
-    - name: "harmonic_analysis"
-      params:
-        fundamental_range: [float, float]
-        max_harmonics: int
-    
-    - name: "cepstrum"
-      params: {}
-```
-
-#### Time-Frequency Analysis
-
-```yaml
-time_frequency:
-  enabled: bool
-  methods:
-    - name: "stft"
-      params:
-        n_fft: int
-        hop_length: int
-        window: str
-    
-    - name: "cqt"
-      params:
-        n_bins: int
-        bins_per_octave: int
-    
-    - name: "wavelet"
-      params:
-        wavelet: "morlet" | "mexicanhat"
-        scales: list[int]
-```
-
-#### Modulation Analysis
-
-```yaml
-modulation:
-  enabled: bool
-  methods:
-    - name: "am_detection"
-      params:
-        carrier_range: [float, float]
-    
-    - name: "fm_detection"
-      params:
-        method: "hilbert" | "instantaneous"
-    
-    - name: "phase_analysis"
-      params: {}
-```
-
-#### Information Analysis
-
-```yaml
-information:
-  enabled: bool
-  methods:
-    - name: "shannon_entropy"
-      params:
-        window_size: int
-        normalize: bool
-    
-    - name: "local_entropy"
-      params:
-        window_size: int
-        hop_length: int
-    
-    - name: "compression_ratio"
-      params:
-        algorithm: "gzip" | "lz77"
-```
-
-#### Inter-Channel Analysis
-
-```yaml
-inter_channel:
-  enabled: bool
-  methods:
-    - name: "cross_correlation"
-      params:
-        max_lag: int
-    
-    - name: "phase_difference"
-      params:
-        frequency_bands: list[list[float]]
-    
-    - name: "time_delay"
-      params: {}
-```
-
-### Visualization
-
-```yaml
-visualization:
-  enabled: bool
-  formats: list[str]  # ["png", "svg", "pdf"]
-  dpi: int
-  figsize: [float, float]  # width, height in inches
-```
-
-### Output
-
-```yaml
-output:
-  save_raw_data: bool
-  save_config: bool
-  export_formats: list[str]  # ["json", "csv"]
-```
-
-## Parameter Types
-
-- `bool`: true/false
-- `int`: integer value
-- `float`: floating point value
-- `str`: string value
-- `list[T]`: list of type T
-
-## Validation
-
-The configuration is validated at load time. Invalid configurations will raise descriptive errors before execution begins.
-
-## Examples
-
-See `examples/config_example.yaml` for a complete working example.
-
-## Best Practices
-
-1. Start with a minimal configuration and add analyses progressively
-2. Document why each analysis is enabled
-3. Version your configuration files
-4. Keep parameter values within reasonable ranges for your sample rate
-5. Disable visualization during batch processing for performance

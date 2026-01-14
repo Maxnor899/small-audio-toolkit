@@ -56,7 +56,7 @@ Catégories existantes :
 - `steganography`
 - `meta_analysis`
 
-➡️ Implémenter la méthode dans le fichier correspondant.
+Implémenter la méthode dans le fichier correspondant.
 
 ---
 

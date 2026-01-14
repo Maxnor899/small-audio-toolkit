@@ -24,7 +24,7 @@ Aucun calcul analytique ne doit être déplacé dans la couche graphique.
 - `audio_toolkit/engine/runner.py` → déclenchement des visualisations
 - `audio_toolkit/engine/results.py` → transport des données
 
-⚠️ Toute implémentation de plot doit se faire **uniquement** dans `plots.py`.
+Toute implémentation de plot doit se faire **uniquement** dans `plots.py`.
 
 ---
 
@@ -35,7 +35,7 @@ Les données utilisées pour tracer proviennent de :
 - exceptionnellement de `measurements` (si léger et déjà sérialisable).
 
 Si les données nécessaires n’existent pas :
-➡️ les ajouter **dans l’analyse**, pas dans le plot.
+les ajouter **dans l’analyse**, pas dans le plot.
 
 ---
 

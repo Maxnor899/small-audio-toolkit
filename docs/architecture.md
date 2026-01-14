@@ -41,7 +41,7 @@ pipeline_audio/
 │
 ├── visualization/
 │   └── plots.py             # Graph generation
-│   └── plots_extended.py    # Advanced / experimental visualizations
+│   └── plots_extended.py    # OLD AND DEPRECATED Advanced / experimental visualizations kept only for compatibility - DO NOT USE
 │
 ├── utils/
 │   ├── math.py              # Common math functions
@@ -185,6 +185,8 @@ Visualizations are generated only when explicitly supported by the analysis meth
 and enabled through configuration.
 
 Visualization does not influence analytical results and must remain purely descriptive.
+- plot.py is the UNIQUE way to implement new visualzations
+- plots_extended.py = module kept for documentation consistency, without inner logic
 
 ## Command Line Interface
 

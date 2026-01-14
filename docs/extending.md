@@ -328,6 +328,12 @@ python -m audio_toolkit.main \
 
 Verify the JSON output contains your method's results.
 
+## Adding visualizations
+
+The methods can provide `visualization_data` in `AnalysisResult`.
+Figure rendering is centralized in `visualization/plots.py`.
+`plots_extended.py` should not contain any implementations (only shims/re-exports).
+
 ## Contributing Methods
 
 When contributing new methods to the project:

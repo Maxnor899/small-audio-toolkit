@@ -137,6 +137,8 @@ Unknown categories are not rejected; they trigger a warning during validation.
 
 ## visualization (optional)
 
+Visualization uses the single plotting implementation in visualization/plots.py.
+
 ### visualization.enabled
 
 | Key       | Type | Default | Effect                                                            |

@@ -58,6 +58,9 @@ Each analysis method should:
 
 Visualizations are considered **representational tools**, not interpretative ones.
 
+Add or modify plot functions in visualization/plots.py.
+plots_extended.py is reserved for re-exports/compatibility and should not contain implementations.
+
 When contributing visualizations:
 
 * Plots must represent raw or derived measurements only

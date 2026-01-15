@@ -1,119 +1,91 @@
-# Analysis Documentation — Scope and Methodology
+# Analysis Explanations — Read Me First
 
-This documentation describes the analytical foundations of the tool and the principles governing how its results should be read.
+This documentation explains **how to read and reason about the analyses produced by this tool**.
 
-It is intentionally conservative, explicit about limitations, and designed to withstand skeptical examination.
+It is intentionally concise, conservative, and explicit about limitations.
+Its role is to define the **intellectual posture** required to use the tool responsibly.
 
 ---
 
-## Purpose of This Documentation
+## What This Documentation Is
 
-This documentation exists to explain:
+This documentation provides:
 
-- what the tool measures,
-- how those measurements are produced,
-- how they can be contextualized,
-- and, critically, what **cannot** be inferred from them.
+- an explanation of the analytical posture adopted by the tool,
+- a clear statement of what the tool does and does not do,
+- guidance on how to approach the results without over-interpreting them.
 
-It does **not** attempt to convince the reader that any given signal is meaningful, artificial, or intentional.
+It does **not** explain individual analysis methods in detail.
+Those explanations are provided in subsequent documents.
 
 ---
 
 ## What This Tool Does
 
-This tool performs **objective signal measurements** on audio data using established methods from digital signal processing (DSP), including:
+This tool performs **objective signal measurements** on audio data.
 
-- temporal analysis,
-- spectral and time–frequency analysis,
-- modulation analysis,
-- information-theoretic metrics,
-- inter-channel relationships,
-- residual and noise-oriented analyses.
+It applies established signal-processing techniques to extract numerical observations describing:
+- temporal behavior,
+- spectral structure,
+- modulation characteristics,
+- information-related properties,
+- inter-channel relationships.
 
-Each analysis produces **numerical observations only**.
-
-No semantic interpretation, classification, or decision logic is applied at any stage.
+The tool produces **measurements only**.
 
 ---
 
-## What This Tool Deliberately Does *Not* Do
+## What This Tool Deliberately Does Not Do
 
 This tool does **not**:
 
 - detect messages,
-- identify intent,
+- infer meaning or intent,
 - classify signals as artificial or natural,
-- determine whether a signal is meaningful,
-- converge toward a hypothesis.
+- converge toward a hypothesis,
+- decide whether a signal is “interesting”.
 
-The presence of structure does **not** imply intention.  
-The absence of structure does **not** imply randomness.
-
-A complete lack of notable observations is a **valid and expected outcome**.
+The presence of structure does not imply intention.
+The absence of structure does not imply randomness.
 
 ---
 
-## Measurements vs Interpretation
+## Interpretation Is Outside the Tool
 
-All outputs produced by the tool are measurements.
+All interpretation lies **outside** the scope of the tool.
 
-Any interpretation — including relevance, intent, or meaning — lies **entirely outside** the scope of the tool and remains the responsibility of the user.
+Assigning meaning, relevance, or intent to measurements is a **human responsibility**, not an automated one.
 
-This separation is deliberate:
-
-- it prevents automated bias,
-- it preserves reproducibility,
-- it allows multiple independent readings of the same data.
-
-The tool is an **instrument**, not an analyst.
+The tool should be understood as an **instrument**, not an analyst.
 
 ---
 
-## Role of Configuration and References
+## Validity of Null Results
 
-Analysis behavior is defined through configuration files:
+Producing no notable observations is a **valid and expected outcome**.
 
-- YAML configurations define **what is observed and at what scale**.
-- External reference files provide **contextual comparison ranges**, not thresholds or verdicts.
-
-Reference values exist solely to help position measurements relative to commonly observed ranges in DSP practice.
-
-They do not imply correctness, abnormality, or significance.
-
----
-
-## Limits and Scope
-
-This tool operates strictly at the signal level.
-
-It cannot:
-- infer meaning,
-- validate hypotheses,
-- confirm design intent,
-- replace domain expertise.
-
-Any apparent convergence of observations must be treated as a **human analytical construct**, not an automated result.
+The tool is not designed to “find something”.
+It is designed to **measure faithfully**, regardless of whether the result appears trivial or complex.
 
 ---
 
 ## How to Read the Rest of This Documentation
 
-The remaining documents are organized by **analysis families**.
+The remaining documents are organized to progressively deepen understanding:
 
-Each family document explains:
-- what that class of analyses measures,
-- how such metrics are typically used in DSP,
-- what value ranges are commonly observed,
-- and what limitations apply.
+1. `01_METHODOLOGY.md` explains how measurements are produced and how they should be reasoned about.
+2. `02_CONTEXTUAL_REFERENCES.md` explains how comparative reference ranges are used without interpretation.
+3. `03_OBSERVATION_LIMITS.md` details the theoretical and practical limits of signal-based analysis.
+4. `families/*` documents describe each analysis family in detail.
 
-These documents are descriptive, not prescriptive.
-
-They are intended to support careful human analysis — including skepticism.
+Reading them in order is strongly recommended.
 
 ---
 
 ## Final Note
 
-If, after careful examination, the tool produces no observations of interest, this should be considered a meaningful result.
+This documentation is written with skepticism in mind.
 
-Scientific rigor includes the acceptance of null outcomes.
+If, after careful examination, the tool does not reveal anything of interest, this should be regarded as a **legitimate analytical result**.
+
+Scientific rigor includes accepting negative or null outcomes.

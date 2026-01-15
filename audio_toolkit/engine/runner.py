@@ -1,3 +1,4 @@
+# audio_toolkit/engine/runner.py
 """
 Main orchestrator for the analysis pipeline with complete visualization support.
 """
@@ -112,7 +113,7 @@ class AnalysisRunner:
             return channel_data
 
         normalize_config = preprocessing_config.get("normalize", {})
-        if normalize_config.get("enabled", False):
+        if isinstance(normalize_config, dict) and normalize_config.get("enabled", False):
             method = normalize_config.get("method", "rms")
             target_level = normalize_config.get("target_level", -20.0)
 
@@ -135,7 +136,7 @@ class AnalysisRunner:
         """Compute temporal segments if configured."""
         segmentation_config = preprocessing_config.get("segmentation", {})
 
-        if not segmentation_config.get("enabled", False):
+        if not isinstance(segmentation_config, dict) or not segmentation_config.get("enabled", False):
             first_channel = list(channel_data.values())[0]
             return [(0, len(first_channel))]
 
@@ -179,10 +180,7 @@ class AnalysisRunner:
 
         if len(context.audio_data) > 1:
             multi_path = viz_dir / "multi_channel_overview"
-            sample_data = {
-                name: audio[:min(len(audio), 50000)]
-                for name, audio in context.audio_data.items()
-            }
+            sample_data = {name: audio[:min(len(audio), 50000)] for name, audio in context.audio_data.items()}
             self.visualizer.plot_multi_channel(
                 sample_data,
                 context.sample_rate,
@@ -248,12 +246,7 @@ class AnalysisRunner:
         viz_dir = output_path / "visualizations"
         viz_dir.mkdir(exist_ok=True, parents=True)
 
-        # ✅ ResultsAggregator provides get_results() (and now also to_dict())
         results_dict = self.results.get_results()
-
-        viz_config = self.config.get("visualization", {})
-        formats = viz_config.get("formats", ["png"])
-        dpi = viz_config.get("dpi", 150)
 
         for category, methods in results_dict.get("results", {}).items():
             for method_result in methods:
@@ -272,7 +265,7 @@ class AnalysisRunner:
 
     def _generate_method_visualization(self, method: str, viz_data: Dict, viz_dir: Path) -> None:
         """Generate visualization for a specific method."""
-        
+
         # ========================================
         # TEMPORAL
         # ========================================
@@ -297,8 +290,6 @@ class AnalysisRunner:
         # ========================================
         # SPECTRAL
         # ========================================
-        
-        # 🔧 CORRECTION #1 : Ajout de fft_global
         elif method == "fft_global":
             for channel, data in viz_data.items():
                 if "frequencies" in data and "magnitudes" in data:
@@ -308,7 +299,7 @@ class AnalysisRunner:
                         viz_dir / f"fft_global_{channel}",
                         f"FFT Spectrum - {channel}",
                     )
-        
+
         elif method == "peak_detection":
             for channel, data in viz_data.items():
                 if "spectrum" in data and "peaks" in data:
@@ -345,8 +336,6 @@ class AnalysisRunner:
         # ========================================
         # TIME-FREQUENCY
         # ========================================
-        
-        # 🔧 CORRECTION #2 : Ajout de stft
         elif method == "stft":
             for channel, data in viz_data.items():
                 if all(k in data for k in ["frequencies", "times", "stft_matrix"]):
@@ -362,15 +351,29 @@ class AnalysisRunner:
                         dpi=self.visualizer.dpi,
                         formats=self.visualizer.formats,
                     )
-        
-        # 🔧 CORRECTION #3 : Correction de band_stability (clé 'bands_data' au lieu de 'bands')
+
+        elif method == "cqt":
+            for channel, data in viz_data.items():
+                if all(k in data for k in ["frequencies", "times", "cqt_db"]):
+                    from ..visualization.plots import plot_cqt_spectrogram
+                    plot_cqt_spectrogram(
+                        np.asarray(data["frequencies"]),
+                        np.asarray(data["times"]),
+                        np.asarray(data["cqt_db"]),
+                        viz_dir / f"cqt_{channel}",
+                        f"CQT Spectrogram - {channel}",
+                        figsize=self.visualizer.figsize,
+                        dpi=self.visualizer.dpi,
+                        formats=self.visualizer.formats,
+                    )
+
         elif method == "band_stability":
             for channel, data in viz_data.items():
-                if "times" in data and "bands_data" in data:  # ← CORRECTION ICI
+                if "times" in data and "bands_data" in data:
                     from ..visualization.plots import plot_band_stability
                     plot_band_stability(
                         np.asarray(data["times"]),
-                        data["bands_data"],  # ← CORRECTION ICI
+                        data["bands_data"],
                         viz_dir / f"band_stability_{channel}",
                         figsize=self.visualizer.figsize,
                         dpi=self.visualizer.dpi,
@@ -390,27 +393,24 @@ class AnalysisRunner:
         # ========================================
         # MODULATION
         # ========================================
-        
-        # 🔧 CORRECTION #4 : Correction de am_detection (clés 'modulation_frequencies'/'modulation_spectrum')
         elif method == "am_detection":
             for channel, data in viz_data.items():
-                if all(k in data for k in ["time", "envelope", "modulation_frequencies", "modulation_spectrum"]):  # ← CORRECTION ICI
+                if all(k in data for k in ["time", "envelope", "modulation_frequencies", "modulation_spectrum"]):
                     self.visualizer.plot_am_detection(
                         np.asarray(data["time"]),
                         np.asarray(data["envelope"]),
-                        np.asarray(data["modulation_frequencies"]),  # ← CORRECTION ICI
-                        np.asarray(data["modulation_spectrum"]),      # ← CORRECTION ICI
+                        np.asarray(data["modulation_frequencies"]),
+                        np.asarray(data["modulation_spectrum"]),
                         viz_dir / f"am_{channel}",
                     )
 
-        # 🔧 CORRECTION #5 : Correction de fm_detection (clés 'instantaneous_frequency'/'carrier_frequency')
         elif method == "fm_detection":
             for channel, data in viz_data.items():
-                if all(k in data for k in ["time", "instantaneous_frequency", "carrier_frequency"]):  # ← CORRECTION ICI
+                if all(k in data for k in ["time", "instantaneous_frequency", "carrier_frequency"]):
                     self.visualizer.plot_fm_detection(
                         np.asarray(data["time"]),
-                        np.asarray(data["instantaneous_frequency"]),  # ← CORRECTION ICI
-                        float(data["carrier_frequency"]),             # ← CORRECTION ICI
+                        np.asarray(data["instantaneous_frequency"]),
+                        float(data["carrier_frequency"]),
                         viz_dir / f"fm_{channel}",
                     )
 
@@ -436,12 +436,10 @@ class AnalysisRunner:
                         pair_key,
                         viz_dir / f"cross_corr_{pair_key}",
                     )
-        
-        # 🔧 CORRECTION #6 : Ajout de lr_difference
+
         elif method == "lr_difference":
             data = viz_data.get("lr_difference", {})
             if data:
-                # Waveform
                 if "waveform" in data:
                     max_samples = min(len(data["waveform"]), 100_000)
                     self.visualizer.plot_waveform(
@@ -450,8 +448,7 @@ class AnalysisRunner:
                         viz_dir / "lr_difference_waveform",
                         "L-R Difference Waveform",
                     )
-                
-                # Spectrum
+
                 if "frequencies" in data and "spectrum" in data:
                     self.visualizer.plot_spectrum(
                         np.asarray(data["frequencies"]),

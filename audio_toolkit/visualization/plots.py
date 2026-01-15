@@ -1,3 +1,4 @@
+# audio_toolkit/visualization/plots.py
 """
 Extended visualization functions for all analysis methods + Visualizer wrapper.
 
@@ -5,7 +6,7 @@ Per architecture: visualization is optional and must not affect analysis executi
 """
 
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, List
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
@@ -31,7 +32,7 @@ def save_figure(fig: plt.Figure, output_path: Path, formats: list, dpi: int) -> 
 
 
 # ----------------------------
-# Basic plots (missing before)
+# Basic plots
 # ----------------------------
 
 def plot_waveform(
@@ -184,7 +185,7 @@ def plot_peaks(
 
 
 # ----------------------------
-# Existing extended plots (your file already had these)
+# Extended plots
 # ----------------------------
 
 def plot_harmonics(
@@ -286,62 +287,6 @@ def plot_band_stability(
     save_figure(fig, output_path, formats, dpi)
     plt.close(fig)
 
-def plot_stft_spectrogram(
-    frequencies: np.ndarray,
-    times: np.ndarray,
-    stft_matrix: np.ndarray,
-    sample_rate: int,
-    output_path: Path,
-    title: str,
-    figsize: tuple = (12, 8),
-    dpi: int = 150,
-    formats: list = ["png"],
-) -> None:
-    """
-    Plot STFT spectrogram.
-    
-    Args:
-        frequencies: Frequency bins (Hz)
-        times: Time frames (s)
-        stft_matrix: Complex STFT matrix (freq x time)
-        sample_rate: Sample rate
-        output_path: Output file path (without extension)
-        title: Plot title
-        figsize: Figure size
-        dpi: Resolution
-        formats: Output formats
-    """
-    fig, ax = plt.subplots(figsize=figsize)
-    
-    # Convert to magnitude (dB)
-    magnitude = np.abs(stft_matrix)
-    magnitude_db = 20 * np.log10(magnitude + 1e-10)
-    
-    # Create mesh
-    im = ax.pcolormesh(
-        times,
-        frequencies,
-        magnitude_db,
-        shading='auto',
-        cmap='viridis',
-        vmin=np.percentile(magnitude_db, 5),
-        vmax=np.percentile(magnitude_db, 95)
-    )
-    
-    ax.set_xlabel("Time (s)")
-    ax.set_ylabel("Frequency (Hz)")
-    ax.set_title(title)
-    
-    # Limit y-axis to meaningful frequencies
-    ax.set_ylim([0, min(sample_rate / 2, 10000)])
-    
-    # Colorbar
-    cbar = fig.colorbar(im, ax=ax)
-    cbar.set_label("Magnitude (dB)")
-    
-    fig.tight_layout()
-    save_figure(fig, output_path, formats, dpi)
-    plt.close(fig)
 
 def plot_wavelet_scalogram(
     scalogram: np.ndarray,
@@ -508,7 +453,7 @@ def plot_stft_spectrogram(
 ) -> None:
     """
     Plot STFT spectrogram (time-frequency representation).
-    
+
     Args:
         frequencies: Frequency bins (Hz)
         times: Time frames (seconds)
@@ -516,47 +461,99 @@ def plot_stft_spectrogram(
         sample_rate: Audio sample rate
         output_path: Output file path (without extension)
         title: Plot title
-        figsize: Figure size
-        dpi: Resolution
-        formats: Output formats
-        vmin: Minimum dB value for colormap
-        vmax: Maximum dB value for colormap
     """
     fig, ax = plt.subplots(figsize=figsize)
-    
-    # Compute magnitude and convert to dB
+
     magnitude = np.abs(stft_matrix)
     magnitude_db = 20 * np.log10(magnitude + 1e-12)
-    
-    # Create spectrogram
+
     im = ax.pcolormesh(
         times,
         frequencies,
         magnitude_db,
-        shading='auto',
-        cmap='viridis',
+        shading="auto",
+        cmap="viridis",
         vmin=vmin,
-        vmax=vmax
+        vmax=vmax,
     )
-    
+
     ax.set_xlabel("Time")
     ax.set_ylabel("Hz")
     ax.set_title(title)
-    
-    # Format time axis
-    if times[-1] > 120:  # More than 2 minutes
-        # Format as MM:SS
-        def format_time(x, p):
+
+    # Format time axis for long durations
+    if len(times) > 0 and times[-1] > 120:
+        from matplotlib.ticker import FuncFormatter
+
+        def format_time(x, _p):
             minutes = int(x // 60)
             seconds = int(x % 60)
             return f"{minutes}:{seconds:02d}"
-        from matplotlib.ticker import FuncFormatter
+
         ax.xaxis.set_major_formatter(FuncFormatter(format_time))
-    
-    # Colorbar
+
     cbar = plt.colorbar(im, ax=ax)
     cbar.set_label("Magnitude (dB)")
-    
+
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
+def plot_cqt_spectrogram(
+    frequencies: np.ndarray,
+    times: np.ndarray,
+    cqt_db: np.ndarray,
+    output_path: Path,
+    title: str = "CQT Spectrogram",
+    figsize: tuple = (14, 8),
+    dpi: int = 150,
+    formats: list = ["png"],
+    vmin: float = None,
+    vmax: float = None,
+) -> None:
+    """
+    Plot CQT spectrogram (log-frequency time-frequency representation).
+
+    Args:
+        frequencies: CQT center frequencies (Hz), length = freq_bins
+        times: Time frames (s), length = time_bins
+        cqt_db: Magnitude in dB (freq_bins x time_bins)
+        output_path: Output file path (without extension)
+        title: Plot title
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+
+    freqs = np.asarray(frequencies)
+    t = np.asarray(times)
+    M = np.asarray(cqt_db)
+
+    # Robust display range defaults
+    if vmin is None:
+        vmin = float(np.percentile(M, 5))
+    if vmax is None:
+        vmax = float(np.percentile(M, 95))
+
+    im = ax.pcolormesh(
+        t,
+        freqs,
+        M,
+        shading="auto",
+        cmap="viridis",
+        vmin=vmin,
+        vmax=vmax,
+    )
+
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("Frequency (Hz)")
+    ax.set_title(title)
+
+    if np.all(freqs > 0):
+        ax.set_yscale("log")
+
+    cbar = fig.colorbar(im, ax=ax)
+    cbar.set_label("Magnitude (dB)")
+
     fig.tight_layout()
     save_figure(fig, output_path, formats, dpi)
     plt.close(fig)
@@ -624,6 +621,9 @@ class Visualizer:
 
     def plot_cross_correlation(self, lags, corr, pair_key, output_path):
         plot_cross_correlation(lags, corr, pair_key, output_path, self.figsize, self.dpi, self.formats)
-    
+
     def plot_stft_spectrogram(self, frequencies, times, stft_matrix, sample_rate, output_path, title="STFT Spectrogram"):
         plot_stft_spectrogram(frequencies, times, stft_matrix, sample_rate, output_path, title, self.figsize, self.dpi, self.formats)
+
+    def plot_cqt_spectrogram(self, frequencies, times, cqt_db, output_path, title="CQT Spectrogram"):
+        plot_cqt_spectrogram(frequencies, times, cqt_db, output_path, title, self.figsize, self.dpi, self.formats)

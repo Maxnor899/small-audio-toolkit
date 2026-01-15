@@ -1,48 +1,85 @@
 ## A Note on This Project's Development
 
-Yes, this project was built with extensive assistance from Claude AI to compensate for the author's chronic lack of development skills. 
-Even worse, Claude and the author share an equal talent for wild hallucinations, which is probably why they work so well together.
+Yes, this project was built with extensive assistance from AI to compensate for the author's chronic lack of development skills. 
+Even worse, AI and the author share an equal talent for wild hallucinations, which is probably why they work so well together.
 If you think this makes the author a monster, a fraud, an illusionist, or a coding muggle, feel free to move along.
 However, if you're willing to give this project the benefit of curiosity, you'll have the opportunity to judge its relevance for yourself. 
 Who knows, you might even want to contribute.
 
-# Small Audio Toolkit
+# Small Audio Tool
 
-A configurable, audio analysis toolkit designed to detect non-trivial informational structures in audio files through objective measurements.
+Small Audio Tool is a Python-based audio analysis toolkit designed to explore
+**structural properties of audio signals** using a broad set of classical
+digital signal processing (DSP) techniques.
 
-## Overview
+The tool focuses on **measurement and observation**, not interpretation or classification.
 
-This toolkit provides a reproducible framework for analyzing audio signals using proven methods. It is particularly suited for exploring intentionally designed audio signals (game design, ARGs, steganography) without automatic semantic interpretation.
+---
 
-**Most questions are (probably) answered in this project's wiki, and in the documentation, so please read it !**
+## What this project does
 
-## Key Principles
+Small Audio Tool analyzes audio files and produces:
 
-The tool intentionally separates measurable signal properties from any semantic interpretation.
-Documentation follows the same principle.
+- numerical measurements,
+- visualizations,
+- and structured reports,
 
-- **Configuration-driven**: All analyses are declared in an external configuration file
-- **No interpretation**: The system only extracts, measures, compares and reports measurable properties
-- **Multi-channel preservation**: Spatial and inter-channel information is preserved throughout analysis
-- **Reproducibility**: All parameters and results are fully traceable and auditable
-- **Extensibility**: New analysis methods can be added without modifying the core engine
+covering multiple analytical domains, including:
 
-## Features
+- temporal analysis,
+- spectral analysis,
+- time–frequency representations,
+- modulation-related measurements,
+- information-theoretic metrics,
+- inter-channel relationships (including difference channels),
+- residual and quantization-related statistics.
 
-- Multi-channel audio support (mono, stereo, multi-channel)
-- 9 categories of analyses:
-  - Preprocessing
-  - Temporal analysis
-  - Frequency analysis
-  - Time-frequency analysis
-  - Modulation analysis
-  - Information theory analysis
-  - Inter-channel analysis
-  - Steganography exploration
-  - Meta-analysis
-- Configurable preprocessing pipeline
-- Optional visualization generation
-- JSON export with full parameter traceability
+All analyses are configuration-driven and reproducible.
+
+---
+
+## What this project does *not* do
+
+This tool does **not**:
+
+- detect messages,
+- infer intent,
+- classify signals as natural or artificial,
+- determine whether a signal is meaningful,
+- draw conclusions or probabilities.
+
+Measured structure is reported as-is.
+Any interpretation remains entirely the responsibility of the user.
+A lack of notable observations is considered a valid outcome.
+
+---
+## Configuration-driven design
+
+The tool relies on two distinct YAML configuration files:
+
+### Analysis protocol
+
+The analysis protocol configuration defines:
+- which analyses are executed,
+- on which channels,
+- with which parameters and resolutions.
+
+This file controls **what is measured and how**.
+It has no influence on report interpretation.
+
+### Contextual references
+
+Contextual reference files define:
+- typical value ranges,
+- orders of magnitude,
+- explanatory notes and references.
+
+They are used **only during report generation** to provide contextual positioning
+of measurements, without thresholds or decisions.
+
+They never influence the analysis itself.
+
+---
 
 ## Installation
 
@@ -56,7 +93,15 @@ pip install -r requirements.txt
 ```bash
 python run_analysis.py audio_file.ext --config examples/config_example.yaml --output outputs/
 ```
-## Report Generation
+## Report generation
+
+Generated reports are intentionally structured to separate:
+
+1. Raw measurements and visualizations  
+2. Methodology and reading guidance  
+3. Contextual positioning of results  
+
+Reports describe observations and reference contexts, but do not produce conclusions.
 
 After running the analysis, generate human-readable reports from the JSON results:
 
@@ -70,34 +115,24 @@ Or simply provide the output directory:
 python Generate_Report.py output_folder
 ```
 
-### Generated Reports
+## Documentation
 
-Three complementary Markdown reports are created:
+Project documentation is split into two main sections:
 
-**1. `01_MEASUREMENT_SUMMARY.md`**
-- Key measured values across all channels
-- Reference thresholds for context
-- No interpretation, just measurements
+- `docs/analysis_explanations/`  
+  Documentation intended for users and analysts, explaining how measurements
+  should be read and what their limitations are.
 
-**2. `02_APPENDICES_AB.md`**
-- Appendix A: Reference thresholds from signal processing literature
-- Appendix B: Interpretation guide for understanding measured values
-- Distinguishing characteristics of natural vs artificial signals
+- `docs/technical/`  
+  Developer-oriented documentation covering architecture, configuration schemas,
+  and extension mechanisms.
 
-**3. `03_FUNNEL_HYPOTHESIS.md`**
-- Factual observations organized by analysis stage
-- Stage 1: Natural vs Artificial indicators
-- Stage 2: Data-bearing likelihood indicators  
-- Stage 3: Plausible encoding families
-- Suggested next steps for investigation
+---
 
 ### Important Notes
 
-- Reports provide **factual observations** based on measured values
-- **No automated classification** or definitive conclusions
-- Reference thresholds are for **context only**, not automated decision-making
-- Designed to assist human interpretation, not replace it
-- Multiple converging indicators are more significant than single metrics
+This project exists because humans are very good at seeing patterns, 
+sometimes more patterns than actually exist.
 
 ### Example Workflow
 
@@ -109,40 +144,11 @@ python run_analysis.py audio.flac --config config.yaml --output output_audio
 python Generate_Report.py output_audio
 
 # Review reports
-cat output_audio/01_MEASUREMENT_SUMMARY.md
-cat output_audio/02_APPENDICES_AB.md  
-cat output_audio/03_FUNNEL_HYPOTHESIS.md
+working on it...
 
 # Examine visualizations (if enabled)
 ls output_audio/visualizations/
 ```
-
-The approach whishes to help prioritizing which analysis results deserve closer inspection based on converging evidence across multiple measurement categories.
-
-## Configuration
-
-All analyses are controlled via a YAML configuration file. See `examples/config_example.yaml` and `docs/configuration.md` for details.
-
-## Documentation
-
-This project distinguishes clearly between **effective behavior** and **design intent**.
-
-- `docs/architecture.md`  
-  Describes the execution engine, module boundaries, and design constraints.
-
-- `docs/analyses.md`  
-  Function-by-function documentation of all analysis methods effectively implemented in the codebase.
-  No interpretation or classification is performed.
-
-- `docs/configuration.md`  
-  **Contractual configuration reference.**  
-  This document defines the exact configuration keys consumed by the engine.
-  Any undocumented key is ignored.
-
-- `docs/configuration_schema.md`  
-  **Conceptual configuration notes (non-contractual).**  
-  Documents experimental ideas, planned extensions, and design considerations.
-  Options listed here have no effect unless explicitly implemented.
 
 
 ## Requirements
@@ -159,7 +165,3 @@ See `requirements.txt` for complete list.
 ## License
 
 MIT License - see `LICENSE` file.
-
-## Context
-
-This toolkit was developed for analyzing audio files from games like Elite Dangerous, where intentional informational structures may be embedded in audio signals.

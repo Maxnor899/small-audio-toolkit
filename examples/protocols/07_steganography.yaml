@@ -1,0 +1,29 @@
+version: "1.0"
+
+channels:
+  analyze: ["left", "right", "difference"]
+
+# Optional, but useful for repeatable tests
+preprocessing:
+  normalize:
+    enabled: false
+  segmentation:
+    enabled: false
+
+visualization:
+  enabled: true
+  formats: ["png"]
+  dpi: 150
+  figsize: [12, 8]
+
+output:
+  save_raw_data: true
+  save_config: true
+
+analyses:
+  steganography:
+    enabled: true
+    methods:
+      - name: "lsb_analysis"
+      - name: "quantization_noise"
+      - name: "signal_residual"

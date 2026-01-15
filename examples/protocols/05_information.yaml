@@ -1,0 +1,33 @@
+version: "1.0"
+
+channels:
+  analyze: ["left", "right", "difference"]
+
+# Optional, but useful for repeatable tests
+preprocessing:
+  normalize:
+    enabled: false
+  segmentation:
+    enabled: false
+
+visualization:
+  enabled: true
+  formats: ["png"]
+  dpi: 150
+  figsize: [12, 8]
+
+output:
+  save_raw_data: true
+  save_config: true
+
+analyses:
+  information:
+    enabled: true
+    methods:
+      - name: "shannon_entropy"
+      - name: "local_entropy"
+        params:
+          window_size: 1024
+          hop_length: 512
+      - name: "compression_ratio"
+      - name: "approximate_complexity"

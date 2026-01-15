@@ -1,0 +1,39 @@
+version: "1.0"
+
+channels:
+  analyze: ["left", "right", "difference"]
+
+# Optional, but useful for repeatable tests
+preprocessing:
+  normalize:
+    enabled: false
+  segmentation:
+    enabled: false
+
+visualization:
+  enabled: true
+  formats: ["png"]
+  dpi: 150
+  figsize: [12, 8]
+
+output:
+  save_raw_data: true
+  save_config: true
+
+analyses:
+  temporal:
+    enabled: true
+    methods:
+      - name: "envelope"
+        params:
+          method: "hilbert"
+      - name: "autocorrelation"
+        params:
+          max_lag: 5000
+          normalize: true
+          max_samples: 100000
+      - name: "pulse_detection"
+        params:
+          threshold: 0.6
+          min_distance: 500
+      - name: "duration_ratios"

@@ -1,0 +1,38 @@
+version: "1.0"
+
+channels:
+  analyze: ["left", "right", "difference"]
+
+# Optional, but useful for repeatable tests
+preprocessing:
+  normalize:
+    enabled: false
+  segmentation:
+    enabled: false
+
+visualization:
+  enabled: true
+  formats: ["png"]
+  dpi: 150
+  figsize: [12, 8]
+
+output:
+  save_raw_data: true
+  save_config: true
+
+analyses:
+  spectral:
+    enabled: true
+    methods:
+      - name: "fft_global"
+        params:
+          window: "hann"
+      - name: "peak_detection"
+        params:
+          prominence: 0.1
+          distance: 10
+      - name: "harmonic_analysis"
+        params:
+          max_harmonics: 10
+      - name: "cepstrum"
+      - name: "spectral_descriptors"

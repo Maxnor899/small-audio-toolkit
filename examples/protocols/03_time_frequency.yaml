@@ -1,0 +1,53 @@
+version: "1.0"
+
+channels:
+  analyze: ["left", "right", "difference"]
+
+# Optional, but useful for repeatable tests
+preprocessing:
+  normalize:
+    enabled: false
+  segmentation:
+    enabled: false
+
+visualization:
+  enabled: true
+  formats: ["png"]
+  dpi: 150
+  figsize: [12, 8]
+
+output:
+  save_raw_data: true
+  save_config: true
+
+analyses:
+  time_frequency:
+    enabled: true
+    methods:
+      - name: "stft"
+        params:
+          window_size: 2048
+          hop_length: 512
+          window_type: "hann"
+      - name: "cqt"
+        params:
+          hop_length: 512
+          fmin: 32.70319566257483
+          n_bins: 84
+          bins_per_octave: 12
+          max_time_frames: 500
+          max_samples: 200000
+      - name: "wavelet"
+        params:
+          wavelet: "morlet"
+          num_scales: 64
+      - name: "band_stability"
+        params:
+          window_size: 2048
+          hop_length: 512
+          bands:
+            - [0, 100]
+            - [100, 500]
+            - [500, 2000]
+            - [2000, 8000]
+            - [8000, 20000]

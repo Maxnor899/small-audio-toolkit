@@ -79,13 +79,3 @@ The remaining documents are organized to progressively deepen understanding:
 4. `families/*` documents describe each analysis family in detail.
 
 Reading them in order is strongly recommended.
-
----
-
-## Final Note
-
-This documentation is written with skepticism in mind.
-
-If, after careful examination, the tool does not reveal anything of interest, this should be regarded as a **legitimate analytical result**.
-
-Scientific rigor includes accepting negative or null outcomes.

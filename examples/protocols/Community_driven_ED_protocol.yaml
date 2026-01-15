@@ -1,0 +1,82 @@
+version: "1.0"
+
+# ------------------------------------------------------------------
+# Elite Dangerous – Observation Protocol
+#
+# This protocol reproduces commonly used community observation views
+# for Elite Dangerous audio signals, based on documented Audacity
+# spectrogram settings and analysis practices.
+#
+# It encodes how signals are observed, not what they mean.
+# ------------------------------------------------------------------
+
+channels:
+  analyze:
+    - left
+    - right
+    - difference
+
+preprocessing:
+  normalize:
+    enabled: false
+  segmentation:
+    enabled: false
+
+visualization:
+  enabled: true
+  formats: ["png"]
+  dpi: 150
+  figsize: [12, 8]
+
+output:
+  save_raw_data: true
+  save_config: true
+
+analyses:
+
+  time_frequency:
+    enabled: true
+    methods:
+
+      # Large-window linear spectrogram
+      # Matches common Audacity FFT settings (2048–4096)
+      - name: stft
+        params:
+          window_size: 4096
+          hop_length: 1024
+          window_type: "hann"
+
+      # Log-frequency complementary view
+      # Used to reveal harmonic / proportional structures
+      - name: cqt
+        params:
+          hop_length: 512
+          fmin: 20
+          n_bins: 120
+          bins_per_octave: 24
+          max_time_frames: 800
+          max_samples: 300000
+
+      # Frequency-band stability
+      # Bands inspired by commonly inspected regions
+      - name: band_stability
+        params:
+          window_size: 4096
+          hop_length: 1024
+          bands:
+            - [0, 8000]       # full low–mid band
+            - [800, 5000]     # mid-band focus
+            - [20000, 26000]  # high-frequency region
+
+  spectral:
+    enabled: true
+    methods:
+      - name: fft_global
+
+  inter_channel:
+    enabled: true
+    methods:
+      - name: lr_difference
+      - name: cross_correlation
+        params:
+          max_lag: 5000

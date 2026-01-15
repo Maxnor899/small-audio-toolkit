@@ -1,15 +1,11 @@
 # Analysis Catalog (Code-Accurate Documentation)
-
 This document describes **all analysis functions effectively implemented in the codebase**, documented **function by function**.
-
 For each analysis, the documentation specifies:
-
 * the exact **registry identifier** (used in configuration files)
 * the **Python function** implementing the analysis
 * the **objective** of the computation
 * the **parameters** actually used by the code
 * the **outputs** effectively produced
-
 This document is strictly descriptive:
 
 * no interpretation
@@ -17,703 +13,916 @@ This document is strictly descriptive:
 * no assumptions about signal intent
 
 ---
-
 ## Temporal Analyses (`analyses/temporal.py`)
-
-### Amplitude Envelope
-
+### envelope
 **Registry identifier:** `envelope`
 **Function:** `envelope_analysis`
 
 #### Objective
 
-Compute the amplitude envelope of the signal in the time domain to measure energy variations over time.
-
----
+Amplitude envelope analysis
 
 #### Parameters
 
-| Name          | Type | Description                                               |
-| ------------- | ---- | --------------------------------------------------------- |
-| `method`      | str  | Envelope computation method (`hilbert` or `rms`).         |
-| `window_size` | int  | Window size for RMS envelope computation (if applicable). |
-
----
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `method` | `'hilbert'` |  |
+| `window_size` | `1024` |  |
 
 #### Outputs
 
 **Measurements:**
 
-* `envelope`: amplitude envelope signal per channel
+* `envelope_length`
+* `envelope_max`
+* `envelope_mean`
+* `envelope_std`
+
+**Visualization data:**
+
+* `envelope`
 
 ---
-
-### Temporal Autocorrelation
-
+### autocorrelation
 **Registry identifier:** `autocorrelation`
 **Function:** `autocorrelation_analysis`
 
 #### Objective
 
-Compute the temporal autocorrelation of the signal to measure periodic or repetitive structures.
-
----
+Temporal autocorrelation
 
 #### Parameters
 
-| Name          | Type | Description                                                     |
-| ------------- | ---- | --------------------------------------------------------------- |
-| `max_lag`     | int  | Maximum lag (in samples) for which autocorrelation is computed. |
-| `normalize`   | bool | Normalize autocorrelation by zero-lag value.                    |
-| `max_samples` | int  | Maximum number of samples used for computation.                 |
-
----
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `max_lag` | `1000` |  |
+| `max_samples` | `50000` |  |
+| `normalize` | `True` |  |
 
 #### Outputs
 
 **Measurements:**
 
-* `lags`: array of lag values
-* `autocorrelation`: autocorrelation values
+* `autocorr_max`
+* `autocorr_mean`
+* `first_peak_lag`
+* `num_peaks`
+* `periodicity_score`
+
+**Visualization data:**
+
+* `autocorr`
 
 ---
-
-### Pulse Detection
-
+### pulse_detection
 **Registry identifier:** `pulse_detection`
 **Function:** `pulse_detection`
 
 #### Objective
 
-Detect discrete transient or impulsive events based on amplitude thresholding.
-
----
+Pulse/impulse detection
 
 #### Parameters
 
-| Name           | Type  | Description                                            |
-| -------------- | ----- | ------------------------------------------------------ |
-| `threshold`    | float | Detection threshold.                                   |
-| `min_distance` | int   | Minimum distance between detected pulses (in samples). |
-
----
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `min_distance` | `100` |  |
+| `threshold` | `0.5` |  |
 
 #### Outputs
 
 **Measurements:**
 
-* `pulse_positions`: sample indices of detected pulses
+* `interval_mean`
+* `interval_std`
+* `num_pulses`
+* `pulse_positions`
+* `regularity_score`
+
+**Visualization data:** *(none)*
 
 ---
-
-### Duration Ratios
-
+### duration_ratios
 **Registry identifier:** `duration_ratios`
 **Function:** `duration_ratios`
 
 #### Objective
 
-Compute ratios between durations separating detected temporal events.
+Event interval ratios
 
----
+#### Parameters
+
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `min_distance` | `100` |  |
+| `threshold` | `0.3` |  |
 
 #### Outputs
 
 **Measurements:**
 
-* `ratios`: list of duration ratios
+* `num_events`
+* `num_intervals`
+* `ratio_mean`
+* `ratio_std`
+* `ratios`
+
+**Visualization data:** *(none)*
 
 ---
-
 ## Spectral Analyses (`analyses/spectral.py`)
-
-### Global FFT
-
+### fft_global
 **Registry identifier:** `fft_global`
 **Function:** `fft_global`
 
 #### Objective
 
-Compute the global frequency spectrum of the signal.
-
----
+Global FFT spectrum
 
 #### Parameters
 
-| Name     | Type | Description                         |
-| -------- | ---- | ----------------------------------- |
-| `window` | str  | Window function applied before FFT. |
-
----
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `window` | `'hann'` |  |
 
 #### Outputs
 
 **Measurements:**
+
+* `frequency_resolution`
+* `n_fft`
+* `peak_frequency`
+* `peak_magnitude`
+* `spectral_energy`
+
+**Visualization data:**
 
 * `frequencies`
 * `magnitudes`
 
 ---
-
-### Spectral Peak Detection
-
+### peak_detection
 **Registry identifier:** `peak_detection`
 **Function:** `peak_detection`
 
 #### Objective
 
-Identify prominent spectral peaks in the frequency domain.
-
----
+Spectral peak detection
 
 #### Parameters
 
-| Name         | Type  | Description                           |
-| ------------ | ----- | ------------------------------------- |
-| `prominence` | float | Minimum prominence of detected peaks. |
-| `distance`   | int   | Minimum distance between peaks.       |
-| `height`     | float | Minimum peak height (optional).       |
-
----
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `distance` | `100` |  |
+| `height` | `None` |  |
+| `prominence` | `10.0` |  |
 
 #### Outputs
 
 **Measurements:**
 
-* `peaks`: list of peak frequencies and magnitudes
+* `dominant_frequency`
+* `frequency_spread`
+* `num_peaks`
+* `peak_frequencies`
+* `peak_magnitudes`
+
+**Visualization data:**
+
+* `peaks`
+* `spectrum`
 
 ---
-
-### Harmonic Analysis
-
+### harmonic_analysis
 **Registry identifier:** `harmonic_analysis`
 **Function:** `harmonic_analysis`
 
 #### Objective
 
-Detect harmonic relationships relative to an estimated fundamental frequency.
-
----
+Harmonic structure analysis
 
 #### Parameters
 
-| Name                | Type | Description                             |
-| ------------------- | ---- | --------------------------------------- |
-| `fundamental_range` | list | Frequency search range for fundamental. |
-| `max_harmonics`     | int  | Maximum number of harmonics considered. |
-
----
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `fundamental_range` | `[80.0, 400.0]` |  |
+| `max_harmonics` | `10` |  |
 
 #### Outputs
 
 **Measurements:**
 
 * `fundamental_frequency`
+* `harmonic_numbers`
+* `harmonic_ratios`
+* `harmonicity_score`
+* `harmonics_detected`
+
+**Visualization data:**
+
+* `frequencies`
+* `fundamental`
 * `harmonics`
+* `spectrum`
 
 ---
+### spectral_centroid
+**Registry identifier:** `spectral_centroid`
+**Function:** `spectral_centroid`
 
-### Cepstrum Analysis
+#### Objective
 
+Spectral centroid
+
+#### Outputs
+
+**Measurements:**
+
+* `normalized_centroid`
+* `spectral_centroid`
+
+**Visualization data:** *(none)*
+
+---
+### spectral_flatness
+**Registry identifier:** `spectral_flatness`
+**Function:** `spectral_flatness`
+
+#### Objective
+
+Spectral flatness
+
+#### Outputs
+
+**Measurements:**
+
+* `spectral_flatness`
+* `tonality`
+
+**Visualization data:** *(none)*
+
+---
+### cepstrum
 **Registry identifier:** `cepstrum`
 **Function:** `cepstrum_analysis`
 
 #### Objective
 
-Compute the real cepstrum to detect periodic structures in the frequency domain.
-
----
+Cepstrum analysis
 
 #### Outputs
 
 **Measurements:**
 
+* `cepstrum_mean`
+* `cepstrum_std`
+* `peak_magnitude`
+* `peak_quefrency`
+* `samples_analyzed`
+
+**Visualization data:**
+
 * `cepstrum`
+* `peak_quefrency`
+* `quefrency`
 
 ---
-
-### Spectral Descriptors
-
-**Registry identifiers:** `spectral_centroid`, `spectral_bandwidth`, `spectral_flatness`
+### spectral_bandwidth
+**Registry identifier:** `spectral_bandwidth`
+**Function:** `spectral_bandwidth`
 
 #### Objective
 
-Compute global scalar descriptors of spectral structure.
-
----
+Spectral bandwidth
 
 #### Outputs
 
 **Measurements:**
 
-* centroid value
-* bandwidth value
-* flatness value
+* `spectral_bandwidth`
+* `spectral_centroid_Hz`
+
+**Visualization data:** *(none)*
 
 ---
-
 ## Time–Frequency Analyses (`analyses/time_frequency.py`)
-
-### STFT
-
+### stft
 **Registry identifier:** `stft`
 **Function:** `stft_analysis`
 
 #### Objective
 
-Compute a short-time Fourier transform spectrogram.
-
----
+Short-Time Fourier Transform
 
 #### Parameters
 
-| Name         | Type | Description      |
-| ------------ | ---- | ---------------- |
-| `n_fft`      | int  | FFT size.        |
-| `hop_length` | int  | Hop length.      |
-| `window`     | str  | Window function. |
-
----
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `hop_length` | `512` |  |
+| `window_size` | `2048` |  |
+| `window_type` | `'hann'` |  |
 
 #### Outputs
 
 **Measurements:**
 
-* `spectrogram`
+* `dominant_freq_mean`
+* `dominant_freq_std`
+* `frequency_resolution`
+* `max_magnitude`
+* `mean_magnitude`
+* `num_freq_bins`
+* `num_time_frames`
+* `spectral_flux_max`
+* `spectral_flux_mean`
+* `temporal_stability`
+* `time_resolution`
+
+**Visualization data:**
+
+* `frequencies`
+* `stft_matrix`
+* `times`
 
 ---
-
-### Constant-Q Transform
-
+### cqt
 **Registry identifier:** `cqt`
 **Function:** `cqt_analysis`
 
 #### Objective
 
-Compute a constant-Q spectrogram with logarithmic frequency resolution.
+Constant-Q Transform
 
----
+#### Parameters
+
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `bins_per_octave` | `12` |  |
+| `fmin` | `32.70319566257483` |  |
+| `hop_length` | `512` |  |
+| `max_samples` | `200000` |  |
+| `max_time_frames` | `500` |  |
+| `n_bins` | `84` |  |
 
 #### Outputs
 
 **Measurements:**
 
-* `cqt_spectrogram`
+* `bins_per_octave`
+* `fmin_hz`
+* `hop_length`
+* `max_magnitude_db`
+* `mean_magnitude_db`
+* `n_bins`
+* `note`
+* `num_freq_bins`
+* `num_time_frames`
+* `samples_analyzed`
+
+**Visualization data:**
+
+* `cqt_db`
+* `frequencies`
+* `times`
+
+**Registry default_params:**
+
+```python
+{'hop_length': 512, 'fmin': 32.70319566257483, 'n_bins': 84, 'bins_per_octave': 12, 'max_time_frames': 500, 'max_samples': 200000}
+```
 
 ---
-
-### Wavelet Transform
-
+### wavelet
 **Registry identifier:** `wavelet`
 **Function:** `wavelet_analysis`
 
 #### Objective
 
-Perform a multi-scale wavelet decomposition of the signal.
-
----
+Wavelet transform
 
 #### Parameters
 
-| Name      | Type | Description     |
-| --------- | ---- | --------------- |
-| `wavelet` | str  | Wavelet type.   |
-| `scales`  | list | List of scales. |
-
----
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `num_scales` | `64` |  |
+| `wavelet` | `'morlet'` |  |
 
 #### Outputs
 
 **Measurements:**
 
-* `coefficients`
+* `energy_concentration`
+* `max_magnitude`
+* `mean_magnitude`
+* `num_scales`
+* `samples_analyzed`
+* `scale_of_max`
+
+**Visualization data:**
+
+* `scales`
+* `scalogram`
 
 ---
-
-### Frequency Band Stability
-
+### band_stability
 **Registry identifier:** `band_stability`
 **Function:** `band_stability`
 
 #### Objective
 
-Measure temporal stability of predefined frequency bands.
+Frequency band stability
 
----
+#### Parameters
+
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `bands` | `[(0, 100), (100, 500), (500, 2000), (2000, 8000), (8000, 20000)]` |  |
+| `hop_length` | `512` |  |
+| `window_size` | `2048` |  |
 
 #### Outputs
 
 **Measurements:**
 
-* `stability_scores`
+* `band_stability_data`
+
+**Visualization data:**
+
+* `bands_data`
+* `times`
 
 ---
-
 ## Modulation Analyses (`analyses/modulation.py`)
-
-### Amplitude Modulation Detection
-
+### am_detection
 **Registry identifier:** `am_detection`
 **Function:** `am_detection`
 
 #### Objective
 
-Extract and analyze low-frequency amplitude modulation.
-
----
+AM detection
 
 #### Outputs
 
 **Measurements:**
 
-* `am_envelope`
+* `dominant_modulation_freq`
+* `envelope_mean`
+* `envelope_std`
+* `modulation_depth`
+* `modulation_detected`
+* `modulation_frequencies`
 * `modulation_index`
+* `modulation_magnitudes`
+* `num_modulation_frequencies`
+
+**Visualization data:**
+
+* `envelope`
+* `modulation_frequencies`
+* `modulation_spectrum`
+* `time`
 
 ---
-
-### Frequency Modulation Detection
-
+### fm_detection
 **Registry identifier:** `fm_detection`
 **Function:** `fm_detection`
 
 #### Objective
 
-Estimate instantaneous frequency variations.
-
----
+FM detection
 
 #### Outputs
 
 **Measurements:**
 
+* `carrier_frequency_mean`
+* `fm_detected`
+* `fm_modulation_frequencies`
+* `frequency_deviation`
+* `frequency_range`
+* `frequency_std`
+* `modulation_index_fm`
+* `num_fm_components`
+
+**Visualization data:**
+
+* `carrier_frequency`
 * `instantaneous_frequency`
+* `time`
 
 ---
-
-### Phase Analysis
-
+### phase_analysis
 **Registry identifier:** `phase_analysis`
 **Function:** `phase_analysis`
 
 #### Objective
 
-Analyze instantaneous phase evolution over time.
-
----
+Phase analysis
 
 #### Outputs
 
 **Measurements:**
 
+* `num_phase_jumps`
+* `phase_coherence`
+* `phase_jump_rate`
+* `phase_mean`
+* `phase_range`
+* `phase_std`
+* `unwrapped_phase_total`
+
+**Visualization data:**
+
+* `jumps`
 * `phase`
+* `time`
 
 ---
-
-### Modulation Index
-
+### modulation_index
 **Registry identifier:** `modulation_index`
 **Function:** `modulation_index`
 
 #### Objective
 
-Compute a scalar index describing modulation depth.
-
----
+Modulation index
 
 #### Outputs
 
 **Measurements:**
 
+* `ac_component`
+* `dc_component`
+* `modulation_depth`
 * `modulation_index`
+* `peak_to_average_ratio`
+
+**Visualization data:** *(none)*
 
 ---
-
 ## Information Analyses (`analyses/information.py`)
-
-### Shannon Entropy
-
+### shannon_entropy
 **Registry identifier:** `shannon_entropy`
 **Function:** `shannon_entropy`
 
 #### Objective
 
-Compute global Shannon entropy of the signal.
+Shannon entropy
 
----
+#### Parameters
+
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `num_bins` | `256` |  |
 
 #### Outputs
 
 **Measurements:**
 
-* `entropy`
+* `max_entropy`
+* `normalized_entropy`
+* `num_bins`
+* `shannon_entropy`
+
+**Visualization data:** *(none)*
 
 ---
-
-### Local Entropy
-
+### local_entropy
 **Registry identifier:** `local_entropy`
 **Function:** `local_entropy`
 
 #### Objective
 
-Compute windowed entropy over time.
-
----
+Local windowed entropy
 
 #### Parameters
 
-| Name          | Type | Description  |
-| ------------- | ---- | ------------ |
-| `window_size` | int  | Window size. |
-| `hop_length`  | int  | Hop length.  |
-
----
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `hop_length` | `512` |  |
+| `num_bins` | `64` |  |
+| `window_size` | `2048` |  |
 
 #### Outputs
 
 **Measurements:**
 
-* `entropy_series`
+* `entropy_variation`
+* `max_entropy`
+* `mean_entropy`
+* `min_entropy`
+* `num_windows`
+* `std_entropy`
+
+**Visualization data:** *(none)*
 
 ---
-
-### Compression Ratio
-
+### compression_ratio
 **Registry identifier:** `compression_ratio`
 **Function:** `compression_ratio`
 
 #### Objective
 
-Estimate signal redundancy using lossless compression.
-
----
+Compression ratio
 
 #### Outputs
 
 **Measurements:**
 
+* `compressed_size`
 * `compression_ratio`
+* `original_size`
+* `samples_analyzed`
+
+**Visualization data:** *(none)*
 
 ---
-
-### Approximate Complexity
-
+### approximate_complexity
 **Registry identifier:** `approximate_complexity`
 **Function:** `approximate_complexity`
 
 #### Objective
 
-Estimate algorithmic regularity using approximate complexity measures.
+Approximate complexity
 
----
+#### Parameters
+
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `m` | `2` |  |
+| `r_factor` | `0.2` |  |
 
 #### Outputs
 
 **Measurements:**
 
-* `complexity_score`
+* `approximate_complexity`
+* `pattern_length`
+* `samples_analyzed`
+* `tolerance`
+
+**Visualization data:** *(none)*
 
 ---
-
 ## Inter-Channel Analyses (`analyses/inter_channel.py`)
-
-### L − R Difference
-
-**Registry identifier:** `lr_difference`
-**Function:** `lr_difference`
-
-#### Objective
-
-Compute the difference signal between left and right channels.
-
----
-
-#### Outputs
-
-**Measurements:**
-
-* `difference_signal`
-
----
-
-### Cross-Correlation
-
+### cross_correlation
 **Registry identifier:** `cross_correlation`
 **Function:** `cross_correlation`
 
 #### Objective
 
-Compute inter-channel cross-correlation.
-
----
+Cross-correlation
 
 #### Parameters
 
-| Name          | Type | Description        |
-| ------------- | ---- | ------------------ |
-| `max_lag`     | int  | Maximum lag.       |
-| `max_samples` | int  | Sample limitation. |
-
----
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `max_lag` | `1000` |  |
+| `max_samples` | `50000` |  |
 
 #### Outputs
 
 **Measurements:**
 
+* `correlation_at_zero`
+* `max_correlation`
+* `mean_correlation`
+* `peak_lag`
+* `peak_value`
+
+**Visualization data:**
+
 * `correlation`
+* `lags`
 
 ---
+### lr_difference
+**Registry identifier:** `lr_difference`
+**Function:** `lr_difference`
 
-### Phase Difference
+#### Objective
 
+L-R difference
+
+#### Outputs
+
+**Measurements:**
+
+* `contains_unique_info`
+* `difference_energy`
+* `difference_peak_freq`
+* `difference_peak_magnitude`
+* `difference_rms`
+* `energy_ratio`
+* `left_energy`
+* `right_energy`
+
+**Visualization data:**
+
+* `frequencies`
+* `spectrum`
+* `waveform`
+
+---
+### phase_difference
 **Registry identifier:** `phase_difference`
 **Function:** `phase_difference`
 
 #### Objective
 
-Compute phase differences between channels across frequency bands.
-
----
+Phase difference
 
 #### Outputs
 
 **Measurements:**
 
-* `phase_differences`
+* `in_phase`
+* `out_of_phase`
+* `phase_coherence`
+* `phase_diff_mean`
+* `phase_diff_range`
+* `phase_diff_std`
+
+**Visualization data:** *(none)*
 
 ---
-
-### Time Delay Estimation
-
+### time_delay
 **Registry identifier:** `time_delay`
 **Function:** `time_delay`
 
 #### Objective
 
-Estimate constant temporal offset between channels.
+Time delay (ITD)
 
----
+#### Parameters
+
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `max_delay_samples` | `100` |  |
+| `max_samples` | `50000` |  |
 
 #### Outputs
 
 **Measurements:**
 
+* `correlation_at_delay`
+* `delay_ms`
 * `delay_samples`
+* `is_synchronized`
+
+**Visualization data:** *(none)*
 
 ---
-
 ## Steganography Analyses (`analyses/steganography.py`)
-
-### LSB Analysis
-
+### lsb_analysis
 **Registry identifier:** `lsb_analysis`
 **Function:** `lsb_analysis`
 
 #### Objective
 
-Analyze least significant bit distributions.
-
----
+LSB analysis
 
 #### Outputs
 
 **Measurements:**
 
-* `bit_statistics`
+* `lsb_mean`
+* `lsb_std`
+* `mean_one_run`
+* `mean_zero_run`
+* `samples_analyzed`
+* `transition_rate`
+
+**Visualization data:** *(none)*
 
 ---
-
-### Quantization Noise Analysis
-
+### quantization_noise
 **Registry identifier:** `quantization_noise`
 **Function:** `quantization_noise`
 
 #### Objective
 
-Analyze quantization residuals.
-
----
+Quantization noise structure
 
 #### Outputs
 
 **Measurements:**
 
-* `residual_signal`
+* `autocorr_peak`
+* `noise_power`
+* `noise_std`
+* `samples_analyzed`
+* `spectral_flatness`
+
+**Visualization data:** *(none)*
 
 ---
-
-### Signal Residual Analysis
-
+### signal_residual
 **Registry identifier:** `signal_residual`
 **Function:** `signal_residual`
 
 #### Objective
 
-Compute signal residual after filtering.
+Signal vs residual comparison
 
----
+#### Parameters
+
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `cutoff_freq` | `1000` |  |
 
 #### Outputs
 
 **Measurements:**
 
-* `residual`
+* `energy_ratio`
+* `residual_peak_freq`
+* `residual_power`
+* `samples_analyzed`
+* `signal_power`
+* `snr_db`
+
+**Visualization data:** *(none)*
 
 ---
-
 ## Meta-Analyses (`analyses/meta_analysis.py`)
-
-### Inter-Segment Comparison
-
+### inter_segment_comparison
 **Registry identifier:** `inter_segment_comparison`
 **Function:** `inter_segment_comparison`
 
 #### Objective
 
-Compare analysis features across temporal segments.
+Inter-segment comparison
 
----
+#### Parameters
+
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `num_segments` | `10` |  |
 
 #### Outputs
 
 **Measurements:**
 
-* `similarity_matrix`
+* `max_distance`
+* `mean_distance`
+* `min_distance`
+* `num_segments`
+* `similarity_score`
+* `std_distance`
+
+**Visualization data:** *(none)*
 
 ---
-
-### Segment Clustering
-
+### segment_clustering
 **Registry identifier:** `segment_clustering`
 **Function:** `segment_clustering`
 
 #### Objective
 
-Cluster segments based on measured features.
+Segment clustering
 
----
+#### Parameters
+
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `num_segments` | `20` |  |
 
 #### Outputs
 
 **Measurements:**
 
-* `cluster_labels`
+* `avg_intra_distance`
+* `num_segments`
+* `repetition_rate`
+* `unique_segments`
+
+**Visualization data:** *(none)*
 
 ---
-
-### Stability Scores
-
+### stability_scores
 **Registry identifier:** `stability_scores`
 **Function:** `stability_scores`
 
 #### Objective
 
-Compute stability indicators across segments or frequency bands.
+Temporal/spectral stability
 
----
+#### Parameters
+
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `hop_length` | `512` |  |
+| `window_size` | `2048` |  |
 
 #### Outputs
 
 **Measurements:**
 
-* `stability_scores`
+* `energy_stability`
+* `num_windows`
+* `overall_stability`
+* `spectral_stability`
+
+**Visualization data:** *(none)*
+
+---

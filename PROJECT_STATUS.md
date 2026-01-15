@@ -1,6 +1,6 @@
 # Project Status
 
-This document reflects the **actual state of the project**, not an idealized or aspirational roadmap.  
+This document reflects the **actual state of the project**.  
 Its purpose is to describe what **exists**, what is **stabilizing**, and what remains **to be aligned**, in full coherence with the project’s methodological foundations.
 
 ---

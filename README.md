@@ -155,6 +155,7 @@ ls output_audio/visualizations/
 - librosa
 - soundfile
 - PyYAML
+- PyWavelets
 
 See `requirements.txt` for complete list.
 

@@ -1,0 +1,16 @@
+context:
+  name: dynamic_profiles
+  description: >
+    Reference ranges related to amplitude dynamics
+    and energy variation over time.
+
+references:
+  temporal:
+    rms_variation:
+      typical_range: [0.1, 2.0]
+    envelope_dynamic_range:
+      typical_range: [6, 40]
+
+  modulation:
+    modulation_rate_hz:
+      typical_range: [0.1, 20.0]

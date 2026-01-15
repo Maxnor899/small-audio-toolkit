@@ -1,0 +1,22 @@
+context:
+  name: generic_audio
+  description: >
+    Broad, non-specific reference ranges commonly observed
+    across a wide variety of audio signals.
+
+references:
+  temporal:
+    envelope_variation:
+      typical_range: [0.1, 1.5]
+    autocorrelation_peak_lag_s:
+      typical_range: [0.001, 0.5]
+
+  spectral:
+    spectral_centroid_hz:
+      typical_range: [200, 6000]
+    spectral_bandwidth_hz:
+      typical_range: [300, 8000]
+
+  information:
+    shannon_entropy:
+      typical_range: [3.0, 7.5]

@@ -1,0 +1,16 @@
+context:
+  name: temporal_regularities
+  description: >
+    Reference ranges focusing on temporal structure,
+    periodicity, and short-term regularity.
+
+references:
+  temporal:
+    autocorrelation_peak_strength:
+      typical_range: [0.2, 1.0]
+    envelope_stability:
+      typical_range: [0.3, 0.9]
+
+  modulation:
+    amplitude_modulation_depth:
+      typical_range: [0.05, 0.8]

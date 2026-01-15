@@ -1,0 +1,14 @@
+context:
+  name: stereo_relations
+  description: >
+    Reference ranges focusing on relationships between
+    multiple channels (e.g. left/right).
+
+references:
+  inter_channel:
+    cross_correlation_peak:
+      typical_range: [0.2, 1.0]
+    inter_channel_delay_ms:
+      typical_range: [0.0, 5.0]
+    phase_difference_std:
+      typical_range: [0.0, 1.5]

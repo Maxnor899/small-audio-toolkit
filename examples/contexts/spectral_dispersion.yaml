@@ -1,0 +1,16 @@
+context:
+  name: spectral_dispersion
+  description: >
+    Reference ranges describing frequency spread and
+    spectral concentration without semantic labeling.
+
+references:
+  spectral:
+    spectral_flatness:
+      typical_range: [0.1, 0.9]
+    spectral_rolloff_hz:
+      typical_range: [1000, 12000]
+
+  time_frequency:
+    band_stability_score:
+      typical_range: [0.2, 1.0]

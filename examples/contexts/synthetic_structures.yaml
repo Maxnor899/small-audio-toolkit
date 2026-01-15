@@ -1,0 +1,18 @@
+context:
+  name: synthetic_structures
+  description: >
+    Reference ranges commonly observed in simple
+    algorithmically generated or highly regular signals.
+
+references:
+  spectral:
+    harmonic_alignment_score:
+      typical_range: [0.5, 1.0]
+
+  time_frequency:
+    cqt_band_stability:
+      typical_range: [0.6, 1.0]
+
+  information:
+    shannon_entropy:
+      typical_range: [0.5, 4.0]

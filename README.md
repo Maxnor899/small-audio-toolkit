@@ -127,7 +127,9 @@ Project documentation is split into two main sections:
 This project exists because humans are very good at seeing patterns, 
 sometimes more patterns than actually exist.
 
+
 ---
+
 
 ### Example Workflow
 

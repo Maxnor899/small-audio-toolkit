@@ -14,8 +14,6 @@ digital signal processing (DSP) techniques.
 
 The tool focuses on **measurement and observation**, not interpretation or classification.
 
----
-
 ## What this project does
 
 Small Audio Tool analyzes audio files and produces:
@@ -36,8 +34,6 @@ covering multiple analytical domains, including:
 
 All analyses are configuration-driven and reproducible.
 
----
-
 ## What this project does *not* do
 
 This tool does **not**:
@@ -52,7 +48,6 @@ Measured structure is reported as-is.
 Any interpretation remains entirely the responsibility of the user.
 A lack of notable observations is considered a valid outcome.
 
----
 ## Configuration-driven design
 
 The tool relies on two distinct YAML configuration files:
@@ -78,8 +73,6 @@ They are used **only during report generation** to provide contextual positionin
 of measurements, without thresholds or decisions.
 
 They never influence the analysis itself.
-
----
 
 ## Installation
 
@@ -127,8 +120,6 @@ Project documentation is split into two main sections:
   Developer-oriented documentation covering architecture, configuration schemas,
   and extension mechanisms.
 
----
-
 ### Important Notes
 
 This project exists because humans are very good at seeing patterns, 
@@ -149,7 +140,6 @@ working on it...
 # Examine visualizations (if enabled)
 ls output_audio/visualizations/
 ```
-
 
 ## Requirements
 

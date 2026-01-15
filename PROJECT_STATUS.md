@@ -183,32 +183,34 @@ This layer is being refined incrementally to avoid architectural disruption.
 
 ---
 
-## Phase 7 — Technical Documentation Update  
+## Phase 7 — Technical Documentation  
 **Status: COMPLETE**
 
 ### Scope
 
-This phase formalizes the completion of the **technical documentation** required to correctly use, read, and reason about the tool’s outputs.
+This phase formalizes the completion of the **technical documentation**
+required to configure, execute, understand, and extend the tool.
 
-This documentation does not describe implementation details,
-but defines the **technical reading posture**, usage constraints,
-and interpretative boundaries necessary for responsible analysis.
+These documents describe the **operational and structural aspects** of the project:
+architecture, configuration contract, analysis catalog, and extension mechanisms.
 
-It complements the conceptual and methodological foundations
-by ensuring that measurements are not misused or over-interpreted.
+They do not define analytical interpretation rules,
+which are covered separately in the conceptual documentation.
 
 ### Technical Documentation Set  
-*(docs/analysis_explanations)*
+*(docs/technical)*
 
-- `00_README.md` — Scope, purpose, and analytical posture of the tool
-- `01_METHODOLOGY.md` — How measurements are produced and how they should be read
-- `02_CONTEXTUAL_REFERENCES.md` — Use of comparative ranges without interpretation
-- `03_OBSERVATION_LIMITS.md` — Explicit limits of signal-based analysis
-- Analysis family explanation documents
-- YAML configuration methodology
+- `01_ANALYSIS_PROTOCOL.md` — Definition of analysis execution protocols
+- `02_CONTEXTUAL_REFERENCES.md` — Technical handling of contextual reference files
+- `analyses.md` — Code-accurate catalog of implemented analyses
+- `architecture.md` — Software architecture and execution model
+- `configuration_schema.md` — Conceptual and planned configuration options
+- `configuration.md` — Configuration contract as implemented
+- `extending.md` — How to add new analyses and extend the pipeline
 
-This documentation set is considered **complete, stable, and sufficient**
-for correct technical use of the tool.
+This technical documentation is considered **complete, stable, and sufficient**
+for correct technical use and extension of the tool.
+
 
 ---
 

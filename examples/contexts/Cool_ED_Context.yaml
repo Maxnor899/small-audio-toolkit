@@ -1,0 +1,58 @@
+families:
+
+  time_frequency:
+    methods:
+
+      stft:
+        metrics:
+          mean_magnitude:
+            typical_min: 1e-06
+            typical_max: 1e-02
+          max_magnitude:
+            typical_min: 1e-04
+            typical_max: 1e-01
+          temporal_stability:
+            typical_min: 0.3
+            typical_max: 1.0
+
+      cqt:
+        metrics:
+          mean_magnitude_db:
+            typical_min: -80
+            typical_max: -10
+          max_magnitude_db:
+            typical_min: -5
+            typical_max: 5
+
+      band_stability:
+        metrics:
+          stability_score:
+            typical_min: 0.2
+            typical_max: 1.0
+          variation_coefficient:
+            typical_min: 0.0
+            typical_max: 1.0
+
+  spectral:
+    methods:
+
+      fft_global:
+        metrics:
+          peak_frequency:
+            typical_min: 20
+            typical_max: 5000
+          spectral_energy:
+            typical_min: 1e5
+            typical_max: 1e9
+
+  inter_channel:
+    methods:
+
+      lr_difference:
+        metrics:
+          energy_ratio:
+            typical_min: 0.01
+            typical_max: 0.5
+          difference_rms:
+            typical_min: 0.0001
+            typical_max: 0.01

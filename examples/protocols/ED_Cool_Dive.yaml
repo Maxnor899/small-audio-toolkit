@@ -1,0 +1,67 @@
+version: "1.0"
+
+channels:
+  analyze:
+    - left
+    - right
+    - difference
+
+preprocessing:
+  normalize:
+    enabled: false
+  segmentation:
+    enabled: false
+
+visualization:
+  enabled: true
+  formats: ["png"]
+  dpi: 150
+  figsize: [12, 8]
+  stft:
+    colormap: "gray"
+    vmin_db: -80
+    vmax_db: 0
+    gain_db: 0.0
+
+output:
+  save_raw_data: true
+  save_config: true
+
+analyses:
+
+  time_frequency:
+    enabled: true
+    methods:
+      - name: stft
+        params:
+          window_size: 4096
+          hop_length: 1024
+          window_type: "hann"
+
+      - name: cqt
+        params:
+          hop_length: 512
+          fmin: 20
+          n_bins: 120
+          bins_per_octave: 24
+          max_time_frames: 800
+          max_samples: 300000
+
+      - name: band_stability
+        params:
+          window_size: 4096
+          hop_length: 1024
+          bands:
+            - [0, 8000]
+            - [800, 5000]
+            - [20000, 26000]
+
+  spectral:
+    enabled: true
+    methods:
+      - name: fft_global
+
+  inter_channel:
+    enabled: true
+    methods:
+      - name: lr_difference

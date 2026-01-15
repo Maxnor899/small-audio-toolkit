@@ -450,6 +450,8 @@ def plot_stft_spectrogram(
     formats: list = ["png"],
     vmin: float = -80,
     vmax: float = 0,
+    cmap: str = "viridis",
+    gain_db: float = 0.0,
 ) -> None:
     """
     Plot STFT spectrogram (time-frequency representation).
@@ -465,14 +467,14 @@ def plot_stft_spectrogram(
     fig, ax = plt.subplots(figsize=figsize)
 
     magnitude = np.abs(stft_matrix)
-    magnitude_db = 20 * np.log10(magnitude + 1e-12)
+    magnitude_db = 20 * np.log10(magnitude + 1e-12) + float(gain_db)
 
     im = ax.pcolormesh(
         times,
         frequencies,
         magnitude_db,
         shading="auto",
-        cmap="viridis",
+        cmap=cmap,
         vmin=vmin,
         vmax=vmax,
     )
@@ -577,6 +579,8 @@ class Visualizer:
         self.figsize = tuple(self.config.get("figsize", [12, 8]))
         self.dpi = int(self.config.get("dpi", 150))
         self.formats = list(self.config.get("formats", ["png"]))
+        # Per-method visualization options (pure rendering parameters)
+        self.stft_cfg = dict(self.config.get("stft", {}) or {})
 
     # Basics
     def plot_waveform(self, signal, sample_rate, output_path, title):
@@ -623,7 +627,25 @@ class Visualizer:
         plot_cross_correlation(lags, corr, pair_key, output_path, self.figsize, self.dpi, self.formats)
 
     def plot_stft_spectrogram(self, frequencies, times, stft_matrix, sample_rate, output_path, title="STFT Spectrogram"):
-        plot_stft_spectrogram(frequencies, times, stft_matrix, sample_rate, output_path, title, self.figsize, self.dpi, self.formats)
+        cmap = str(self.stft_cfg.get("colormap", "viridis"))
+        vmin_db = float(self.stft_cfg.get("vmin_db", -80))
+        vmax_db = float(self.stft_cfg.get("vmax_db", 0))
+        gain_db = float(self.stft_cfg.get("gain_db", 0.0))
+        plot_stft_spectrogram(
+            frequencies,
+            times,
+            stft_matrix,
+            sample_rate,
+            output_path,
+            title,
+            self.figsize,
+            self.dpi,
+            self.formats,
+            vmin=vmin_db,
+            vmax=vmax_db,
+            cmap=cmap,
+            gain_db=gain_db,
+        )
 
     def plot_cqt_spectrogram(self, frequencies, times, cqt_db, output_path, title="CQT Spectrogram"):
         plot_cqt_spectrogram(frequencies, times, cqt_db, output_path, title, self.figsize, self.dpi, self.formats)

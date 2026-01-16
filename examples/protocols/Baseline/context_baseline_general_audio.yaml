@@ -1,0 +1,68 @@
+version: "1.0"
+scope: "general_audio"
+description: >
+  Contextual reference ranges for general audio signals.
+  These references provide comparative positioning only.
+  They do not imply interpretation or detection.
+
+sources:
+  - "DSP literature"
+  - "Empirical observations on synthesized and natural signals"
+
+references:
+
+  temporal.autocorrelation.max_peak_excluding_zero:
+    unit: "normalized"
+    typical_range: [0.0, 0.2]
+    notes:
+      - "Higher values indicate stronger repetitive structure."
+
+  spectral.spectral_flatness:
+    unit: "ratio"
+    typical_range: [0.2, 0.6]
+    notes:
+      - "Lower values are commonly observed in tonal or structured spectra."
+      - "Higher values are common in noise-like signals."
+
+  spectral.spectral_centroid:
+    unit: "Hz"
+    typical_range: [500, 4000]
+    notes:
+      - "Centroid position depends strongly on signal type and bandwidth."
+
+  time_frequency.band_stability.mean:
+    unit: "normalized"
+    typical_range: [0.0, 0.3]
+    notes:
+      - "Higher stability reflects persistent energy in fixed bands."
+
+  modulation.am_detection.modulation_index:
+    unit: "ratio"
+    typical_range: [0.0, 0.3]
+    notes:
+      - "Stronger modulation increases index values."
+
+  information.shannon_entropy:
+    unit: "bits/sample"
+    typical_range: [3.5, 5.5]
+    notes:
+      - "Lower values often occur in repetitive or highly structured signals."
+      - "Higher values are typical of broadband noise."
+
+  information.compression_ratio:
+    unit: "ratio"
+    typical_range: [1.5, 4.0]
+    notes:
+      - "Higher ratios indicate greater redundancy."
+
+  inter_channel.cross_correlation.max:
+    unit: "normalized"
+    typical_range: [0.0, 0.5]
+    notes:
+      - "Higher correlation reflects stronger channel similarity."
+
+  inter_channel.time_delay.delay_samples:
+    unit: "samples"
+    typical_range: [-10, 10]
+    notes:
+      - "Larger delays may reflect intentional offsets or processing artifacts."

@@ -1,83 +1,155 @@
 # Example Analysis Protocols
 
-This directory contains **example analysis protocols** for the Small Audio Tool.
+This directory contains **reference analysis protocols** for the Small Audio Tool (SAT).
 
-Each YAML file defines a **self-contained observation protocol**:
-it specifies *what is measured*, *on which channels*, and *with which parameters*.
+In SAT, a protocol is not a preset, not a scenario, and not a hypothesis.
+It is a **formal observation contract** that defines *what is measured*,
+*how it is measured*, and *on which analytical axes*.
 
-These files are intended for:
-- testing analysis coverage by category,
-- validating visualizations,
-- demonstrating reproducible observation setups,
-- onboarding and experimentation.
+All protocols in this directory are:
+- explicit
+- reproducible
+- interpretation-free
 
-They are **not hypotheses**, **not scenarios**, and **not interpretations**.
+They differ only by **scope and intent of observation**.
 
 ---
 
-## What Is a Protocol?
+## Directory Structure
 
-In this project, a protocol is:
+```
+examples/protocols/
+├── Baseline/
+├── Focused/
+├── Experimental/
+└── README.md
+```
 
-- a declarative description of **what to observe**,
-- fully explicit and reproducible,
-- independent from interpretation,
-- external to the analysis code.
+Each subdirectory corresponds to a **distinct methodological role**.
+
+---
+
+## Baseline/
+
+The `Baseline/` directory contains **reference protocols** designed to provide
+**maximal analytical coverage with minimal assumptions**.
+
+Baseline protocols aim to:
+- observe all major degrees of freedom of an audio signal,
+- cover all analysis families at least once,
+- provide a neutral starting point when no hypothesis exists.
+
+They are typically used:
+- for first-pass exploration of unknown signals,
+- as a shared reference for comparison,
+- to validate or calibrate more specialized protocols.
+
+Baseline protocols are **not defaults** and are **not optimized**.
+They are intentionally exhaustive rather than selective.
+
+Each baseline protocol is usually paired with:
+- a dedicated README explaining its intent,
+- an optional contextual reference file.
+
+---
+
+## Focused/
+
+The `Focused/` directory contains **specialized observation protocols**.
+
+Focused protocols deliberately:
+- restrict analytical scope,
+- emphasize specific families, scales, or relationships,
+- leave certain degrees of freedom unobserved on purpose.
+
+They are used when:
+- a hypothesis has been formulated,
+- a structure was suggested by a baseline pass,
+- computational cost must be reduced,
+- a specific analytical question is being explored.
+
+A focused protocol should always be readable as:
+> “This protocol observes *this* and explicitly ignores *that*.”
+
+---
+
+## Experimental/
+
+The `Experimental/` directory contains **exploratory or provisional protocols**.
+
+These protocols may:
+- test unusual parameter ranges,
+- explore edge cases,
+- support development or visualization validation,
+- experiment with new analysis combinations.
+
+They are not guaranteed to be:
+- stable,
+- optimal,
+- or methodologically complete.
+
+Experimental protocols may evolve, be replaced, or be removed.
+They should not be used as references without critical review.
+
+---
+
+## What a Protocol Is (and Is Not)
+
+A protocol in SAT:
+
+- defines *what to observe*, not *what to conclude*
+- never embeds thresholds or decisions
+- never implies intent, meaning, or anomaly
+- does not classify signals
+- does not validate hypotheses
 
 Changing a protocol changes the **question asked of the signal**,
-not the meaning of the results.
+not the interpretation of the results.
 
 ---
 
-## Structure
+## Relationship With Context Files
 
-Each protocol typically defines:
+Protocols define **measurements**.
 
-- analyzed channels (`channels.analyze`),
-- enabled analysis families and methods,
-- method-specific parameters,
-- visualization settings,
-- output options.
+Context files (when used) define **comparative reference ranges**
+that help position numerical values during report generation.
 
-Protocols are expected to be versioned and shareable.
+- Protocols affect computation.
+- Contexts affect presentation only.
+- The two are strictly independent.
 
 ---
 
 ## Usage
 
-Example:
+Example using a baseline protocol **with its associated context file**:
 
 ```bash
-python run_analysis.py input_audio.wav output_directory/ examples/protocols/03_time_frequency.yaml
+python run_analysis.py input_audio.wav \
+  --config examples/protocols/Baseline/protocol_baseline_full.yaml \
+  --context examples/protocols/Baseline/context_baseline_general_audio.yaml \
+  --output output_dir/
 ```
 
-Each run produces:
-- raw measurement results (`results.json`),
+Each execution produces:
+- raw numerical measurements,
 - optional visualizations,
-- optional reports (when post-processing is applied).
+- an exact copy of the protocol used,
+- an optional context-aware report (when report generation is applied).
+
+Interpretation always occurs **outside the tool**.
 
 ---
 
-## Relationship With Contexts
+## Final Note
 
-Protocols define **what is measured**.
+These protocols are provided as **methodological references**.
 
-Context files (see `examples/contexts/`) define **how measurements may be positioned**
-relative to external reference ranges.
+They are meant to be:
+- read,
+- questioned,
+- adapted,
+- and extended.
 
-The two are intentionally separate.
-
----
-
-## Important Notes
-
-- Protocols never contain thresholds or decisions.
-- Protocols never imply intent or meaning.
-- Results are valid regardless of whether a context is applied.
-
-Interpretation always happens **outside the tool**.
-
----
-
-These example protocols are provided as **reference implementations**.
-They may be adapted, combined, or extended as needed.
+They are not authoritative answers — only carefully defined ways of looking.

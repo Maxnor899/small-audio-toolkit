@@ -6,7 +6,7 @@ If you think this makes the author a monster, a fraud, an illusionist, or a codi
 However, if you're willing to give this project the benefit of curiosity, you'll have the opportunity to judge its relevance for yourself. 
 Who knows, you might even want to contribute.
 
-**most questions (hopefully) are answered in the documentation and in the wiki, please read it !**
+**most questions (hopefully) are answered in the documentation and in the wiki (wiki needs to be updated), please read it !**
 
 # Small Audio Tool
 

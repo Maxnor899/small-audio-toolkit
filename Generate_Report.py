@@ -11,7 +11,12 @@ Outputs (3 files):
 - 03_CONTEXTUAL_POSITIONING.md
 
 Usage:
-  python Generate_Report.py <results.json|output_dir> [--protocol analysis_protocol.yaml] [--context contextual_references.yaml]
+  python Generate_Report.py <results.json|output_dir> [--protocol analysis_protocol.yaml] [--contexts-dir PATH]
+
+Notes on contexts:
+- Context files are loaded automatically per analysis family from a directory.
+- Expected file naming: context_<family>.yaml
+- Contexts affect presentation only; they never affect computation.
 """
 
 from __future__ import annotations
@@ -39,6 +44,28 @@ def try_load_yaml(path: Optional[Path]) -> Optional[dict]:
     with path.open("r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
     return data if isinstance(data, dict) else None
+
+
+def try_load_family_context(contexts_dir: Path, family: str) -> Tuple[Optional[dict], Optional[str]]:
+    """
+    Load context_<family>.yaml from contexts_dir.
+    Returns (context_dict, error_message). Exactly one of them is non-None.
+    """
+    if yaml is None:
+        return None, "PyYAML is not available; cannot load context YAML files."
+
+    ctx_path = contexts_dir / f"context_{family}.yaml"
+    if not ctx_path.exists():
+        return None, f"Context file not found: {ctx_path}"
+
+    try:
+        with ctx_path.open("r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+        if not isinstance(data, dict):
+            return None, f"Invalid YAML structure (expected mapping) in: {ctx_path}"
+        return data, None
+    except Exception as e:
+        return None, f"Failed to load context file {ctx_path}: {e}"
 
 
 def format_value(value: Any, precision: int = 3) -> str:
@@ -200,33 +227,11 @@ def generate_measurement_summary_report(results: dict) -> str:
     return "\n".join(md)
 
 
-def _cmp_statement(value: float, ref: dict) -> Optional[str]:
-    # Accept several bound key styles
-    candidates = [
-        ("typical_min", "typical_max"),
-        ("min", "max"),
-        ("low", "high"),
-    ]
-    lo = hi = None
-    for a, b in candidates:
-        if a in ref and b in ref and isinstance(ref[a], (int, float)) and isinstance(ref[b], (int, float)):
-            lo, hi = float(ref[a]), float(ref[b])
-            break
-    if lo is None or hi is None:
-        return None
-    if value < lo:
-        return f"below the reference interval [{format_value(lo)}, {format_value(hi)}]"
-    if value > hi:
-        return f"above the reference interval [{format_value(lo)}, {format_value(hi)}]"
-    return f"within the reference interval [{format_value(lo)}, {format_value(hi)}]"
-
-
 def generate_methodology_and_reading_guide(
     results: dict,
     protocol_path: Optional[Path],
-    context_path: Optional[Path],
+    contexts_dir: Optional[Path],
     protocol: Optional[dict],
-    context: Optional[dict],
 ) -> str:
     md: List[str] = []
     md += _header_lines(results, "Audio Analysis Report - Methodology and Reading Guide")
@@ -245,9 +250,12 @@ def generate_methodology_and_reading_guide(
     md.append(f"- Protocol file: `{protocol_path.name}`" if protocol_path else "- Protocol file: _not provided_")
     md.append("")
     md.append("### 2) Contextual references")
-    md.append("Provides external reference ranges, notes, and sources used only for contextual positioning.")
+    md.append("Provides external reference statuses (A/B/C), optional reference zones, and notes used only for report presentation.")
     md.append("It never affects measurements.")
-    md.append(f"- Context file: `{context_path.name}`" if context_path else "- Context file: _not provided_")
+    if contexts_dir:
+        md.append(f"- Contexts directory: `{contexts_dir}`")
+    else:
+        md.append("- Contexts directory: _not provided_")
     md.append("")
 
     md.append("## Reading principles")
@@ -283,17 +291,82 @@ def generate_methodology_and_reading_guide(
                     md.append(f"- {k}: {format_value(v)}")
         md.append("")
 
-    if isinstance(context, dict):
-        md.append("## Context summary (high-level)")
-        md.append("")
-        fams = context.get("families")
-        md.append(f"- families: {len(fams)}" if isinstance(fams, dict) else "- families: (not found)")
-        md.append("")
-
     return "\n".join(md)
 
 
-def generate_contextual_positioning_report(results: dict, context: Optional[dict]) -> str:
+def _extract_scalar_metrics(measurements: Any) -> List[Tuple[str, str, Any]]:
+    """
+    Flatten typical measurement structure into a list of (scope_key, metric_name, value)
+    where 'scope_key' is usually channel name or pair key.
+    Only extracts scalar values: int/float/bool/None/short strings.
+    """
+    out: List[Tuple[str, str, Any]] = []
+    if not isinstance(measurements, dict):
+        return out
+
+    for scope_key, data in measurements.items():
+        if isinstance(data, dict):
+            # Skip dict-of-dicts (bands, etc.) here; they are not scalar per-metric entries.
+            if data and all(isinstance(v, dict) for v in data.values()):
+                continue
+            for mk, mv in data.items():
+                if isinstance(mv, (int, float, bool)) or mv is None:
+                    out.append((str(scope_key), str(mk), mv))
+                elif isinstance(mv, str) and len(mv) <= 80:
+                    out.append((str(scope_key), str(mk), mv))
+        else:
+            # Rare: direct scalar at top-level
+            if isinstance(data, (int, float, bool)) or data is None:
+                out.append((str(scope_key), str(scope_key), data))
+    return out
+
+
+def _get_ctx_method(ctx: dict, method_name: str) -> Optional[dict]:
+    methods = ctx.get("methods")
+    if not isinstance(methods, dict):
+        return None
+    m = methods.get(method_name)
+    return m if isinstance(m, dict) else None
+
+
+def _get_ctx_metric(ctx_method: dict, metric_name: str) -> Optional[dict]:
+    metrics = ctx_method.get("metrics")
+    if not isinstance(metrics, dict):
+        return None
+    m = metrics.get(metric_name)
+    return m if isinstance(m, dict) else None
+
+
+def _get_reference(metric_ctx: dict) -> Tuple[Optional[str], Optional[List[float]], List[str]]:
+    """
+    Returns (status, typical_range, notes).
+    """
+    notes: List[str] = []
+    if isinstance(metric_ctx.get("notes"), list):
+        notes = [str(x) for x in metric_ctx["notes"] if str(x).strip()]
+    ref = metric_ctx.get("reference")
+    if not isinstance(ref, dict):
+        return None, None, notes
+    status = ref.get("status")
+    status_s = str(status) if isinstance(status, str) else None
+
+    tr = ref.get("typical_range")
+    typical_range: Optional[List[float]] = None
+    if isinstance(tr, list) and len(tr) == 2 and all(isinstance(x, (int, float)) for x in tr):
+        typical_range = [float(tr[0]), float(tr[1])]
+
+    return status_s, typical_range, notes
+
+
+def _position_against_range(value: float, lo: float, hi: float) -> str:
+    if value < lo:
+        return "below"
+    if value > hi:
+        return "above"
+    return "within"
+
+
+def generate_contextual_positioning_report(results: dict, contexts_dir: Path) -> str:
     md: List[str] = []
     md += _header_lines(results, "Audio Analysis Report - Contextual Positioning")
     md += _file_information_lines(results)
@@ -301,105 +374,154 @@ def generate_contextual_positioning_report(results: dict, context: Optional[dict
 
     md.append("## Contextual Positioning")
     md.append("")
-    md.append("This section positions measured values against *external contextual references* when available.")
-    md.append("It does not classify signals, infer intent, or provide conclusions.")
+    md.append("This section uses **context files** to organize measurements into:")
+    md.append("- metrics with reference zones (status **A**)")
+    md.append("- metrics without reference zones (status **B**/**C**)")
+    md.append("")
+    md.append("Contexts affect presentation only; they never affect computation.")
     md.append("")
 
-    if not isinstance(context, dict):
-        md.append("_No contextual reference file was provided (or it could not be loaded)._")
+    if not contexts_dir.exists():
+        md.append(f"_Contexts directory not found: `{contexts_dir}`_")
         md.append("")
         return "\n".join(md)
 
-    families = context.get("families")
-    if not isinstance(families, dict):
-        md.append("_Context file loaded, but no `families:` mapping was found._")
-        md.append("")
-        return "\n".join(md)
-
-    # Build index of measured scalar values
-    measured: Dict[Tuple[str, str, str, str], Any] = {}
+    # Group results by family/method
+    by_family: Dict[str, List[dict]] = {}
     for family, method in iter_result_methods(results):
-        mname = str(method.get("method", ""))
-        meas = method.get("measurements", {})
-        if not isinstance(meas, dict):
-            continue
-        for ch, data in meas.items():
-            if isinstance(data, dict):
-                for mk, mv in data.items():
-                    measured[(family, mname, str(ch), str(mk))] = mv
+        by_family.setdefault(family, []).append(method)
 
-    applied_any = False
+    if not by_family:
+        md.append("_No analysis results found in results.json._")
+        md.append("")
+        return "\n".join(md)
 
-    for fam_name, fam_ref in families.items():
-        if not isinstance(fam_ref, dict):
-            continue
-        methods_ref = fam_ref.get("methods")
-        if not isinstance(methods_ref, dict):
-            continue
-
-        fam_has_meas = any(k[0] == fam_name for k in measured.keys())
-        if not fam_has_meas:
-            continue
-
-        md.append(f"### {fam_name}")
+    # Build report per family
+    for family, methods in by_family.items():
+        md.append(f"### {family}")
         md.append("")
 
-        for meth_name, meth_ref in methods_ref.items():
-            if not isinstance(meth_ref, dict):
-                continue
-            meth_has_meas = any(k[0] == fam_name and k[1] == meth_name for k in measured.keys())
-            if not meth_has_meas:
-                continue
-
-            md.append(f"#### {meth_name}")
+        ctx, err = try_load_family_context(contexts_dir, family)
+        if err:
+            md.append(f"- Context: _not available_ ({err})")
             md.append("")
-            note = meth_ref.get("note") or meth_ref.get("notes")
-            if isinstance(note, str) and note.strip():
-                md.append(f"*Note:* {note.strip()}")
+            # Still list methods/metrics briefly to avoid silent omission
+            for method in methods:
+                mname = str(method.get("method", "unknown"))
+                md.append(f"#### {mname}")
                 md.append("")
+                md.append("_No context available for this family; measurements cannot be organized into A/B/C._")
+                md.append("")
+            md.append("")
+            continue
 
-            metrics_ref = meth_ref.get("metrics")
-            if not isinstance(metrics_ref, dict):
-                md.append("_No metric references found for this method in the context file._")
-                md.append("")
+        # Basic schema sanity
+        if str(ctx.get("family", "")).strip() and str(ctx.get("family", "")).strip() != family:
+            md.append(f"- Context warning: context `family` field is `{ctx.get('family')}` (expected `{family}`)")
+            md.append("")
+
+        # Collect A and B/C entries
+        section_A: List[str] = []
+        section_B: List[str] = []
+        section_C: List[str] = []
+        section_UNMAPPED: List[str] = []
+
+        for method in methods:
+            mname = str(method.get("method", "unknown"))
+            meas = method.get("measurements", {})
+            scalar_items = _extract_scalar_metrics(meas)
+
+            ctx_method = _get_ctx_method(ctx, mname)
+            if ctx_method is None:
+                # No method context: everything becomes unmapped but still visible.
+                for scope_key, metric_name, value in scalar_items:
+                    section_UNMAPPED.append(
+                        f"- `{mname}` / `{scope_key}` / **{metric_name}**: {format_value(value)} "
+                        f"— _not covered by context (missing method entry)_"
+                    )
                 continue
 
-            for metric_name, metric_ref in metrics_ref.items():
-                if not isinstance(metric_ref, dict):
+            for scope_key, metric_name, value in scalar_items:
+                metric_ctx = _get_ctx_metric(ctx_method, metric_name)
+                if metric_ctx is None:
+                    section_UNMAPPED.append(
+                        f"- `{mname}` / `{scope_key}` / **{metric_name}**: {format_value(value)} "
+                        f"— _not covered by context (missing metric entry)_"
+                    )
                     continue
 
-                channels = sorted({k[2] for k in measured.keys()
-                                   if k[0] == fam_name and k[1] == meth_name and k[3] == metric_name})
-                if not channels:
-                    continue
+                status, typical_range, notes = _get_reference(metric_ctx)
+                note_txt = (" ".join(notes)).strip()
+                if not note_txt:
+                    note_txt = "No note provided."
 
-                md.append(f"**{metric_name}**")
-                md.append("")
-                unit = metric_ref.get("unit")
-                source = metric_ref.get("source")
-                if isinstance(unit, str) and unit.strip():
-                    md.append(f"- Unit (reference): {unit.strip()}")
-                if isinstance(source, str) and source.strip():
-                    md.append(f"- Source: {source.strip()}")
-                md.append("")
+                # Status routing
+                if status == "A" and typical_range and isinstance(value, (int, float)):
+                    lo, hi = typical_range
+                    pos = _position_against_range(float(value), lo, hi)
+                    section_A.append(
+                        f"- `{mname}` / `{scope_key}`: **{metric_name}** = {format_value(value)} "
+                        f"(reference [{format_value(lo)}, {format_value(hi)}]) → **{pos}**. "
+                        f"{note_txt}"
+                    )
+                elif status == "A" and typical_range and not isinstance(value, (int, float)):
+                    section_A.append(
+                        f"- `{mname}` / `{scope_key}`: **{metric_name}** = {format_value(value)} "
+                        f"(reference [{format_value(typical_range[0])}, {format_value(typical_range[1])}]) "
+                        f"— _non-numeric value; no positioning applied_. {note_txt}"
+                    )
+                elif status == "B":
+                    section_B.append(
+                        f"- `{mname}` / `{scope_key}`: **{metric_name}** = {format_value(value)} "
+                        f"— {note_txt}"
+                    )
+                elif status == "C":
+                    section_C.append(
+                        f"- `{mname}` / `{scope_key}`: **{metric_name}** = {format_value(value)} "
+                        f"— {note_txt}"
+                    )
+                else:
+                    # Unknown or missing status
+                    section_UNMAPPED.append(
+                        f"- `{mname}` / `{scope_key}` / **{metric_name}**: {format_value(value)} "
+                        f"— _invalid or missing reference.status_"
+                    )
 
-                for ch in channels:
-                    v = measured.get((fam_name, meth_name, ch, metric_name))
-                    if isinstance(v, (int, float)):
-                        stmt = _cmp_statement(float(v), metric_ref)
-                        if stmt:
-                            md.append(f"- {ch}: {format_value(v)} → {stmt}")
-                            applied_any = True
-                        else:
-                            md.append(f"- {ch}: {format_value(v)} (no numeric interval available in reference entry)")
-                    else:
-                        md.append(f"- {ch}: {format_value(v)} (non-numeric or unavailable)")
-                md.append("")
-
+        # Render family sections
+        md.append("#### 3.A Metrics with reference zones (Status A)")
+        md.append("")
+        if section_A:
+            md.extend(section_A)
+        else:
+            md.append("_No status A metrics were applicable for this family._")
         md.append("")
 
-    if not applied_any:
-        md.append("_Context file loaded, but no comparable numeric intervals were applied (schema mismatch or references are notes-only)._")
+        md.append("#### 3.B Metrics without reference zones")
+        md.append("")
+        md.append("**Status B — context-dependent (no stable zone)**")
+        md.append("")
+        if section_B:
+            md.extend(section_B)
+        else:
+            md.append("_No status B metrics listed for this family._")
+        md.append("")
+
+        md.append("**Status C — descriptive only (no stable zone)**")
+        md.append("")
+        if section_C:
+            md.extend(section_C)
+        else:
+            md.append("_No status C metrics listed for this family._")
+        md.append("")
+
+        md.append("**Unmapped / missing context coverage**")
+        md.append("")
+        if section_UNMAPPED:
+            md.extend(section_UNMAPPED)
+        else:
+            md.append("_No unmapped scalar metrics for this family._")
+        md.append("")
+
         md.append("")
 
     return "\n".join(md)
@@ -409,7 +531,11 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Generate objective analysis reports from results.json")
     p.add_argument("input", help="results.json file OR output directory containing results.json")
     p.add_argument("--protocol", help="analysis_protocol.yaml (optional)")
-    p.add_argument("--context", help="contextual_references.yaml (optional)")
+    p.add_argument(
+        "--contexts-dir",
+        help="Directory containing family context files (context_<family>.yaml).",
+        default=str((Path.cwd() / ".." / "Analysis_examples" / "02_contexts").resolve()),
+    )
     return p.parse_args()
 
 
@@ -423,16 +549,15 @@ def main() -> None:
     results = load_json(results_file)
 
     protocol_path = Path(args.protocol) if args.protocol else None
-    context_path = Path(args.context) if args.context else None
-
     protocol = try_load_yaml(protocol_path)
-    context = try_load_yaml(context_path)
+
+    contexts_dir = Path(args.contexts_dir)
 
     out_dir = results_file.parent
 
     r1 = generate_measurement_summary_report(results)
-    r2 = generate_methodology_and_reading_guide(results, protocol_path, context_path, protocol, context)
-    r3 = generate_contextual_positioning_report(results, context)
+    r2 = generate_methodology_and_reading_guide(results, protocol_path, contexts_dir, protocol)
+    r3 = generate_contextual_positioning_report(results, contexts_dir)
 
     (out_dir / "01_MEASUREMENT_SUMMARY.md").write_text(r1, encoding="utf-8")
     (out_dir / "02_METHODOLOGY_AND_READING_GUIDE.md").write_text(r2, encoding="utf-8")

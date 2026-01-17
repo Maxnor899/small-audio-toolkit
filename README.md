@@ -86,7 +86,8 @@ pip install -r requirements.txt
 ## Usage
 
 ```bash
-python run_analysis.py audio_file.ext --config examples/config_example.yaml --output outputs/
+python run_analysis.py audio_file.ext --config <path to>/protocol_example.yaml --output <analysis_output_directory>
+
 ```
 ## Report generation
 
@@ -101,13 +102,13 @@ Reports describe observations and reference contexts, but do not produce conclus
 After running the analysis, generate human-readable reports from the JSON results:
 
 ```bash
-python Generate_Report.py output_folder/results.json
+python Generate_Report.py <analysys_results_folder>/results.json
 ```
 
-Or simply provide the output directory:
+Or simply provide the analysis results directory:
 
 ```bash
-python Generate_Report.py output_folder
+python Generate_Report.py analysys_results_folder
 ```
 
 ## Documentation
@@ -140,11 +141,6 @@ python run_analysis.py audio.flac --config config.yaml --output output_audio
 # Generate reports
 python Generate_Report.py output_audio
 
-# Review reports
-working on it...
-
-# Examine visualizations (if enabled)
-ls output_audio/visualizations/
 ```
 
 ## Requirements

@@ -81,9 +81,9 @@ This design avoids hidden decision paths or implicit reasoning.
 
 ---
 
-## 5. Role of Configuration Files (YAML)
+## 5. Role of protocol Files (YAML)
 
-The behavior of the tool is defined by configuration files.
+The behavior of the tool is defined by protocol files.
 
 These files specify:
 - which channels are analyzed,

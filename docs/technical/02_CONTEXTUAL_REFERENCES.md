@@ -1,180 +1,165 @@
-# Contextual Reference Files for Report Generation
-## Externalizing Comparative Markers Without Interpretation
+# Contextual References — Technical Description
 
-This document describes the rationale and methodology for using an **external reference file** to support the final section of the report generation process.
+This document describes the **technical mechanism** by which contextual references
+are loaded and applied during report generation in the Small Audio Tool (SAT).
 
-Its purpose is to provide **contextual comparison markers**, not interpretations, detections, or conclusions.
+It is a **technical document**.
+It does not justify the existence of contextual references, nor does it explain how results
+should be interpreted.
 
----
-
-## 1. Motivation
-
-The analysis engine produces **objective numerical measurements**.
-The report generator summarizes these measurements for human inspection.
-
-However, without context, raw values can be difficult to assess.
-
-At the same time, embedding thresholds directly in code or report logic introduces bias and implicit interpretation.
-
-The adopted solution is therefore:
-
-> **an external, versioned reference file containing contextual ranges and comparison notes**.
+For methodological rationale and reading constraints, see:
+- `docs/analysis_explanations/`
+- `docs/Contexts_explanations/CONTEXT_SCHEMA_GUIDE.md`
 
 ---
 
-## 2. What This File Is — and Is Not
+## Scope of This Document
 
-### ✅ What it *is*
+This document explains:
 
-- A collection of **reference ranges** drawn from DSP practice or empirical observation
-- A **contextual aid** for positioning measured values
-- A **fully optional** input to the report generator
-- A **transparent and traceable** component of the analysis pipeline
+- where contextual reference files are located,
+- how they are loaded by the report generator,
+- how they are matched to analysis results,
+- how reference statuses (A / B / C) affect report structure,
+- what happens when contextual information is missing.
 
-### ❌ What it is *not*
-
-- A detection rule set
-- A classification system
-- A decision engine
-- A source of automated conclusions
-
-No value in this file should ever imply:
-- “signal detected”
-- “artificial content present”
-- “hidden message found”
+It does **not**:
+- define reference values,
+- justify reference ranges,
+- describe how measurements should be interpreted.
 
 ---
 
-## 3. Design Principles
+## Context Files
 
-### 3.1 Externalization
+Contextual references are provided as **family-scoped YAML files**.
 
-All comparative references are kept **outside the codebase logic**:
-- no hard-coded thresholds,
-- no implicit defaults,
-- no invisible assumptions.
+### File Location
 
-This allows:
-- independent revision,
-- context-specific reference sets,
-- full reproducibility.
+Context files are expected to be located in a dedicated directory,
+typically:
 
----
-
-### 3.2 Ranges, Not Thresholds
-
-Each reference uses **ranges or distributions**, not binary cutoffs.
-
-Example:
-- ✔️ *Typical range: 3.5–5.5 bits/sample*
-- ❌ *If entropy < 3.5 → structured signal*
-
-The report generator may describe **relative position**, but never infer meaning.
-
----
-
-### 3.3 Neutral Vocabulary
-
-The report generator must restrict itself to neutral phrasing such as:
-- “measured value”
-- “reference range”
-- “relative position”
-- “within / below / above typical range”
-
-Interpretative terms are explicitly avoided.
-
----
-
-## 4. Example Reference File Structure
-
-Example filename:
 ```
-configs/references/general_audio.yaml
+Analysis_examples/02_contexts/
 ```
 
-```yaml
-version: "1.0"
-scope: "general_audio"
-description: "Contextual reference ranges for report generation. No interpretation."
-sources:
-  - "DSP literature, empirical observations"
+The directory path is provided to the report generator as a parameter.
 
-references:
+### File Naming
 
-  information.shannon_entropy:
-    unit: "bits/sample"
-    typical_range: [3.5, 5.5]
-    notes:
-      - "Lower values are often observed in more repetitive signals."
-      - "Higher values are common in broadband noise."
-    display:
-      compare: "range"
-      emphasize_if_outside: true
+Each context file corresponds to exactly one analysis family and must follow
+this naming convention:
 
-  temporal.autocorrelation.max_peak_excluding_zero:
-    unit: "normalized"
-    typical_range: [0.0, 0.2]
-    notes:
-      - "Non-zero peaks increase when periodic components are present."
-    display:
-      compare: "range"
-      emphasize_if_outside: true
+```
+context_<family>.yaml
 ```
 
----
-
-## 5. How the Report Generator Uses This File
-
-For each referenced metric:
-
-1. Read the **measured value**
-2. Read the **reference range**
-3. Determine **relative position** (below / within / above)
-4. Generate a **purely descriptive statement**
-
-### Example Output
-
-> Shannon entropy: 3.2 bits/sample.  
-> Reference typical range: 3.5–5.5 bits/sample.  
-> Relative position: below typical range.
-
-No further inference is produced.
+The `<family>` identifier must match the family name used in:
+- the analysis code,
+- the results JSON structure.
 
 ---
 
-## 6. Versioning and Traceability
+## Context File Structure (Overview)
 
-The reference file must be:
+Each context file:
 
-- versioned,
-- copied to the output directory,
-- recorded alongside `config_used.json`.
+- declares exactly one analysis family,
+- lists methods belonging to that family,
+- lists scalar metrics produced by each method,
+- assigns a reference status to each metric.
 
-This ensures that every report can be traced back to:
-- the audio input,
-- the analysis configuration,
-- the contextual reference set used.
+The full normative schema is defined in:
 
----
+```
+docs/Contexts_explanations/CONTEXT_SCHEMA_GUIDE.md
+```
 
-## 7. Multiple Contexts
-
-Different reference files may coexist, for example:
-
-- `general_audio.yaml`
-- `elite_dangerous.yaml`
-- `speech_recordings.yaml`
-
-Switching reference files changes **context**, not interpretation.
+This document does not redefine that schema.
 
 ---
 
-## 8. Summary
+## Loading Mechanism
 
-- Analysis computes measurements.
-- YAML configuration defines observation protocols.
-- Reference files provide contextual ranges.
-- Reports describe relative positioning.
-- Interpretation remains entirely human.
+During report generation:
 
-This separation preserves scientific rigor while keeping reports readable and informative.
+1. The report generator inspects `results.json`.
+2. It extracts the list of analysis families present.
+3. For each family:
+   - it attempts to load `context_<family>.yaml` from the contexts directory,
+   - failures are reported explicitly in the generated report.
+
+No default or fallback context is applied.
+
+---
+
+## Matching Logic
+
+Contextual references are matched using **exact identifiers**.
+
+The matching hierarchy is:
+
+```
+family → method → metric
+```
+
+Rules:
+
+- A context entry must match an existing metric exactly.
+- No metric may be introduced by a context file.
+- Metrics present in results but absent from the context are reported as such.
+
+The generator performs no inference or name normalization.
+
+---
+
+## Reference Status Handling
+
+Each metric context entry declares a reference status:
+
+- **A** — metric admits a numeric reference zone,
+- **B** — metric is context-dependent and non-zonable,
+- **C** — metric is descriptive only.
+
+The report generator uses this status mechanically:
+
+### Status A
+- A numeric `typical_range` is read.
+- Numeric values are positioned relative to that range
+  (below / within / above).
+- Positioning is descriptive only.
+
+### Status B
+- No numeric positioning is performed.
+- Metrics are listed with explanatory notes.
+
+### Status C
+- Metrics are listed as descriptive outputs.
+- No numeric comparison is attempted.
+
+---
+
+## Missing or Incomplete Context Coverage
+
+The report generator explicitly reports:
+
+- missing context files for a family,
+- missing method entries,
+- missing metric entries,
+- invalid or incomplete reference definitions.
+
+No metric is silently ignored.
+
+---
+
+## Relationship With Other Documentation
+
+- This document describes **how** contextual references are applied.
+- `analysis_explanations/` documents explain **why** interpretation is constrained.
+- `Contexts_explanations/CONTEXT_SCHEMA_GUIDE.md` defines **how context files must be written**.
+
+These documents are complementary and non-overlapping.
+
+---
+
+End of document.

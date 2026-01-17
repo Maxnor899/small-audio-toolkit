@@ -22,6 +22,12 @@ has little meaning without knowing **where such values are commonly observed** i
 
 Contextual references exist to provide **orientation**, not conclusions.
 
+In this tool, contextual references are implemented through explicit, family-scoped context files (context_<family>.yaml).
+Each metric is assigned a reference status (A, B, or C), which determines whether it may be positioned relative to a numeric 
+reference zone, listed as context-dependent, or presented as descriptive only.
+This mechanism is used exclusively during report generation and never influences measurement or analysis execution, it is applied mechanically in the 
+contextual positioning section of generated reports.
+
 ---
 
 ## 2. Why Binary Thresholds Are Explicitly Avoided

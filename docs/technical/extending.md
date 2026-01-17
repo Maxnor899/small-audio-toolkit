@@ -317,15 +317,7 @@ analyses:
 
 ## Testing Your Method
 
-Create a simple test configuration and run:
-
-```bash
-python -m audio_toolkit.main \
-  --audio test_signal.wav \
-  --config test_config.yaml \
-  --output test_output/
-```
-
+Create a simple test protocol and run an analysis.
 Verify the JSON output contains your method's results.
 
 ## Adding visualizations

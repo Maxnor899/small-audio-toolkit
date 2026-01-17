@@ -1,8 +1,8 @@
 # Software Architecture
 
-## Overview
+## Overview 
 
-The tool is structured around a **generic execution engine**, driven by a configuration file, and a set of **independent analysis modules** registered dynamically.
+The tool is structured around a **generic execution engine**, driven by an **analysis protocol**, and relying on a set of **independent analysis modules** registered dynamically.
 
 The architecture ensures:
 
@@ -15,7 +15,6 @@ The architecture ensures:
 ```
 pipeline_audio/
 │
-├── main.py                  # CLI entry point
 ├── engine/
 │   ├── runner.py            # Main orchestrator
 │   ├── context.py           # Analysis context (audio, channels, metadata)
@@ -37,167 +36,136 @@ pipeline_audio/
 │   ├── time_frequency.py    # STFT, CQT, wavelets
 │   ├── modulation.py        # AM / FM / phase
 │   ├── information.py       # Entropy, compression
-│   └── inter_channel.py     # Inter-channel analyses
+│   ├── inter_channel.py     # Inter-channel analyses
+│   ├── steganography/       # Steganography-oriented analyses
+│   └── meta_analysis/       # Cross-analysis / meta metrics
 │
 ├── visualization/
 │   └── plots.py             # Graph generation
 │   └── plots_extended.py    # OLD AND DEPRECATED Advanced / experimental visualizations kept only for compatibility - DO NOT USE
 │
-├── utils/
-│   ├── math.py              # Common math functions
-│   ├── windowing.py         # Windowing functions
-│   └── logging.py           # Logging
-│
-└── outputs/
-    └── run_YYYYMMDD_HHMMSS/ # Execution results
+└── utils/
+    ├── math.py              # Common math functions
+    ├── windowing.py         # Windowing functions
+    └── logging.py           # Logging
+
 ```
 
 ## Execution Engine
 
-### Role
+The execution engine is responsible for orchestrating the analysis run.
+
+It is implemented in the `engine/` directory and includes:
+
+- `runner.py`: execution orchestration and method dispatch
+- `context.py`: shared analysis context (audio, channels, metadata)
+- `registry.py`: analysis methods registry
+- `results.py`: results aggregation and serialization
+
+### Responsibilities
 
 The engine is responsible for:
 
-1. Loading the configuration
-2. Loading the audio
+1. Consuming execution inputs (analysis protocol and execution parameters)
+2. Loading audio data
 3. Preparing analysis channels
-4. Executing declared methods
-5. Collecting and exporting results
+4. Executing declared analysis methods
+5. Aggregating and exporting results
 
-It **contains no sound processing logic**.
+The engine **contains no signal processing logic**.
 
-### Flow
+---
 
-```
-Configuration → Audio Loading → Channel Preparation →
-Method Execution → Results Aggregation → Export
-```
-## Configuration as a Contract
+## Configuration
 
-The configuration file is treated as a **strict execution contract**.
+The `config/` directory contains components related to execution configuration.
 
-Only configuration keys explicitly consumed by the engine have an effect on execution.
-Unknown or undocumented keys are ignored or may trigger validation warnings.
+It includes:
 
-The project distinguishes between:
-- **Contractual configuration** (`configuration.md`), which documents options actively consumed by the code
-- **Conceptual configuration notes** (`configuration_schema.md`), which document design ideas or future extensions with no runtime effect
+- `loader.py`: loading and validation of configuration files
+- `schema.md`: formal description of the supported configuration format
 
-This separation ensures reproducibility and prevents implicit or undocumented behavior.
+Configuration files act as an **execution contract**:
+only options explicitly consumed by the code have an effect on execution.
+Unknown or unsupported keys are ignored or may trigger validation warnings.
 
-## Analysis Context
+---
 
-The context is a shared object passed to each method. It contains:
+## Audio Handling
 
-- Audio data per channel
-- Sample rate
-- Temporal segments
-- Execution metadata
+The `audio/` directory contains all components related to audio input handling.
 
-The context is **immutable** for analysis methods.
+It includes:
 
-## Methods Registry
+- `loader.py`: multi-channel audio loading
+- `channels.py`: channel management (left, right, sum, difference)
+- `preprocessing.py`: configurable preprocessing steps
 
-All methods are registered in a global registry.
+These components are responsible for preparing audio data before analysis methods are executed.
 
-Each registry entry associates:
-
-- A unique identifier
-- A category
-- An analysis function
-
-The engine calls methods **by their identifier**, as defined in the configuration file.
+---
 
 ## Analysis Modules
 
-### Principle
+The `analyses/` directory contains all analysis method implementations.
 
-Each module groups methods sharing the same intent.
+Each submodule corresponds to an analysis family:
 
-Methods:
+- `temporal/`: temporal analyses
+- `spectral/`: frequency-domain analyses
+- `time_frequency/`: time–frequency analyses (STFT, CQT, wavelets)
+- `modulation/`: amplitude and frequency modulation analyses
+- `information/`: entropy and information-theoretic measures
+- `inter_channel/`: inter-channel analyses
+- `steganography/`: steganography-oriented analyses
+- `meta_analysis/`: cross-analysis and structural metrics
 
-- Take the context as input
-- Take parameters from a dictionary derived from configuration
-- Return a structured result object
+Analysis methods:
 
-No method calls another method.
+- take the shared context as input,
+- receive parameters from the analysis protocol,
+- return structured result objects.
 
-### Categories
+No analysis method calls another method.
 
-- **Preprocessing**: Normalization, silence detection, segmentation
-- **Temporal**: Envelope, autocorrelation, pulse detection
-- **Spectral**: FFT, peak detection, cepstrum
-- **Time-Frequency**: STFT, CQT, wavelets
-- **Modulation**: AM/FM/phase analysis
-- **Information**: Shannon entropy, compression ratios
-- **Inter-Channel**: Cross-correlation, phase differences
-- **Steganography**: LSB analysis, structured quantization noise
-- **Meta-Analysis**: Segment comparison, clustering
-
-Note : Meta-analysis methods provide **structural indicators only**.
-
-They operate on previously computed measurements and do not perform
-classification, labeling, or interpretation of signal meaning.
-
-Meta-analysis outputs are intended to guide further human inspection,
-not to produce conclusions.
-
-
-## Results
-
-Each method returns:
-
-- Numerical values
-- Derived metrics
-- Stability or anomaly indicators
-
-The engine aggregates everything into a hierarchical structure:
-
-```
-run
- ├── metadata
- ├── preprocessing
- ├── temporal
- ├── spectral
- ├── time_frequency
- ├── modulation
- ├── information
- ├── inter_channel
- ├── steganography
- └── meta_analysis
-```
-
-Results are exported as:
-
-- JSON (raw data)
-- Images (visualizations)
-- Exact copy of configuration file
+---
 
 ## Visualization
 
-Graphs are produced **optionally**, driven by configuration.
-No visualization is required for analytical functionality.
+The `visualization/` directory contains visualization components.
 
-Visualization is an optional, non-intrusive layer.
+It includes:
 
-Not all analyses guarantee associated visual output.
-Visualizations are generated only when explicitly supported by the analysis method
-and enabled through configuration.
+- `plots.py`: current visualization implementation
+- `plots_extended.py`: deprecated module kept for compatibility and documentation purposes (not used)
 
-Visualization does not influence analytical results and must remain purely descriptive.
-- plot.py is the UNIQUE way to implement new visualzations
-- plots_extended.py = module kept for documentation consistency, without inner logic
+Visualization is optional and does not influence analytical results.
+Only analyses explicitly supporting visualization can produce graphical output.
 
-## Command Line Interface
+---
+
+## Utilities
+
+The `utils/` directory contains shared utility functions.
+
+It includes:
+
+- `math.py`: common mathematical helpers
+- `windowing.py`: windowing functions
+- `logging.py`: logging utilities
+
+These modules support the rest of the codebase and contain no analysis logic.
+
+
+# Command Line Interface
 
 Example call:
 
 ```bash
-python main.py \
-  --audio guardian_signal.wav \
-  --config config.yaml \
-  --output outputs/
-```
+python run_analysis.py \
+  --audio <path_to>/guardian_signal.wav \
+  --config <path_to>/config.yaml \
+  --output <analysis_output_directory>
 
 ## Explicit Constraints
 
@@ -216,6 +184,3 @@ Adding a new method only requires:
 
 The engine should never be modified to add an analysis.
 
-## Design Philosophy
-
-This architecture is designed to produce an ** audio analysis tool**, reproducible and shareable, suitable for exploring intentionally designed artificial signals (game design, ARG, steganography).

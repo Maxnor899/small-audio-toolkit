@@ -9,6 +9,8 @@ Its purpose is to ensure that contextual references:
 - never introduce interpretation or hidden logic.
 
 This document is normative.
+It complements the methodological documents in docs/analysis_explanations by translating their 
+constraints into a concrete, machine-readable context schema.
 
 ---
 
@@ -141,6 +143,8 @@ The report generator MUST behave mechanically:
   - no numeric positioning
 
 No metric is skipped silently.
+This behavior is implemented in the contextual positioning section of generated reports and 
+reflects exactly the constraints described in 02_LINK_WITH_CONTEXTUAL_REFERENCES.md.
 
 ---
 

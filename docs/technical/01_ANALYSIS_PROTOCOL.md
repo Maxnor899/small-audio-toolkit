@@ -1,199 +1,136 @@
-# YAML Configuration Methodology
-## Observation Protocols for Audio Signal Analysis
+# Analysis Protocols — Technical Description
 
-This document describes the **central role of YAML configurations** in the *Small Audio Tool* project and introduces a **first reference observation protocol** specifically suited to the analysis of audio signals from the game *Elite Dangerous*.
+This document describes the **technical role and structure** of analysis protocol files
+used by the Small Audio Tool (SAT).
 
----
+It is a **technical reference document**.
+It does not explain why particular analyses should be run, nor how results should be interpreted.
 
-## 1. Fundamental Principle
-
-The analysis engine is deliberately **neutral**:
-
-- it computes objective measurements only,
-- it never interprets results,
-- it produces no automatic conclusions.
-
-As a result, the **scientific subtlety** of the analysis lies almost entirely in the YAML configuration.
-
-A YAML configuration is **not** a simple parameter file:
-> it is an **experimental observation protocol**, fully explicit and reproducible.
+For methodological rationale and reading constraints, see:
+- `docs/analysis_explanations/`
+- `Analysis_examples/01_protocols/README.md`
 
 ---
 
-## 2. Role of YAML in the Architecture
+## Scope of This Document
 
-A YAML configuration defines:
+This document explains:
 
-- **which channels** are observed (left, right, difference, etc.),
-- **which analysis families** are enabled,
-- **which specific methods** are applied,
-- **at what temporal and spectral scales**,
-- **with which resolution trade-offs**.
+- what an analysis protocol file is,
+- how it is structured,
+- how it is interpreted by the analysis engine,
+- how it controls analysis execution.
 
-Changing the YAML means:
-> observing the same signal **from a different analytical angle**, without changing the instrument.
-
----
-
-## 3. Why Multiple Configurations Are Necessary
-
-An audio signal may simultaneously contain:
-
-- temporal structures,
-- spectral structures,
-- modulations,
-- inter-channel relationships,
-- informational signatures.
-
-A single configuration cannot explore all these dimensions effectively without:
-
-- increasing noise,
-- masking certain structures,
-- introducing implicit compromises.
-
-The adopted solution is therefore:
-> **multiple YAML configurations, each corresponding to a clearly defined observation objective.**
+It does **not**:
+- justify analytical choices,
+- recommend specific protocols,
+- describe how to read or interpret results.
 
 ---
 
-## 4. Reference Protocol:
-## “Artificial Structures and Regularities”
+## Role of Analysis Protocols
 
-### Objective
+An analysis protocol defines **what is measured and how**.
 
-Reveal **stable temporal, spectral, and inter-channel structures** that may indicate intentional or algorithmic construction, **without any interpretation of content**.
+Protocols are declarative configuration files that:
+- select analysis families and methods,
+- define channels and signal representations,
+- specify method parameters,
+- control which analyses are executed.
 
-This protocol is particularly suited to audio signals from *Elite Dangerous*, which often exhibit:
-
-- non-musical repetitions,
-- regular pulsations,
-- deliberate left/right asymmetries,
-- strong spectral stability.
-
----
-
-### Corresponding YAML Configuration
-
-```yaml
-version: "1.0"
-
-channels:
-  analyze:
-    - left
-    - right
-    - difference
-
-analyses:
-
-  temporal:
-    enabled: true
-    methods:
-      - name: envelope
-        params:
-          method: hilbert
-
-      - name: autocorrelation
-        params:
-          max_lag: 5000
-          normalize: true
-          max_samples: 100000
-
-  spectral:
-    enabled: true
-    methods:
-      - name: fft_global
-        params:
-          window: hann
-
-      - name: peak_detection
-        params:
-          prominence: 0.05
-          distance: 50
-
-      - name: harmonic_analysis
-        params:
-          fundamental_range: [20, 2000]
-          max_harmonics: 10
-
-  time_frequency:
-    enabled: true
-    methods:
-      - name: stft
-        params:
-          n_fft: 4096
-          hop_length: 256
-          window: hann
-
-      - name: band_stability
-        params:
-          bands:
-            - [20, 100]
-            - [100, 300]
-            - [300, 800]
-            - [800, 2000]
-            - [2000, 6000]
-
-  modulation:
-    enabled: true
-    methods:
-      - name: am_detection
-      - name: fm_detection
-      - name: phase_analysis
-
-  information:
-    enabled: true
-    methods:
-      - name: shannon_entropy
-      - name: local_entropy
-        params:
-          window_size: 2048
-          hop_length: 512
-      - name: compression_ratio
-
-  inter_channel:
-    enabled: true
-    methods:
-      - name: lr_difference
-      - name: cross_correlation
-        params:
-          max_lag: 2000
-          max_samples: 50000
-      - name: phase_difference
-      - name: time_delay
-
-visualization:
-  enabled: true
-  formats: ["png"]
-  dpi: 150
-  figsize: [12, 8]
-
-output:
-  save_raw_data: true
-  save_config: true
-```
+Protocols do not:
+- perform analysis,
+- alter signal data,
+- interpret results.
 
 ---
 
-## 5. What This Protocol Allows One to Observe
+## Protocol File Format
 
-Without drawing conclusions, this protocol makes it possible to measure:
+Analysis protocols are defined as **YAML files**.
 
-- global and local periodicities,
-- repetitive structures in time and frequency,
-- frequency-band stability,
-- slow or structured modulations,
-- inter-channel coherence or asymmetry,
-- levels of order, redundancy, or complexity.
-
-All interpretations remain **outside the tool** and are the responsibility of the human analyst.
+They are consumed directly by the analysis engine at runtime.
+The engine does not modify protocol content.
 
 ---
 
-## 6. General Philosophy
+## High-Level Structure
 
-- The **code** is the instrument.
-- The **YAML file** is the experimental protocol.
-- The **results** are observations.
-- **Interpretation** belongs to the user.
+A protocol file is expected to define, at minimum:
 
-This separation is a deliberate methodological choice, ensuring rigor, reproducibility, and the absence of automatic bias.
+- a list of channels to analyze,
+- one or more analysis families,
+- the methods to run within each family,
+- optional parameters for each method.
+
+The exact structure is validated before execution.
+
+---
+
+## Channels Definition
+
+The protocol defines which signal representations are analyzed.
+
+Typical channel identifiers include:
+- individual audio channels (e.g. `left`, `right`),
+- derived representations (e.g. `difference`, `sum`).
+
+The protocol specifies:
+- which channels are enabled,
+- how they are derived when applicable.
+
+The protocol does not define semantic meaning for channels.
+
+---
+
+## Analysis Families and Methods
+
+Protocols organize analysis execution by **family**.
+
+For each family, the protocol may specify:
+- one or more analysis methods,
+- optional parameters for each method.
+
+Family and method identifiers must match those implemented
+in the analysis code.
+
+The engine executes only what is explicitly declared.
+
+---
+
+## Method Parameters
+
+Each method may accept a set of parameters.
+
+Parameters:
+- are passed verbatim to the analysis function,
+- control algorithmic behavior (e.g. window size, thresholds),
+- are not interpreted or validated beyond type and presence.
+
+Default values are used when parameters are omitted.
+
+---
+
+## Validation and Error Handling
+
+Before execution, the analysis engine performs validation:
+
+- unknown families or methods are rejected,
+- invalid parameter structures cause execution to fail,
+- missing required fields are reported.
+
+Validation errors prevent analysis execution.
+
+---
+
+## Relationship With Other Documentation
+
+- This document describes **how protocols are structured and consumed**.
+- `analysis_explanations/` documents describe **why interpretation is constrained**.
+- `Analysis_examples/01_protocols/` contains **example protocol files**.
+
+These documents are complementary and non-overlapping.
+
+---
+
+End of document.

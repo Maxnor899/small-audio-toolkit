@@ -18,10 +18,9 @@ They differ only by **scope and intent of observation**.
 ## Directory Structure
 
 ```
-examples/protocols/
-├── Baseline/
-├── Focused/
-├── Experimental/
+Analysis_examples/protocols/
+├── 01_Baseline/
+├── 02_Focused/
 └── README.md
 ```
 
@@ -29,9 +28,9 @@ Each subdirectory corresponds to a **distinct methodological role**.
 
 ---
 
-## Baseline/
+## 01_Baseline/
 
-The `Baseline/` directory contains **reference protocols** designed to provide
+The `01_Baseline/` directory contains **reference protocols** designed to provide
 **maximal analytical coverage with minimal assumptions**.
 
 Baseline protocols aim to:
@@ -53,9 +52,9 @@ Each baseline protocol is usually paired with:
 
 ---
 
-## Focused/
+## 02_Focused/
 
-The `Focused/` directory contains **specialized observation protocols**.
+The `02_Focused/` directory contains **specialized observation protocols**.
 
 Focused protocols deliberately:
 - restrict analytical scope,
@@ -70,26 +69,6 @@ They are used when:
 
 A focused protocol should always be readable as:
 > “This protocol observes *this* and explicitly ignores *that*.”
-
----
-
-## Experimental/
-
-The `Experimental/` directory contains **exploratory or provisional protocols**.
-
-These protocols may:
-- test unusual parameter ranges,
-- explore edge cases,
-- support development or visualization validation,
-- experiment with new analysis combinations.
-
-They are not guaranteed to be:
-- stable,
-- optimal,
-- or methodologically complete.
-
-Experimental protocols may evolve, be replaced, or be removed.
-They should not be used as references without critical review.
 
 ---
 
@@ -118,27 +97,6 @@ that help position numerical values during report generation.
 - Protocols affect computation.
 - Contexts affect presentation only.
 - The two are strictly independent.
-
----
-
-## Usage
-
-Example using a baseline protocol **with its associated context file**:
-
-```bash
-python run_analysis.py input_audio.wav \
-  --config examples/protocols/Baseline/protocol_baseline_full.yaml \
-  --context examples/protocols/Baseline/context_baseline_general_audio.yaml \
-  --output output_dir/
-```
-
-Each execution produces:
-- raw numerical measurements,
-- optional visualizations,
-- an exact copy of the protocol used,
-- an optional context-aware report (when report generation is applied).
-
-Interpretation always occurs **outside the tool**.
 
 ---
 

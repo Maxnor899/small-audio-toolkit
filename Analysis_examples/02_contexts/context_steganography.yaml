@@ -1,0 +1,31 @@
+version: "1.0"
+family: "steganography"
+description: "Steganography-oriented analysis reference context."
+
+methods:
+  lsb_analysis:
+    scope: "per_channel"
+    metrics:
+      lsb_mean:
+        unit: "probability"
+        reference:
+          status: "A"
+          typical_range: [0.0, 1.0]
+        notes:
+          - "LSB mean is a Bernoulli probability."
+      transition_rate:
+        unit: "probability"
+        reference:
+          status: "A"
+          typical_range: [0.0, 1.0]
+        notes:
+          - "Transition rate is a probability."
+
+  quantization_noise:
+    scope: "per_channel"
+    metrics:
+      noise_std:
+        unit: "amplitude"
+        reference: { status: "B" }
+        notes:
+          - "Noise level depends on quantization and scaling."

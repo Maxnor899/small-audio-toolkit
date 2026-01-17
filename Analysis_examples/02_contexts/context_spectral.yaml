@@ -1,0 +1,34 @@
+version: "1.0"
+family: "spectral"
+description: "Spectral analysis reference context."
+
+methods:
+  fft_global:
+    scope: "per_channel"
+    metrics:
+      peak_frequency:
+        unit: "Hz"
+        reference: { status: "B" }
+        notes:
+          - "Frequency depends on signal content and sampling rate."
+      spectral_centroid:
+        unit: "Hz"
+        reference: { status: "B" }
+        notes:
+          - "Centroid depends on spectral distribution."
+      spectral_flatness:
+        unit: "ratio"
+        reference:
+          status: "A"
+          typical_range: [0.0, 1.0]
+        notes:
+          - "Flatness is normalized in [0,1]."
+
+  spectral_peaks:
+    scope: "per_channel"
+    metrics:
+      num_peaks:
+        unit: "count"
+        reference: { status: "B" }
+        notes:
+          - "Depends on peak detection parameters."

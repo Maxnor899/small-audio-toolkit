@@ -1,0 +1,29 @@
+version: "1.0"
+family: "inter_channel"
+description: "Inter-channel analysis reference context."
+
+methods:
+  cross_correlation:
+    scope: "pair"
+    metrics:
+      max_correlation:
+        unit: "normalized correlation"
+        reference:
+          status: "A"
+          typical_range: [-1.0, 1.0]
+        notes:
+          - "Normalized cross-correlation is bounded in [-1,1]."
+      peak_lag:
+        unit: "samples"
+        reference: { status: "B" }
+        notes:
+          - "Lag depends on geometry and processing."
+
+  lr_difference:
+    scope: "single"
+    metrics:
+      energy_ratio:
+        unit: "ratio"
+        reference: { status: "B" }
+        notes:
+          - "Difference energy depends on stereo content."

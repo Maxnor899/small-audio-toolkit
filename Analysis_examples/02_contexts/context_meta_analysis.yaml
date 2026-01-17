@@ -1,0 +1,22 @@
+version: "1.0"
+family: "meta_analysis"
+description: "Meta-analysis reference context."
+
+methods:
+  stability_analysis:
+    scope: "per_channel"
+    metrics:
+      stability_score:
+        unit: "ratio"
+        reference: { status: "B" }
+        notes:
+          - "Stability is relative and configuration-dependent."
+
+  cross_metric_consistency:
+    scope: "single"
+    metrics:
+      consistency_score:
+        unit: "ratio"
+        reference: { status: "B" }
+        notes:
+          - "Consistency is comparative, not absolute."

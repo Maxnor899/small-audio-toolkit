@@ -1,0 +1,22 @@
+version: "1.0"
+family: "modulation"
+description: "Modulation analysis reference context."
+
+methods:
+  am_analysis:
+    scope: "per_channel"
+    metrics:
+      am_depth:
+        unit: "ratio"
+        reference: { status: "B" }
+        notes:
+          - "AM depth depends on modulation index and signal."
+
+  fm_analysis:
+    scope: "per_channel"
+    metrics:
+      fm_deviation:
+        unit: "Hz"
+        reference: { status: "B" }
+        notes:
+          - "FM deviation is signal- and configuration-dependent."

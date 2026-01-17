@@ -1,0 +1,20 @@
+version: "1.0"
+family: "information"
+description: "Information-theoretic analysis reference context."
+
+methods:
+  shannon_entropy:
+    scope: "per_channel"
+    metrics:
+      shannon_entropy:
+        unit: "bits"
+        reference: { status: "B" }
+        notes:
+          - "Entropy depends on quantization and binning."
+      normalized_entropy:
+        unit: "ratio"
+        reference:
+          status: "A"
+          typical_range: [0.0, 1.0]
+        notes:
+          - "Normalized entropy is bounded in [0,1]."

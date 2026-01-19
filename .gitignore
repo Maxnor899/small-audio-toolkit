@@ -36,7 +36,6 @@ Thumbs.db
 
 # Project specific
 outputs/
-*.wav
 *.mp3
 *.flac
 *.ogg
@@ -65,7 +64,6 @@ results/visualizations/waveform_difference.png
 results/visualizations/waveform_left.png
 results/visualizations/waveform_right.png
 results/visualizations/waveform_sum.png
-Generate_Report.py
 results/lsig/visualizations/multi_channel_overview.png
 results/lsig/visualizations/spectrum_difference.png
 results/lsig/visualizations/spectrum_left.png

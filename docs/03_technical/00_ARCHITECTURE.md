@@ -163,8 +163,8 @@ Example call:
 
 ```bash
 python run_analysis.py \
-  --audio <path_to>/guardian_signal.wav \
-  --config <path_to>/config.yaml \
+  <path_to>/guardian_signal.wav \
+  --config <path_to>/protocol.yaml \
   --output <analysis_output_directory>
 
 ## Explicit Constraints

@@ -121,7 +121,7 @@ Each registered method has:
 - `description`: Human-readable description
 - `default_params`: Default parameter values
 
-## Step 3: Activate in Configuration
+## Step 3: Activate in protocol
 
 Add the method to your YAML configuration:
 

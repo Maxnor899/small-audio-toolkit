@@ -1,10 +1,19 @@
+# Audio Toolkit - Dependencies
+# Python >= 3.9 required
+
 # Core dependencies
 numpy>=1.24.0
 scipy>=1.10.0
 soundfile>=0.12.0
 pyyaml>=6.0
 matplotlib>=3.7.0
+
 # Wavelet analysis (REQUIRED for wavelet method)
 PyWavelets>=1.4.0
-# Optional but recommended
-# librosa>=0.10.0  # For CQT (currently not implemented - stub only)
+
+# Time-frequency analysis (REQUIRED for CQT method)
+librosa>=0.10.0  # For Constant-Q Transform analysis
+
+# Optional dependencies (used in some experimental features)
+# scikit-learn>=1.2.0  # For advanced clustering/meta-analysis
+# pyloudnorm>=0.1.0  # For accurate LUFS normalization

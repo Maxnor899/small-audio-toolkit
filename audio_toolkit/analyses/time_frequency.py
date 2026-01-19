@@ -21,6 +21,14 @@ try:
 except Exception:
     librosa = None  # type: ignore
 
+# Optional dependency for wavelets
+try:
+    import pywt
+    HAS_PYWAVELETS = True
+except ImportError:
+    HAS_PYWAVELETS = False
+    pywt = None  # type: ignore
+
 
 def stft_analysis(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResult:
     """
@@ -210,6 +218,8 @@ def cqt_analysis(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisRe
 def wavelet_analysis(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResult:
     """
     Wavelet transform analysis with visualization_data.
+    
+    Uses PyWavelets if available, falls back to scipy.signal.
     """
     wavelet_type = params.get("wavelet", "morlet")
     num_scales = params.get("num_scales", 64)
@@ -229,18 +239,30 @@ def wavelet_analysis(context: AnalysisContext, params: Dict[str, Any]) -> Analys
 
         scales = np.geomspace(1, 128, num_scales)
 
-        if wavelet_type == "morlet":
-            coefficients, frequencies = signal.cwt(
-                audio_subset,
-                signal.morlet2,
-                scales,
-                w=6.0,
-            )
+        # FIX: Utiliser PyWavelets en priorité, fallback sur scipy
+        if HAS_PYWAVELETS and wavelet_type == "morlet":
+            try:
+                # PyWavelets: plus robuste et standardisé
+                coefficients, frequencies = pywt.cwt(
+                    audio_subset,
+							   
+                    scales,
+                    'morl',  # Morlet wavelet
+                    sampling_period=1.0 / context.sample_rate
+                )
+                logger.debug("Wavelet: using PyWavelets (morl)")
+                
+            except Exception as e:
+                logger.warning(f"PyWavelets failed: {e}, falling back to scipy")
+                coefficients, frequencies = _cwt_scipy_fallback(
+                    audio_subset, scales, wavelet_type, context.sample_rate
+                )
         else:
-            coefficients, frequencies = signal.cwt(
-                audio_subset,
-                signal.ricker,
-                scales,
+            # Fallback scipy pour autres wavelets ou si PyWavelets absent
+            coefficients, frequencies = _cwt_scipy_fallback(
+                audio_subset, scales, wavelet_type, context.sample_rate
+							  
+					   
             )
 
         magnitude = np.abs(coefficients)
@@ -252,6 +274,7 @@ def wavelet_analysis(context: AnalysisContext, params: Dict[str, Any]) -> Analys
             "max_magnitude": float(np.max(magnitude)),
             "scale_of_max": int(np.unravel_index(np.argmax(magnitude), magnitude.shape)[0]),
             "energy_concentration": float(np.max(magnitude) / (np.mean(magnitude) + 1e-10)),
+            "wavelet_backend": "pywavelets" if HAS_PYWAVELETS and wavelet_type == "morlet" else "scipy",
         }
 
         visualization_data[channel_name] = {
@@ -267,6 +290,53 @@ def wavelet_analysis(context: AnalysisContext, params: Dict[str, Any]) -> Analys
         metrics={"wavelet": wavelet_type, "num_scales": num_scales},
         visualization_data=visualization_data,
     )
+
+
+def _cwt_scipy_fallback(
+    audio_subset: np.ndarray,
+    scales: np.ndarray,
+    wavelet_type: str,
+    sample_rate: int
+) -> tuple:
+    """
+    Compute CWT using scipy.signal with proper fallbacks for old scipy versions.
+    
+    Returns:
+        (coefficients, frequencies) tuple
+    """
+    # Essayer signal.morlet2 (scipy >= 1.4.0)
+    if wavelet_type == "morlet":
+        try:
+            wavelet_func = signal.morlet2
+            logger.debug("Wavelet: using scipy.signal.morlet2")
+        except AttributeError:
+            # Fallback pour scipy < 1.4.0
+            try:
+                wavelet_func = signal.morlet
+                logger.warning("scipy.signal.morlet2 not available, using deprecated morlet")
+            except AttributeError:
+                logger.error("No morlet wavelet available in scipy")
+                raise RuntimeError(
+                    "Morlet wavelet not available. Please upgrade scipy to >= 1.4.0 "
+                    "or install PyWavelets: pip install PyWavelets"
+                )
+        
+        coefficients, frequencies = signal.cwt(
+            audio_subset,
+            wavelet_func,
+            scales,
+            w=6.0,
+        )
+    else:
+        # Ricker wavelet (toujours disponible)
+        coefficients, frequencies = signal.cwt(
+            audio_subset,
+            signal.ricker,
+            scales,
+        )
+        logger.debug("Wavelet: using scipy.signal.ricker")
+    
+    return coefficients, frequencies
 
 
 def band_stability(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResult:

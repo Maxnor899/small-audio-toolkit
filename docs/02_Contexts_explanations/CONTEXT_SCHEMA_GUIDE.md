@@ -3,6 +3,12 @@
 This document defines the **official schema and authoring rules** for all
 `context_<family>.yaml` files used by the report generator.
 
+This document applies exclusively to official contextual reference files maintained by the project.
+User-provided contexts follow a different schema and are documented separately.
+
+This document does not define the schema or authoring rules for user-provided contextual references.
+User contexts are explicitly non-normative and are described in separate documentation.
+
 Its purpose is to ensure that contextual references:
 - remain scientifically defensible,
 - strictly match the analysis code outputs,

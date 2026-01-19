@@ -1,0 +1,20 @@
+version: "1.0"
+family: "XXXX"
+description: "Template context."
+
+methods:
+  shannon_entropy:
+    scope: "xxx"
+    metrics:
+      shannon_entropy:
+        unit: "xxx"
+        reference: { status: "x" }
+        notes:
+          - "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      normalized_entropy:
+        unit: "xxx"
+        reference:
+          status: "x"
+          typical_range: xxxxxxx
+        notes:
+          - "xxxxxxxxxxxxxxxx"

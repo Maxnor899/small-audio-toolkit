@@ -208,9 +208,10 @@ def spectral_centroid(context: AnalysisContext, params: Dict[str, Any]) -> Analy
         params: analysis parameters
         
     Returns:
-        AnalysisResult with centroid values
+        AnalysisResult with centroid values and visualization_data
     """
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -225,12 +226,20 @@ def spectral_centroid(context: AnalysisContext, params: Dict[str, Any]) -> Analy
             'spectral_centroid': float(centroid),
             'normalized_centroid': float(centroid / (context.sample_rate / 2))
         }
+        
+        # AJOUT: visualization_data pour afficher spectrum + centroid line
+        visualization_data[channel_name] = {
+            'frequencies': freqs,
+            'spectrum': magnitude,
+            'centroid': centroid
+        }
     
     logger.info(f"Computed spectral centroid for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='spectral_centroid',
-        measurements=measurements
+        measurements=measurements,
+        visualization_data=visualization_data
     )
 
 
@@ -256,7 +265,7 @@ def spectral_flatness(context: AnalysisContext, params: Dict[str, Any]) -> Analy
         geometric_mean = np.exp(np.mean(np.log(magnitude)))
         arithmetic_mean = np.mean(magnitude)
         
-        flatness = geometric_mean / arithmetic_mean
+        flatness = geometric_mean / (arithmetic_mean + 1e-10)
         
         measurements[channel_name] = {
             'spectral_flatness': float(flatness),
@@ -326,9 +335,17 @@ def cepstrum_analysis(context: AnalysisContext, params: Dict[str, Any]) -> Analy
 
 def spectral_bandwidth(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResult:
     """
-    Spectral bandwidth.
+    Spectral bandwidth with visualization_data.
+    
+    Args:
+        context: Analysis context
+        params: analysis parameters
+        
+    Returns:
+        AnalysisResult with bandwidth values and visualization_data
     """
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -350,12 +367,23 @@ def spectral_bandwidth(context: AnalysisContext, params: Dict[str, Any]) -> Anal
             'spectral_bandwidth': float(bandwidth),
             'spectral_centroid_Hz': float(centroid)
         }
+        
+        # AJOUT: visualization_data pour afficher spectrum + bandwidth zone
+        visualization_data[channel_name] = {
+            'frequencies': freqs,
+            'spectrum': magnitude,
+            'centroid': centroid,
+            'bandwidth': bandwidth,
+            'lower_bound': centroid - bandwidth,
+            'upper_bound': centroid + bandwidth
+        }
     
     logger.info(f"Spectral bandwidth for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='spectral_bandwidth',
-        measurements=measurements
+        measurements=measurements,
+        visualization_data=visualization_data
     )
 
 

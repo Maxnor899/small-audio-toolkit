@@ -561,6 +561,262 @@ def plot_cqt_spectrogram(
     plt.close(fig)
 
 
+
+# ----------------------------
+# NEW visualizations
+# ----------------------------
+
+def plot_pulse_detection(
+    waveform: np.ndarray,
+    envelope: np.ndarray,
+    pulse_positions: np.ndarray,
+    threshold_level: float,
+    sample_rate: int,
+    output_path: Path,
+    title: str = "Pulse Detection",
+    figsize: tuple = (14, 6),
+    dpi: int = 150,
+    formats: list = ["png"],
+) -> None:
+    """
+    Plot waveform with detected pulse markers.
+    
+    Args:
+        waveform: Audio waveform
+        envelope: Hilbert envelope
+        pulse_positions: Sample indices of detected pulses
+        threshold_level: Detection threshold level
+        sample_rate: Sample rate in Hz
+    """
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=figsize, sharex=True)
+    
+    time = np.arange(len(waveform)) / float(sample_rate)
+    
+    # Top: waveform with pulse markers
+    ax1.plot(time, waveform, linewidth=0.5, color="blue", alpha=0.6, label="Waveform")
+    
+    if len(pulse_positions) > 0:
+        pulse_times = pulse_positions / float(sample_rate)
+        ax1.scatter(
+            pulse_times,
+            waveform[pulse_positions],
+            color="red",
+            s=50,
+            marker="x",
+            linewidths=2,
+            label=f"Pulses ({len(pulse_positions)})",
+            zorder=5
+        )
+    
+    ax1.set_ylabel("Amplitude")
+    ax1.set_title(title)
+    ax1.legend(loc="upper right")
+    ax1.grid(True, alpha=0.25)
+    
+    # Bottom: envelope with threshold
+    ax2.plot(time, envelope, linewidth=1, color="orange", alpha=0.8, label="Envelope")
+    ax2.axhline(
+        y=threshold_level,
+        color="red",
+        linestyle="--",
+        linewidth=1.5,
+        label=f"Threshold: {threshold_level:.3f}",
+        alpha=0.7
+    )
+    
+    if len(pulse_positions) > 0:
+        pulse_times = pulse_positions / float(sample_rate)
+        ax2.scatter(
+            pulse_times,
+            envelope[pulse_positions],
+            color="red",
+            s=30,
+            marker="o",
+            alpha=0.6,
+            zorder=5
+        )
+    
+    ax2.set_xlabel("Time (s)")
+    ax2.set_ylabel("Envelope")
+    ax2.legend(loc="upper right")
+    ax2.grid(True, alpha=0.25)
+    
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
+def plot_spectral_centroid(
+    frequencies: np.ndarray,
+    spectrum: np.ndarray,
+    centroid: float,
+    output_path: Path,
+    title: str = "Spectral Centroid",
+    figsize: tuple = (12, 6),
+    dpi: int = 150,
+    formats: list = ["png"],
+) -> None:
+    """Plot spectrum with centroid marker."""
+    fig, ax = plt.subplots(figsize=figsize)
+    
+    spectrum_db = 20 * np.log10(spectrum + 1e-12)
+    ax.plot(frequencies, spectrum_db, linewidth=1, color="blue", alpha=0.7, label="Spectrum")
+    
+    ax.axvline(
+        x=centroid,
+        color="red",
+        linestyle="--",
+        linewidth=2,
+        label=f"Centroid: {centroid:.1f} Hz",
+        alpha=0.8
+    )
+    
+    ax.set_xlabel("Frequency (Hz)")
+    ax.set_ylabel("Magnitude (dB)")
+    ax.set_title(title)
+    ax.legend(loc="upper right")
+    ax.grid(True, alpha=0.25)
+    
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
+def plot_spectral_bandwidth(
+    frequencies: np.ndarray,
+    spectrum: np.ndarray,
+    centroid: float,
+    bandwidth: float,
+    lower_bound: float,
+    upper_bound: float,
+    output_path: Path,
+    title: str = "Spectral Bandwidth",
+    figsize: tuple = (12, 6),
+    dpi: int = 150,
+    formats: list = ["png"],
+) -> None:
+    """Plot spectrum with bandwidth zone."""
+    fig, ax = plt.subplots(figsize=figsize)
+    
+    spectrum_db = 20 * np.log10(spectrum + 1e-12)
+    ax.plot(frequencies, spectrum_db, linewidth=1, color="blue", alpha=0.7, label="Spectrum")
+    
+    ax.axvline(
+        x=centroid,
+        color="red",
+        linestyle="--",
+        linewidth=2,
+        label=f"Centroid: {centroid:.1f} Hz",
+        alpha=0.8
+    )
+    
+    ax.axvspan(
+        lower_bound,
+        upper_bound,
+        color="red",
+        alpha=0.2,
+        label=f"Bandwidth: {bandwidth:.1f} Hz"
+    )
+    
+    ax.set_xlabel("Frequency (Hz)")
+    ax.set_ylabel("Magnitude (dB)")
+    ax.set_title(title)
+    ax.legend(loc="upper right")
+    ax.grid(True, alpha=0.25)
+    
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
+def plot_temporal_curve(
+    times: np.ndarray,
+    values: np.ndarray,
+    mean_level: float,
+    output_path: Path,
+    title: str,
+    ylabel: str,
+    figsize: tuple = (14, 5),
+    dpi: int = 150,
+    formats: list = ["png"],
+) -> None:
+    """Plot a temporal curve (generic for entropy, stability, etc.)."""
+    fig, ax = plt.subplots(figsize=figsize)
+    
+    ax.plot(times, values, linewidth=1, color="blue", alpha=0.7, label=ylabel)
+    
+    ax.axhline(
+        y=mean_level,
+        color="red",
+        linestyle="--",
+        linewidth=1,
+        label=f"Mean: {mean_level:.3f}",
+        alpha=0.6
+    )
+    
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    ax.legend(loc="upper right")
+    ax.grid(True, alpha=0.25)
+    
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
+def plot_stability_dual(
+    times: np.ndarray,
+    energy: np.ndarray,
+    spectral_centroid: np.ndarray,
+    energy_mean: float,
+    centroid_mean: float,
+    output_path: Path,
+    title: str = "Stability Analysis",
+    figsize: tuple = (14, 8),
+    dpi: int = 150,
+    formats: list = ["png"],
+) -> None:
+    """Plot dual temporal curves for stability scores (energy + spectral)."""
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=figsize, sharex=True)
+    
+    # Top: Energy stability
+    ax1.plot(times, energy, linewidth=1, color="blue", alpha=0.7, label="Energy")
+    ax1.axhline(
+        y=energy_mean,
+        color="red",
+        linestyle="--",
+        linewidth=1,
+        label=f"Mean: {energy_mean:.2e}",
+        alpha=0.6
+    )
+    ax1.set_ylabel("Energy")
+    ax1.set_title(f"{title} - Energy Stability")
+    ax1.legend(loc="upper right")
+    ax1.grid(True, alpha=0.25)
+    
+    # Bottom: Spectral stability
+    ax2.plot(times, spectral_centroid, linewidth=1, color="green", alpha=0.7, label="Spectral Centroid")
+    ax2.axhline(
+        y=centroid_mean,
+        color="red",
+        linestyle="--",
+        linewidth=1,
+        label=f"Mean: {centroid_mean:.2f}",
+        alpha=0.6
+    )
+    ax2.set_xlabel("Time (s)")
+    ax2.set_ylabel("Spectral Centroid (bin)")
+    ax2.set_title(f"{title} - Spectral Stability")
+    ax2.legend(loc="upper right")
+    ax2.grid(True, alpha=0.25)
+    
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
+
 # ----------------------------
 # Visualizer wrapper (compat runner historique)
 # ----------------------------
@@ -649,3 +905,18 @@ class Visualizer:
 
     def plot_cqt_spectrogram(self, frequencies, times, cqt_db, output_path, title="CQT Spectrogram"):
         plot_cqt_spectrogram(frequencies, times, cqt_db, output_path, title, self.figsize, self.dpi, self.formats)
+
+    def plot_pulse_detection(self, waveform, envelope, pulse_positions, threshold_level, sample_rate, output_path, title="Pulse Detection"):
+        plot_pulse_detection(waveform, envelope, pulse_positions, threshold_level, sample_rate, output_path, title, self.figsize, self.dpi, self.formats)
+
+    def plot_spectral_centroid(self, frequencies, spectrum, centroid, output_path, title="Spectral Centroid"):
+        plot_spectral_centroid(frequencies, spectrum, centroid, output_path, title, self.figsize, self.dpi, self.formats)
+
+    def plot_spectral_bandwidth(self, frequencies, spectrum, centroid, bandwidth, lower_bound, upper_bound, output_path, title="Spectral Bandwidth"):
+        plot_spectral_bandwidth(frequencies, spectrum, centroid, bandwidth, lower_bound, upper_bound, output_path, title, self.figsize, self.dpi, self.formats)
+
+    def plot_temporal_curve(self, times, values, mean_level, output_path, title, ylabel):
+        plot_temporal_curve(times, values, mean_level, output_path, title, ylabel, self.figsize, self.dpi, self.formats)
+
+    def plot_stability_dual(self, times, energy, spectral_centroid, energy_mean, centroid_mean, output_path, title="Stability Analysis"):
+        plot_stability_dual(times, energy, spectral_centroid, energy_mean, centroid_mean, output_path, title, self.figsize, self.dpi, self.formats)

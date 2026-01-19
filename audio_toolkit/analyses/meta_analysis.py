@@ -145,11 +145,19 @@ def segment_clustering(context: AnalysisContext, params: Dict[str, Any]) -> Anal
 def stability_scores(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResult:
     """
     Temporal and spectral stability indicators.
+    
+    Args:
+        context: Analysis context
+        params: window_size, hop_length
+        
+    Returns:
+        AnalysisResult with stability scores and visualization_data
     """
     window_size = params.get('window_size', 2048)
     hop_length = params.get('hop_length', 512)
     
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -188,13 +196,25 @@ def stability_scores(context: AnalysisContext, params: Dict[str, Any]) -> Analys
             'overall_stability': float(overall_stability),
             'num_windows': len(energies)
         }
+        
+        # AJOUT: visualization_data pour afficher stability evolution dans le temps
+        # Calculer les temps correspondants aux fenêtres
+        times = (np.arange(len(energies)) * hop_length) / context.sample_rate
+        visualization_data[channel_name] = {
+            'times': times,
+            'energy': energies,
+            'spectral_centroid': spectral_centroids,
+            'energy_mean': np.mean(energies),
+            'centroid_mean': np.mean(spectral_centroids)
+        }
     
     logger.info(f"Stability scores for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='stability_scores',
         measurements=measurements,
-        metrics={'window_size': window_size, 'hop_length': hop_length}
+        metrics={'window_size': window_size, 'hop_length': hop_length},
+        visualization_data=visualization_data
     )
 
 

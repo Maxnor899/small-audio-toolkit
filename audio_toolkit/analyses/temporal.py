@@ -141,12 +141,13 @@ def pulse_detection(context: AnalysisContext, params: Dict[str, Any]) -> Analysi
         params: threshold, min_distance
         
     Returns:
-        AnalysisResult with detected pulse positions
+        AnalysisResult with detected pulse positions and visualization_data
     """
     threshold = params.get('threshold', 0.5)
     min_distance = params.get('min_distance', 100)
     
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -173,13 +174,24 @@ def pulse_detection(context: AnalysisContext, params: Dict[str, Any]) -> Analysi
             'interval_std': interval_std,
             'regularity_score': 1.0 - min(interval_std / (interval_mean + 1e-10), 1.0)
         }
+        
+        # AJOUT: visualization_data pour afficher waveform + pulse markers
+        # Limiter à 100k samples pour la visualisation
+        max_viz_samples = min(len(audio_data), 100000)
+        visualization_data[channel_name] = {
+            'waveform': audio_data[:max_viz_samples],
+            'envelope': envelope[:max_viz_samples],
+            'pulse_positions': peaks[peaks < max_viz_samples],  # Garder seulement les pulses visibles
+            'threshold_level': threshold * np.max(envelope)
+        }
     
     logger.info(f"Detected pulses for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='pulse_detection',
         measurements=measurements,
-        metrics={'threshold': threshold, 'min_distance': min_distance}
+        metrics={'threshold': threshold, 'min_distance': min_distance},
+        visualization_data=visualization_data
     )
 
 

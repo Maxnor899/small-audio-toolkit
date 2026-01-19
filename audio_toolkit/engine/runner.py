@@ -302,6 +302,19 @@ class AnalysisRunner:
                     f"Autocorrelation - {channel}",
                 )
 
+        elif method == "pulse_detection":
+            for channel, data in viz_data.items():
+                if all(k in data for k in ["waveform", "envelope", "pulse_positions", "threshold_level"]):
+                    self.visualizer.plot_pulse_detection(
+                        np.asarray(data["waveform"]),
+                        np.asarray(data["envelope"]),
+                        np.asarray(data["pulse_positions"]),
+                        float(data["threshold_level"]),
+                        self.context.sample_rate,
+                        viz_dir / f"pulse_detection_{channel}",
+                        f"Pulse Detection - {channel}",
+                    )
+
         # ========================================
         # SPECTRAL
         # ========================================
@@ -346,6 +359,31 @@ class AnalysisRunner:
                         np.asarray(data["cepstrum"]),
                         float(data["peak_quefrency"]),
                         viz_dir / f"cepstrum_{channel}",
+                    )
+
+        elif method == "spectral_centroid":
+            for channel, data in viz_data.items():
+                if all(k in data for k in ["frequencies", "spectrum", "centroid"]):
+                    self.visualizer.plot_spectral_centroid(
+                        np.asarray(data["frequencies"]),
+                        np.asarray(data["spectrum"]),
+                        float(data["centroid"]),
+                        viz_dir / f"spectral_centroid_{channel}",
+                        f"Spectral Centroid - {channel}",
+                    )
+
+        elif method == "spectral_bandwidth":
+            for channel, data in viz_data.items():
+                if all(k in data for k in ["frequencies", "spectrum", "centroid", "bandwidth", "lower_bound", "upper_bound"]):
+                    self.visualizer.plot_spectral_bandwidth(
+                        np.asarray(data["frequencies"]),
+                        np.asarray(data["spectrum"]),
+                        float(data["centroid"]),
+                        float(data["bandwidth"]),
+                        float(data["lower_bound"]),
+                        float(data["upper_bound"]),
+                        viz_dir / f"spectral_bandwidth_{channel}",
+                        f"Spectral Bandwidth - {channel}",
                     )
 
         # ========================================
@@ -470,6 +508,37 @@ class AnalysisRunner:
                         np.asarray(data["spectrum"]),
                         viz_dir / "lr_difference_spectrum",
                         "L-R Difference Spectrum",
+                    )
+
+        # ========================================
+        # INFORMATION
+        # ========================================
+        elif method == "local_entropy":
+            for channel, data in viz_data.items():
+                if all(k in data for k in ["times", "entropies", "mean_level"]):
+                    self.visualizer.plot_temporal_curve(
+                        np.asarray(data["times"]),
+                        np.asarray(data["entropies"]),
+                        float(data["mean_level"]),
+                        viz_dir / f"local_entropy_{channel}",
+                        f"Local Entropy Evolution - {channel}",
+                        "Entropy (bits)",
+                    )
+
+        # ========================================
+        # META_ANALYSIS
+        # ========================================
+        elif method == "stability_scores":
+            for channel, data in viz_data.items():
+                if all(k in data for k in ["times", "energy", "spectral_centroid", "energy_mean", "centroid_mean"]):
+                    self.visualizer.plot_stability_dual(
+                        np.asarray(data["times"]),
+                        np.asarray(data["energy"]),
+                        np.asarray(data["spectral_centroid"]),
+                        float(data["energy_mean"]),
+                        float(data["centroid_mean"]),
+                        viz_dir / f"stability_scores_{channel}",
+                        f"Stability Analysis - {channel}",
                     )
 
     def _export_results(self, output_path: Path, audio_path: Path) -> None:

@@ -65,12 +65,20 @@ def shannon_entropy(context: AnalysisContext, params: Dict[str, Any]) -> Analysi
 def local_entropy(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResult:
     """
     Compute local entropy (windowed).
+    
+    Args:
+        context: Analysis context
+        params: window_size, hop_length, num_bins
+        
+    Returns:
+        AnalysisResult with local entropy data and visualization_data
     """
     window_size = params.get('window_size', 2048)
     hop_length = params.get('hop_length', 512)
     num_bins = params.get('num_bins', 64)
     
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -109,13 +117,23 @@ def local_entropy(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisR
             'num_windows': len(entropies),
             'entropy_variation': float(np.std(entropies) / (np.mean(entropies) + 1e-10))
         }
+        
+        # AJOUT: visualization_data pour afficher entropy evolution dans le temps
+        # Calculer les temps correspondants aux fenêtres
+        times = (np.arange(len(entropies)) * hop_length) / context.sample_rate
+        visualization_data[channel_name] = {
+            'times': times,
+            'entropies': entropies,
+            'mean_level': np.mean(entropies)
+        }
     
     logger.info(f"Local entropy for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='local_entropy',
         measurements=measurements,
-        metrics={'window_size': window_size, 'hop_length': hop_length, 'num_bins': num_bins}
+        metrics={'window_size': window_size, 'hop_length': hop_length, 'num_bins': num_bins},
+        visualization_data=visualization_data
     )
 
 

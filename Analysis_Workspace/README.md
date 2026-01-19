@@ -1,149 +1,83 @@
-# Analysis Examples
+# Small Audio Toolkit
 
-This directory contains **example analysis material** for the Small Audio Tool (SAT).
-It is the main entry point for users who want to *run analyses*, *understand methodology*,
-and *inspect results* without modifying the core codebase.
+Small Audio Toolkit is a Python-based audio analysis framework focused on **objective signal measurements**.
+It is designed to extract factual, reproducible metrics from audio files, without automated interpretation or classification.
+All conclusions are intentionally left to the human analyst.
 
-The contents of this directory are **illustrative, reproducible, and modular**.
-They demonstrate how SAT is intended to be used, not what should be concluded.
-
----
-
-## Purpose of This Directory
-
-`Analysis_examples/` serves as a **demo working environment** that brings together:
-
-- analysis protocols (what to measure),
-- contextual references (how to read measurements),
-- launch scripts (how to run analyses),
-- input signals (what is analyzed),
-- generated results (what was observed).
-
-Each subdirectory has a distinct methodological role.
-None of them embed interpretation.
+The project is built around the idea that:
+- analyses compute measurements,
+- contexts provide reference ranges,
+- reports compare values to ranges **without inferring meaning**.
 
 ---
 
-## Directory Structure
+## Analysis_Workspace
+
+The main entry point for users is the `Analysis_Workspace/` directory.
+It contains everything needed to run analyses, manage reference contexts, and collect results in a reproducible way.
 
 ```
-Analysis_examples/
+Analysis_Workspace/
 ├── 01_protocols/
 ├── 02_contexts/
+│   ├── Official/
+│   └── User_Defined/
 ├── 03_launchers/
 ├── 04_input_sounds/
-├── 05_Results/
-└── README.md
+└── 05_results/
 ```
 
----
+### 01_protocols
+Analysis protocol definitions.
+A protocol specifies **what analyses are run** and with which parameters.
+Protocols do not contain reference values or interpretation logic.
 
-## 01_protocols/
+### 02_contexts
+Reference contexts used during report generation.
 
-Contains **analysis protocols**.
+- `Official/`  
+  Project-maintained reference contexts based on documented signal processing literature.
 
-Protocols define:
-- which analysis families are executed,
-- which methods are applied,
-- with which parameters.
+- `User_Defined/`  
+  User-provided contexts, intended for domain-specific or experimental reference ranges.
+  These contexts follow the same structure as official ones, but are explicitly marked as user-provided.
 
-They define *what is observed*.
-They never define how results are interpreted.
+Contexts are only used for **comparison in reports**, never during analysis computation.
 
-See `01_protocols/README.md` for details.
+### 03_launchers
+Helper scripts or launch configurations used to run analyses with a given protocol and input set.
 
----
+### 04_input_sounds
+Audio files to be analyzed.
+These files are treated as raw input and are never modified by the toolkit.
 
-## 02_contexts/
-
-Contains **contextual reference files**.
-
-Contexts define:
-- which metrics admit reference zones,
-- which metrics are context-dependent or descriptive,
-- how values may be positioned during report generation.
-
-Contexts affect **presentation only**.
-They never affect computation.
-
-Context files are **methodological artifacts**.
-They should not be modified without understanding:
-- how metrics are derived in the analysis code,
-- how reference statuses (A / B / C) are assigned,
-- and the methodological documentation that justifies them.
-
-See `02_contexts/README.md` for details.
+### 05_results
+Outputs produced by analysis runs and report generation.
+This directory is expected to be populated automatically.
 
 ---
 
-## 03_launchers/
+## Core Principles
 
-Contains **execution scripts**.
+- No automated interpretation or classification
+- No mixing of measurement and reference logic
+- Full separation between analysis, context, and reporting
+- Reproducible and transparent results
 
-Launchers:
-- tie protocols, inputs, and outputs together,
-- define reproducible execution commands,
-- do not embed analytical assumptions.
-
-They are orchestration utilities only.
-
----
-
-## 04_input_sounds/
-
-Contains **audio input material** used for analysis examples.
-
-These files are:
-- not authoritative datasets,
-- not representative of any class by default,
-- provided solely for demonstration and testing.
-
-Users are expected to replace or extend them with their own material.
+If a metric is not measured, it is not reported.
+If a reference range is not provided, no comparison is made.
 
 ---
 
-## 05_Results/
+## Typical Workflow
 
-Contains **generated analysis results**.
-
-Results include:
-- raw measurement outputs,
-- generated reports,
-- copied protocol and context references used for the run.
-
-Results are descriptive artifacts.
-They do not represent conclusions.
+1. Place audio files in `Analysis_Workspace/04_input_sounds`
+2. Select or create an analysis protocol in `01_protocols`
+3. Run an analysis using a launcher from `03_launchers`
+4. Generate one or more reports using official and/or user-defined contexts
+5. Inspect results in `05_results`
 
 ---
 
-## How This Directory Is Used
-
-Users who want to run their **own analyses** should work from
-`Small_Audio_Tool/Analysis/`.
-
-To do so:
-
-1. Copy the directory `Small_Audio_Tool/Analysis_examples/`.
-2. Rename the copy to `Small_Audio_Tool/Analysis/`.
-3. Modify the launcher scripts in `03_launchers/` to point to the appropriate
-   input, output, and working paths.
-
-This workflow preserves the original examples while providing
-a clean, user-controlled analysis workspace.
-
-The directory layout is intentional and stable.
-
----
-
-## Design Principles
-
-This directory is structured to enforce:
-
-- separation of observation and interpretation,
-- reproducibility of analysis runs,
-- transparency of methodological limits,
-- modular reuse of protocols and contexts.
-
-Every file here can be read independently.
-No file asserts meaning.
-
+This structure is intentional and stable.
+Renaming, reorganizing, or extending it should preserve the strict separation between measurement, reference, and interpretation.

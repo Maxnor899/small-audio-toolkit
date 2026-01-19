@@ -61,7 +61,7 @@ This positioning is **descriptive only**.
 
 ---
 
-## 4. External Reference Files
+## 4. External context Reference Files
 
 Contextual references are stored in **external YAML files**, separate from:
 
@@ -78,6 +78,52 @@ This separation ensures:
 Changing a reference file changes **context**, not analytical behavior.
 
 ---
+
+### 4a. Official Contextual References
+
+Official contextual references are **maintained by the project** and are intended to provide a  
+**generic analytical frame of reference**.
+
+They describe value ranges and qualitative statuses that are commonly observed in signal
+processing practice, as documented in standard literature or widely accepted empirical use.
+Their purpose is to offer **orientation grounded in shared knowledge**, not to define norms
+or decision criteria.
+
+Official contextual references are:
+- scoped to specific analytical families and metrics,
+- independent from any particular signal instance,
+- intended to remain valid across a broad range of signal types and acquisition conditions.
+
+They are used to support **neutral positioning of measured values** relative to commonly
+encountered ranges, without asserting correctness, abnormality, or intent.
+
+Their presence in a report does not imply validation, detection, or classification.
+
+---
+
+### 4b. User-Provided Contextual References
+
+User-provided contextual references are **explicitly supplied by the user** and reflect a  
+**situated or experiential frame of reference**.
+
+They may be based on prior observations, domain-specific knowledge, experimental conditions,
+or assumptions about the nature of the analyzed signal. The tool does not verify, validate,
+or assess the correctness of these references.
+
+A user-provided context represents a **hypothesis of reading**, not an authority.
+
+User-provided contextual references:
+- apply only within the user-defined analytical frame,
+- may differ from, complement, or contradict official contextual references,
+- carry no intrinsic priority or validation status.
+
+When both official and user-provided contexts are present, they are presented **side by side**
+as descriptive information. The tool does not resolve discrepancies, assign preference, or
+derive conclusions from their agreement or divergence.
+
+Responsibility for interpreting user-provided contextual references rests entirely with the
+user.
+
 
 ## 5. What a Reference Entry Represents
 

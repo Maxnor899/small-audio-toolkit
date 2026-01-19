@@ -34,7 +34,7 @@ def cross_correlation(context: AnalysisContext, params: Dict[str, Any]) -> Analy
     # Need at least 2 channels
     channels = list(context.audio_data.keys())
     if len(channels) < 2:
-        logger.warning("Cross-correlation needs at least 2 channels")
+        logger.error("Cross-correlation needs at least 2 channels")  # ✅ ERROR au lieu de WARNING
         return AnalysisResult(
             method='cross_correlation',
             measurements={'error': 'Need at least 2 channels'},
@@ -111,7 +111,7 @@ def lr_difference(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisR
     
     # Check if we have left and right
     if 'left' not in context.audio_data or 'right' not in context.audio_data:
-        logger.warning("L-R analysis needs left and right channels")
+        logger.error("L-R analysis needs left and right channels")  # ✅ ERROR au lieu de WARNING
         return AnalysisResult(
             method='lr_difference',
             measurements={'error': 'Need left and right channels'}
@@ -175,7 +175,7 @@ def phase_difference(context: AnalysisContext, params: Dict[str, Any]) -> Analys
     
     channels = list(context.audio_data.keys())
     if len(channels) < 2:
-        logger.warning("Phase difference needs at least 2 channels")
+        logger.error("Phase difference needs at least 2 channels")  # ✅ ERROR au lieu de WARNING
         return AnalysisResult(
             method='phase_difference',
             measurements={'error': 'Need at least 2 channels'}
@@ -247,7 +247,7 @@ def time_delay(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResu
     
     channels = list(context.audio_data.keys())
     if len(channels) < 2:
-        logger.warning("Time delay needs at least 2 channels")
+        logger.error("Time delay needs at least 2 channels")  # ✅ ERROR au lieu de WARNING
         return AnalysisResult(
             method='time_delay',
             measurements={'error': 'Need at least 2 channels'},

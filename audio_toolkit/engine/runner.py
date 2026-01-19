@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Dict, Any
 import numpy as np
 
-# ✅ IMPORTANT: importing analyses triggers method registration (side-effect by design)
+# IMPORTANT: importing analyses triggers method registration (side-effect by design)
 from .. import analyses  # noqa: F401
 
 from .context import AnalysisContext
@@ -157,6 +157,7 @@ class AnalysisRunner:
         logger.info("Generating basic visualizations...")
 
         for channel_name, audio_data in context.audio_data.items():
+            # AMELIORATION : Waveform avec limite
             waveform_path = viz_dir / f"waveform_{channel_name}"
             max_samples = min(len(audio_data), 100000)
 
@@ -167,8 +168,10 @@ class AnalysisRunner:
                 f"Waveform - {channel_name}",
             )
 
-            spectrum = np.fft.rfft(audio_data)
-            freqs = np.fft.rfftfreq(len(audio_data), 1 / context.sample_rate)
+            # FIX: Spectrum avec limite aussi
+            max_samples_spectrum = min(len(audio_data), 100000)
+            spectrum = np.fft.rfft(audio_data[:max_samples_spectrum])
+            freqs = np.fft.rfftfreq(max_samples_spectrum, 1 / context.sample_rate)
             spectrum_path = viz_dir / f"spectrum_{channel_name}"
 
             self.visualizer.plot_spectrum(
@@ -227,7 +230,14 @@ class AnalysisRunner:
         try:
             result = registration.function(context, merged_params)
             self.results.add_result(category, result)
-            logger.info(f"Completed: {category}/{method_name}")
+            
+            # FIX: Vérifier si l'analyse a retourné une erreur
+            if 'error' in result.measurements:
+                logger.error(
+                    f"  {category}/{method_name} failed: {result.measurements['error']}"
+                )
+            else:
+                logger.info(f"Completed: {category}/{method_name}")
 
         except Exception as e:
             logger.error(f"Failed to execute {category}/{method_name}: {e}")
@@ -265,6 +275,11 @@ class AnalysisRunner:
 
     def _generate_method_visualization(self, method: str, viz_data: Dict, viz_dir: Path) -> None:
         """Generate visualization for a specific method."""
+        
+        # FIX: Vérifier explicitement si viz_data est vide/None
+        if not viz_data:
+            logger.debug(f"No visualization data for method '{method}', skipping")
+            return
 
         # ========================================
         # TEMPORAL

@@ -35,4 +35,8 @@ analyses:
         params:
           max_harmonics: 10
       - name: "cepstrum"
-      - name: "spectral_descriptors"
+      # NOUVELLES MÉTHODES AVEC VISUALIZATIONS
+      - name: "spectral_centroid"
+      - name: "spectral_bandwidth"
+      # Autres méthodes spectrales
+      - name: "spectral_flatness"

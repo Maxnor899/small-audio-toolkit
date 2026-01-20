@@ -3,7 +3,7 @@ version: "1.0"
 channels:
   analyze: ["left", "right", "difference"]
 
-# Optional, but useful for repeatable tests
+										   
 preprocessing:
   normalize:
     enabled: false
@@ -28,3 +28,9 @@ analyses:
       - name: "fm_detection"
       - name: "phase_analysis"
       - name: "modulation_index"
+      # PHASE 3B: NEW METHOD
+      - name: "chirp_detection"
+        params:
+          window_size: 2048
+          hop_length: 512
+          min_duration: 0.1

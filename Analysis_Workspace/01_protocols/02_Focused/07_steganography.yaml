@@ -3,7 +3,7 @@ version: "1.0"
 channels:
   analyze: ["left", "right", "difference"]
 
-# Optional, but useful for repeatable tests
+										   
 preprocessing:
   normalize:
     enabled: false
@@ -24,6 +24,13 @@ analyses:
   steganography:
     enabled: true
     methods:
+      # PHASE 3B: MODIFIED (visualization added)
       - name: "lsb_analysis"
       - name: "quantization_noise"
       - name: "signal_residual"
+      # PHASES 3A-3B: NEW METHODS
+      - name: "statistical_anomalies"
+        params:
+          z_threshold: 3.0
+          num_bins: 100
+      - name: "parity_analysis"

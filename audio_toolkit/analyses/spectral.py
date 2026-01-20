@@ -387,6 +387,141 @@ def spectral_bandwidth(context: AnalysisContext, params: Dict[str, Any]) -> Anal
     )
 
 
+def spectral_rolloff(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResult:
+    """
+    Compute spectral rolloff frequency.
+    
+    Spectral rolloff is the frequency below which a specified percentage
+    (default 85%) of the total spectral energy is contained.
+    
+    Args:
+        context: Analysis context
+        params: rolloff_percent (default 0.85)
+        
+    Returns:
+        AnalysisResult with rolloff frequency and visualization_data
+    """
+    rolloff_percent = params.get('rolloff_percent', 0.85)
+    
+    measurements = {}
+    visualization_data = {}
+    
+    for channel_name, audio_data in context.audio_data.items():
+        
+        spectrum = np.fft.rfft(audio_data)
+        magnitude = np.abs(spectrum)
+        freqs = np.fft.rfftfreq(len(audio_data), 1/context.sample_rate)
+        
+        # Compute cumulative energy
+        power = magnitude ** 2
+        cumulative_power = np.cumsum(power)
+        total_power = cumulative_power[-1]
+        
+        # Find rolloff frequency
+        rolloff_threshold = rolloff_percent * total_power
+        rolloff_idx = np.where(cumulative_power >= rolloff_threshold)[0]
+        
+        if len(rolloff_idx) > 0:
+            rolloff_freq = float(freqs[rolloff_idx[0]])
+        else:
+            rolloff_freq = float(freqs[-1])
+        
+        measurements[channel_name] = {
+            'rolloff_frequency': rolloff_freq,
+            'rolloff_percent': rolloff_percent,
+            'normalized_rolloff': rolloff_freq / (context.sample_rate / 2),
+            'energy_concentration': float(rolloff_freq / (freqs[-1] + 1e-10))
+        }
+        
+        # Visualization data
+        visualization_data[channel_name] = {
+            'frequencies': freqs,
+            'spectrum': magnitude,
+            'rolloff_frequency': rolloff_freq,
+            'rolloff_percent': rolloff_percent
+        }
+    
+    logger.info(f"Spectral rolloff for {len(context.audio_data)} channels")
+    
+    return AnalysisResult(
+        method='spectral_rolloff',
+        measurements=measurements,
+        metrics={'rolloff_percent': rolloff_percent},
+        visualization_data=visualization_data
+    )
+
+
+def spectral_flux(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResult:
+    """
+    Compute spectral flux (rate of spectral change).
+    
+    Spectral flux measures how quickly the power spectrum changes,
+    useful for detecting onsets and temporal variations.
+    
+    Args:
+        context: Analysis context
+        params: window_size, hop_length
+        
+    Returns:
+        AnalysisResult with spectral flux over time and visualization_data
+    """
+    window_size = params.get('window_size', 2048)
+    hop_length = params.get('hop_length', 512)
+    
+    measurements = {}
+    visualization_data = {}
+    
+    for channel_name, audio_data in context.audio_data.items():
+        
+        # Limit for performance
+        max_samples = 200000
+        if len(audio_data) > max_samples:
+            audio_subset = audio_data[:max_samples]
+            logger.warning(f"Spectral flux: using first {max_samples} samples")
+        else:
+            audio_subset = audio_data
+        
+        # Compute STFT
+        window = get_window('hann', window_size)
+        frequencies, times, stft_matrix = signal.stft(
+            audio_subset,
+            fs=context.sample_rate,
+            window=window,
+            nperseg=window_size,
+            noverlap=window_size - hop_length
+        )
+        
+        magnitude = np.abs(stft_matrix)
+        
+        # Compute spectral flux (difference between consecutive frames)
+        flux = np.sqrt(np.sum(np.diff(magnitude, axis=1) ** 2, axis=0))
+        
+        measurements[channel_name] = {
+            'mean_flux': float(np.mean(flux)),
+            'std_flux': float(np.std(flux)),
+            'max_flux': float(np.max(flux)),
+            'min_flux': float(np.min(flux)),
+            'num_frames': len(flux),
+            'flux_variation': float(np.std(flux) / (np.mean(flux) + 1e-10))
+        }
+        
+        # Visualization data
+        visualization_data[channel_name] = {
+            'times': times[1:],  # flux has one less frame than times
+            'flux': flux,
+            'mean_flux': np.mean(flux)
+        }
+    
+    logger.info(f"Spectral flux for {len(context.audio_data)} channels")
+    
+    return AnalysisResult(
+        method='spectral_flux',
+        measurements=measurements,
+        metrics={'window_size': window_size, 'hop_length': hop_length},
+        visualization_data=visualization_data
+    )
+
+
 # Register methods
 register_method("fft_global", "spectral", fft_global, "Global FFT spectrum")
 register_method("peak_detection", "spectral", peak_detection, "Spectral peak detection")
@@ -395,3 +530,5 @@ register_method("spectral_centroid", "spectral", spectral_centroid, "Spectral ce
 register_method("spectral_flatness", "spectral", spectral_flatness, "Spectral flatness")
 register_method("cepstrum", "spectral", cepstrum_analysis, "Cepstrum analysis")
 register_method("spectral_bandwidth", "spectral", spectral_bandwidth, "Spectral bandwidth")
+register_method("spectral_rolloff", "spectral", spectral_rolloff, "Spectral rolloff frequency")
+register_method("spectral_flux", "spectral", spectral_flux, "Spectral flux (rate of change)")

@@ -3,7 +3,7 @@ version: "1.0"
 channels:
   analyze: ["left", "right", "difference"]
 
-# Optional, but useful for repeatable tests
+										   
 preprocessing:
   normalize:
     enabled: false
@@ -35,8 +35,16 @@ analyses:
         params:
           max_harmonics: 10
       - name: "cepstrum"
-      # NOUVELLES MÉTHODES AVEC VISUALIZATIONS
+      # PHASES 1-2: Visualizations added
       - name: "spectral_centroid"
       - name: "spectral_bandwidth"
-      # Autres méthodes spectrales
+      # PHASES 3A-3B: NEW METHODS
+      - name: "spectral_rolloff"
+        params:
+          rolloff_percent: 0.85
+      - name: "spectral_flux"
+        params:
+          window_size: 2048
+          hop_length: 512
+      # Other spectral methods
       - name: "spectral_flatness"

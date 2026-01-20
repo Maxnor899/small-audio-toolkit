@@ -821,6 +821,480 @@ def plot_stability_dual(
 # Visualizer wrapper (compat runner historique)
 # ----------------------------
 
+
+# ================================================================================
+ NEW VISUALIZATION FUNCTIONS
+# ================================================================================
+
+
+def plot_spectral_rolloff(
+    frequencies: np.ndarray,
+    spectrum: np.ndarray,
+    rolloff_frequency: float,
+    rolloff_percent: float,
+    output_path: Path,
+    title: str = "Spectral Rolloff",
+    figsize: tuple = (12, 6),
+    dpi: int = 150,
+    formats: list = ["png"]
+) -> None:
+    """
+    Plot spectrum with rolloff frequency marker.
+    
+    Args:
+        frequencies: Frequency bins
+        spectrum: Magnitude spectrum
+        rolloff_frequency: Rolloff frequency value
+        rolloff_percent: Rolloff percentage (e.g., 0.85)
+        output_path: Output file path
+        title: Plot title
+        figsize: Figure size
+        dpi: Dots per inch
+        formats: Output formats
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+    
+    # Plot spectrum
+    ax.plot(frequencies, spectrum, linewidth=0.8, color="blue", alpha=0.7, label="Spectrum")
+    
+    # Mark rolloff frequency
+    ax.axvline(rolloff_frequency, color="red", linestyle="--", linewidth=2, 
+               label=f"{int(rolloff_percent*100)}% Rolloff = {rolloff_frequency:.1f} Hz")
+    
+    ax.set_title(title)
+    ax.set_xlabel("Frequency (Hz)")
+    ax.set_ylabel("Magnitude")
+    ax.legend(loc="upper right")
+    ax.grid(True, alpha=0.25)
+    
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
+def plot_spectral_flux(
+    times: np.ndarray,
+    flux: np.ndarray,
+    mean_flux: float,
+    output_path: Path,
+    title: str = "Spectral Flux",
+    figsize: tuple = (12, 6),
+    dpi: int = 150,
+    formats: list = ["png"]
+) -> None:
+    """
+    Plot spectral flux over time.
+    
+    Args:
+        times: Time points
+        flux: Spectral flux values
+        mean_flux: Mean flux level
+        output_path: Output file path
+        title: Plot title
+        figsize: Figure size
+        dpi: Dots per inch
+        formats: Output formats
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+    
+    # Plot flux
+    ax.plot(times, flux, linewidth=0.8, color="purple", alpha=0.8, label="Spectral Flux")
+    
+    # Mark mean level
+    ax.axhline(mean_flux, color="red", linestyle="--", linewidth=1.5, 
+               label=f"Mean = {mean_flux:.4f}")
+    
+    ax.set_title(title)
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("Flux (arbitrary units)")
+    ax.legend(loc="upper right")
+    ax.grid(True, alpha=0.25)
+    
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
+def plot_high_order_statistics(
+    histogram: np.ndarray,
+    bin_centers: np.ndarray,
+    normal_distribution: np.ndarray,
+    mean: float,
+    std: float,
+    skewness: float,
+    kurtosis: float,
+    output_path: Path,
+    title: str = "High-Order Statistics",
+    figsize: tuple = (12, 6),
+    dpi: int = 150,
+    formats: list = ["png"]
+) -> None:
+    """
+    Plot histogram with normal distribution overlay and statistics.
+    
+    Args:
+        histogram: Histogram values
+        bin_centers: Bin center positions
+        normal_distribution: Fitted normal distribution
+        mean: Mean value
+        std: Standard deviation
+        skewness: Skewness value
+        kurtosis: Kurtosis value
+        output_path: Output file path
+        title: Plot title
+        figsize: Figure size
+        dpi: Dots per inch
+        formats: Output formats
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+    
+    # Plot histogram
+    ax.bar(bin_centers, histogram, width=(bin_centers[1]-bin_centers[0])*0.8, 
+           alpha=0.6, color="blue", edgecolor="black", label="Data Distribution")
+    
+    # Overlay normal distribution
+    ax.plot(bin_centers, normal_distribution, color="red", linewidth=2, 
+            linestyle="--", label="Normal Distribution")
+    
+    # Add statistics text box
+    stats_text = f"Mean: {mean:.6f}\nStd: {std:.6f}\nSkewness: {skewness:.4f}\nKurtosis: {kurtosis:.4f}"
+    ax.text(0.02, 0.98, stats_text, transform=ax.transAxes, 
+            fontsize=10, verticalalignment="top",
+            bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5))
+    
+    ax.set_title(title)
+    ax.set_xlabel("Amplitude")
+    ax.set_ylabel("Probability Density")
+    ax.legend(loc="upper right")
+    ax.grid(True, alpha=0.25)
+    
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
+def plot_statistical_anomalies(
+    histogram: np.ndarray,
+    bin_centers: np.ndarray,
+    normal_distribution: np.ndarray,
+    outlier_indices: np.ndarray,
+    outlier_values: np.ndarray,
+    z_scores: np.ndarray,
+    z_threshold: float,
+    output_path: Path,
+    title: str = "Statistical Anomalies",
+    figsize: tuple = (12, 10),
+    dpi: int = 150,
+    formats: list = ["png"]
+) -> None:
+    """
+    Plot dual subplot: histogram with outliers + Z-scores time series.
+    
+    Args:
+        histogram: Histogram values
+        bin_centers: Bin center positions
+        normal_distribution: Fitted normal distribution
+        outlier_indices: Indices of outlier samples
+        outlier_values: Values of outliers
+        z_scores: Z-score for each sample
+        z_threshold: Threshold for outlier detection
+        output_path: Output file path
+        title: Plot title
+        figsize: Figure size
+        dpi: Dots per inch
+        formats: Output formats
+    """
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=figsize)
+    
+    # Top: Histogram with outliers marked
+    ax1.bar(bin_centers, histogram, width=(bin_centers[1]-bin_centers[0])*0.8, 
+            alpha=0.6, color="blue", edgecolor="black", label="Distribution")
+    ax1.plot(bin_centers, normal_distribution, color="green", linewidth=2, 
+             linestyle="--", label="Normal Fit")
+    
+    # Mark outliers
+    if len(outlier_values) > 0:
+        ax1.scatter(outlier_values, np.zeros_like(outlier_values), 
+                   color="red", s=50, marker="x", label=f"Outliers (n={len(outlier_values)})", zorder=5)
+    
+    ax1.set_title(f"{title} - Distribution")
+    ax1.set_xlabel("Amplitude")
+    ax1.set_ylabel("Probability Density")
+    ax1.legend()
+    ax1.grid(True, alpha=0.25)
+    
+    # Bottom: Z-scores time series
+    sample_indices = np.arange(len(z_scores))
+    ax2.plot(sample_indices, z_scores, linewidth=0.5, color="blue", alpha=0.7, label="Z-Scores")
+    ax2.axhline(z_threshold, color="red", linestyle="--", linewidth=1.5, label=f"Threshold = {z_threshold}")
+    ax2.axhline(-z_threshold, color="red", linestyle="--", linewidth=1.5)
+    
+    # Mark outliers
+    if len(outlier_indices) > 0:
+        ax2.scatter(outlier_indices, z_scores[outlier_indices], 
+                   color="red", s=20, marker="o", alpha=0.6, label="Outliers")
+    
+    ax2.set_title(f"{title} - Z-Scores")
+    ax2.set_xlabel("Sample Index")
+    ax2.set_ylabel("Z-Score")
+    ax2.legend()
+    ax2.grid(True, alpha=0.25)
+    
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
+def plot_chirp_detection(
+    times: np.ndarray,
+    frequencies: np.ndarray,
+    spectrogram: np.ndarray,
+    chirps: list,
+    output_path: Path,
+    title: str = "Chirp Detection",
+    figsize: tuple = (12, 8),
+    dpi: int = 150,
+    formats: list = ["png"]
+) -> None:
+    """
+    Plot spectrogram with detected chirps overlaid.
+    
+    Args:
+        times: Time bins
+        frequencies: Frequency bins
+        spectrogram: STFT magnitude matrix
+        chirps: List of detected chirps (dict with start_time, end_time, start_freq, end_freq)
+        output_path: Output file path
+        title: Plot title
+        figsize: Figure size
+        dpi: Dots per inch
+        formats: Output formats
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+    
+    # Plot spectrogram
+    magnitude_db = 20 * np.log10(np.maximum(spectrogram, 1e-10))
+    im = ax.pcolormesh(times, frequencies, magnitude_db, cmap="viridis", shading="auto")
+    
+    # Overlay chirps
+    for chirp in chirps:
+        # Draw rectangle around chirp
+        t_start = chirp['start_time']
+        t_end = chirp['end_time']
+        f_start = chirp['start_freq']
+        f_end = chirp['end_freq']
+        
+        # Draw diagonal line showing chirp trend
+        ax.plot([t_start, t_end], [f_start, f_end], 
+               color="red", linewidth=2, linestyle="--", alpha=0.8)
+        
+        # Draw bounding box
+        from matplotlib.patches import Rectangle
+        rect_width = t_end - t_start
+        rect_height = abs(f_end - f_start)
+        rect_y = min(f_start, f_end)
+        rect = Rectangle((t_start, rect_y), rect_width, rect_height,
+                        linewidth=2, edgecolor="red", facecolor="none", alpha=0.6)
+        ax.add_patch(rect)
+    
+    ax.set_title(f"{title} ({len(chirps)} chirps detected)")
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("Frequency (Hz)")
+    
+    cbar = plt.colorbar(im, ax=ax)
+    cbar.set_label("Magnitude (dB)")
+    
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
+def plot_lsb_analysis(
+    lsb_bits: np.ndarray,
+    zero_runs: np.ndarray,
+    one_runs: np.ndarray,
+    transition_rate: float,
+    output_path: Path,
+    title: str = "LSB Analysis",
+    figsize: tuple = (12, 10),
+    dpi: int = 150,
+    formats: list = ["png"]
+) -> None:
+    """
+    Plot dual subplot: LSB bit sequence + run length histogram.
+    
+    Args:
+        lsb_bits: LSB bit sequence
+        zero_runs: Run lengths for zeros
+        one_runs: Run lengths for ones
+        transition_rate: Transition rate value
+        output_path: Output file path
+        title: Plot title
+        figsize: Figure size
+        dpi: Dots per inch
+        formats: Output formats
+    """
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=figsize)
+    
+    # Top: LSB bit sequence
+    sample_indices = np.arange(len(lsb_bits))
+    ax1.plot(sample_indices, lsb_bits, linewidth=0.5, color="blue", alpha=0.7)
+    ax1.set_title(f"{title} - LSB Bit Sequence (Transition Rate: {transition_rate:.4f})")
+    ax1.set_xlabel("Sample Index")
+    ax1.set_ylabel("LSB Bit")
+    ax1.set_ylim([-0.2, 1.2])
+    ax1.grid(True, alpha=0.25)
+    
+    # Bottom: Run length histogram
+    all_runs = np.concatenate([zero_runs, one_runs]) if len(zero_runs) > 0 and len(one_runs) > 0 else np.array([])
+    
+    if len(all_runs) > 0:
+        bins = np.arange(0, min(50, np.max(all_runs) + 2))
+        ax2.hist(zero_runs, bins=bins, alpha=0.6, color="blue", edgecolor="black", label="Zero Runs")
+        ax2.hist(one_runs, bins=bins, alpha=0.6, color="red", edgecolor="black", label="One Runs")
+        ax2.set_title(f"{title} - Run Length Distribution")
+        ax2.set_xlabel("Run Length")
+        ax2.set_ylabel("Count")
+        ax2.legend()
+        ax2.grid(True, alpha=0.25)
+    else:
+        ax2.text(0.5, 0.5, "No runs detected", ha="center", va="center", transform=ax2.transAxes)
+    
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
+def plot_parity_analysis(
+    parity_bits: np.ndarray,
+    run_lengths: np.ndarray,
+    transition_rate: float,
+    expected_transition_rate: float,
+    output_path: Path,
+    title: str = "Parity Analysis",
+    figsize: tuple = (12, 10),
+    dpi: int = 150,
+    formats: list = ["png"]
+) -> None:
+    """
+    Plot dual subplot: parity bits evolution + transition rate comparison.
+    
+    Args:
+        parity_bits: Parity bit sequence
+        run_lengths: Run length distribution
+        transition_rate: Observed transition rate
+        expected_transition_rate: Expected transition rate for random data
+        output_path: Output file path
+        title: Plot title
+        figsize: Figure size
+        dpi: Dots per inch
+        formats: Output formats
+    """
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=figsize)
+    
+    # Top: Parity bit evolution
+    sample_indices = np.arange(len(parity_bits))
+    ax1.plot(sample_indices, parity_bits, linewidth=0.5, color="purple", alpha=0.7)
+    ax1.set_title(f"{title} - Parity Bits Evolution")
+    ax1.set_xlabel("Sample Index")
+    ax1.set_ylabel("Parity Bit")
+    ax1.set_ylim([-0.2, 1.2])
+    ax1.grid(True, alpha=0.25)
+    
+    # Bottom: Run length histogram + transition rate bar
+    if len(run_lengths) > 0:
+        bins = np.arange(0, min(50, np.max(run_lengths) + 2))
+        ax2.hist(run_lengths, bins=bins, alpha=0.6, color="green", edgecolor="black")
+        ax2.set_title(f"{title} - Run Length Distribution")
+        ax2.set_xlabel("Run Length")
+        ax2.set_ylabel("Count")
+        ax2.grid(True, alpha=0.25)
+        
+        # Add transition rate comparison text
+        anomaly = abs(transition_rate - expected_transition_rate)
+        stats_text = f"Transition Rate: {transition_rate:.4f}\nExpected: {expected_transition_rate:.4f}\nAnomaly: {anomaly:.4f}"
+        ax2.text(0.98, 0.98, stats_text, transform=ax2.transAxes, 
+                fontsize=10, verticalalignment="top", horizontalalignment="right",
+                bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5))
+    else:
+        ax2.text(0.5, 0.5, "No runs detected", ha="center", va="center", transform=ax2.transAxes)
+    
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
+def plot_mutual_information(
+    channel_names: list,
+    mi_matrix: np.ndarray,
+    mi_pairs: dict,
+    output_path: Path,
+    title: str = "Mutual Information",
+    figsize: tuple = (10, 8),
+    dpi: int = 150,
+    formats: list = ["png"]
+) -> None:
+    """
+    Plot mutual information as heatmap or bar chart.
+    
+    Args:
+        channel_names: Names of channels
+        mi_matrix: Mutual information matrix (NxN)
+        mi_pairs: Dict of pairwise MI values
+        output_path: Output file path
+        title: Plot title
+        figsize: Figure size
+        dpi: Dots per inch
+        formats: Output formats
+    """
+    n_channels = len(channel_names)
+    
+    if n_channels >= 3:
+        # Use heatmap for 3+ channels
+        fig, ax = plt.subplots(figsize=figsize)
+        
+        im = ax.imshow(mi_matrix, cmap="hot", aspect="auto")
+        
+        # Set ticks
+        ax.set_xticks(np.arange(n_channels))
+        ax.set_yticks(np.arange(n_channels))
+        ax.set_xticklabels(channel_names, rotation=45, ha="right")
+        ax.set_yticklabels(channel_names)
+        
+        # Add colorbar
+        cbar = plt.colorbar(im, ax=ax)
+        cbar.set_label("Mutual Information (bits)")
+        
+        # Add text annotations
+        for i in range(n_channels):
+            for j in range(n_channels):
+                if i != j:
+                    text = ax.text(j, i, f"{mi_matrix[i, j]:.3f}",
+                                 ha="center", va="center", color="white", fontsize=9)
+        
+        ax.set_title(title)
+        
+    else:
+        # Use bar chart for 2 channels
+        fig, ax = plt.subplots(figsize=figsize)
+        
+        pair_names = list(mi_pairs.keys())
+        mi_values = list(mi_pairs.values())
+        
+        ax.bar(pair_names, mi_values, color="skyblue", edgecolor="black", alpha=0.8)
+        ax.set_title(title)
+        ax.set_ylabel("Mutual Information (bits)")
+        ax.set_xlabel("Channel Pairs")
+        ax.grid(True, alpha=0.25, axis="y")
+        
+        # Rotate labels if needed
+        if len(pair_names) > 2:
+            plt.xticks(rotation=45, ha="right")
+    
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
 class Visualizer:
     """
     Lightweight wrapper around functional plotters.
@@ -920,3 +1394,26 @@ class Visualizer:
 
     def plot_stability_dual(self, times, energy, spectral_centroid, energy_mean, centroid_mean, output_path, title="Stability Analysis"):
         plot_stability_dual(times, energy, spectral_centroid, energy_mean, centroid_mean, output_path, title, self.figsize, self.dpi, self.formats)
+    def plot_spectral_rolloff(self, frequencies, spectrum, rolloff_frequency, rolloff_percent, output_path, title="Spectral Rolloff"):
+        plot_spectral_rolloff(frequencies, spectrum, rolloff_frequency, rolloff_percent, output_path, title, self.figsize, self.dpi, self.formats)
+
+    def plot_spectral_flux(self, times, flux, mean_flux, output_path, title="Spectral Flux"):
+        plot_spectral_flux(times, flux, mean_flux, output_path, title, self.figsize, self.dpi, self.formats)
+
+    def plot_high_order_statistics(self, histogram, bin_centers, normal_distribution, mean, std, skewness, kurtosis, output_path, title="High-Order Statistics"):
+        plot_high_order_statistics(histogram, bin_centers, normal_distribution, mean, std, skewness, kurtosis, output_path, title, self.figsize, self.dpi, self.formats)
+
+    def plot_statistical_anomalies(self, histogram, bin_centers, normal_distribution, outlier_indices, outlier_values, z_scores, z_threshold, output_path, title="Statistical Anomalies"):
+        plot_statistical_anomalies(histogram, bin_centers, normal_distribution, outlier_indices, outlier_values, z_scores, z_threshold, output_path, title, self.figsize, self.dpi, self.formats)
+
+    def plot_chirp_detection(self, times, frequencies, spectrogram, chirps, output_path, title="Chirp Detection"):
+        plot_chirp_detection(times, frequencies, spectrogram, chirps, output_path, title, self.figsize, self.dpi, self.formats)
+
+    def plot_lsb_analysis(self, lsb_bits, zero_runs, one_runs, transition_rate, output_path, title="LSB Analysis"):
+        plot_lsb_analysis(lsb_bits, zero_runs, one_runs, transition_rate, output_path, title, self.figsize, self.dpi, self.formats)
+
+    def plot_parity_analysis(self, parity_bits, run_lengths, transition_rate, expected_transition_rate, output_path, title="Parity Analysis"):
+        plot_parity_analysis(parity_bits, run_lengths, transition_rate, expected_transition_rate, output_path, title, self.figsize, self.dpi, self.formats)
+
+    def plot_mutual_information(self, channel_names, mi_matrix, mi_pairs, output_path, title="Mutual Information"):
+        plot_mutual_information(channel_names, mi_matrix, mi_pairs, output_path, title, self.figsize, self.dpi, self.formats)

@@ -268,8 +268,113 @@ def modulation_index(context: AnalysisContext, params: Dict[str, Any]) -> Analys
     )
 
 
+def chirp_detection(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResult:
+    """
+    Detect chirps (linear frequency modulation).
+    
+    A chirp is a signal where the frequency increases or decreases
+    linearly with time. Common in sonar, radar, and as potential
+    encoding mechanism.
+    
+    Args:
+        context: Analysis context
+        params: window_size, hop_length, min_duration
+        
+    Returns:
+        AnalysisResult with chirp detection and visualization_data
+    """
+    window_size = params.get('window_size', 2048)
+    hop_length = params.get('hop_length', 512)
+    min_duration = params.get('min_duration', 0.1)  # seconds
+    
+    measurements = {}
+    visualization_data = {}
+    
+    for channel_name, audio_data in context.audio_data.items():
+        
+        # Limit for performance
+        max_samples = 200000
+        if len(audio_data) > max_samples:
+            audio_subset = audio_data[:max_samples]
+            logger.warning(f"Chirp detection: using first {max_samples} samples")
+        else:
+            audio_subset = audio_data
+        
+        # Compute STFT
+        from ..utils.windowing import get_window
+        window = get_window('hann', window_size)
+        frequencies, times, stft_matrix = signal.stft(
+            audio_subset,
+            fs=context.sample_rate,
+            window=window,
+            nperseg=window_size,
+            noverlap=window_size - hop_length
+        )
+        
+        magnitude = np.abs(stft_matrix)
+        
+        # Find dominant frequency at each time frame
+        dominant_freq_indices = np.argmax(magnitude, axis=0)
+        dominant_freqs = frequencies[dominant_freq_indices]
+        
+        # Detect linear trends (chirps) using sliding window
+        min_frames = int(min_duration * context.sample_rate / hop_length)
+        
+        chirps_detected = []
+        i = 0
+        while i < len(dominant_freqs) - min_frames:
+            # Check for linear trend in next N frames
+            window_freqs = dominant_freqs[i:i+min_frames]
+            window_times = times[i:i+min_frames]
+            
+            # Linear regression
+            if len(window_times) > 1 and np.std(window_times) > 0:
+                slope = np.polyfit(window_times, window_freqs, 1)[0]
+                
+                # Check if slope is significant (chirp rate > 100 Hz/s)
+                if abs(slope) > 100:
+                    chirps_detected.append({
+                        'start_time': float(times[i]),
+                        'end_time': float(times[i + min_frames - 1]),
+                        'start_freq': float(window_freqs[0]),
+                        'end_freq': float(window_freqs[-1]),
+                        'chirp_rate': float(slope),
+                        'direction': 'up' if slope > 0 else 'down'
+                    })
+                    i += min_frames  # Skip past detected chirp
+                else:
+                    i += 1
+            else:
+                i += 1
+        
+        measurements[channel_name] = {
+            'num_chirps': len(chirps_detected),
+            'chirps_detected': chirps_detected[:20],  # Limit to 20 for JSON
+            'total_chirp_duration': float(sum(c['end_time'] - c['start_time'] for c in chirps_detected)),
+            'mean_chirp_rate': float(np.mean([abs(c['chirp_rate']) for c in chirps_detected])) if chirps_detected else 0.0
+        }
+        
+        # Visualization data
+        visualization_data[channel_name] = {
+            'times': times,
+            'frequencies': frequencies,
+            'spectrogram': magnitude,
+            'chirps': chirps_detected
+        }
+    
+    logger.info(f"Chirp detection for {len(context.audio_data)} channels")
+    
+    return AnalysisResult(
+        method='chirp_detection',
+        measurements=measurements,
+        metrics={'window_size': window_size, 'hop_length': hop_length, 'min_duration': min_duration},
+        visualization_data=visualization_data
+    )
+
+
 # Register methods
 register_method("am_detection", "modulation", am_detection, "AM detection")
 register_method("fm_detection", "modulation", fm_detection, "FM detection")
 register_method("phase_analysis", "modulation", phase_analysis, "Phase analysis")
 register_method("modulation_index", "modulation", modulation_index, "Modulation index")
+register_method("chirp_detection", "modulation", chirp_detection, "Chirp/linear FM detection")

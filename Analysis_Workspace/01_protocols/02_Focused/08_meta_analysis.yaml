@@ -3,7 +3,7 @@ version: "1.0"
 channels:
   analyze: ["left", "right", "difference"]
 
-# Optional, but useful for repeatable tests
+										   
 preprocessing:
   normalize:
     enabled: false
@@ -30,3 +30,7 @@ analyses:
           max_k: 6
           seed: 42
       - name: "stability_scores"
+      # PHASE 3A: NEW METHOD
+      - name: "high_order_statistics"
+        params:
+          num_bins: 50

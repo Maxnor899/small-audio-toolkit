@@ -3,7 +3,7 @@ version: "1.0"
 channels:
   analyze: ["left", "right", "difference"]
 
-# Optional, but useful for repeatable tests
+										   
 preprocessing:
   normalize:
     enabled: false
@@ -31,3 +31,7 @@ analyses:
           hop_length: 512
       - name: "compression_ratio"
       - name: "approximate_complexity"
+      # PHASE 3B: NEW METHOD
+      - name: "mutual_information"
+        params:
+          num_bins: 64

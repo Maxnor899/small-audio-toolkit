@@ -248,8 +248,123 @@ def approximate_complexity(context: AnalysisContext, params: Dict[str, Any]) -> 
     )
 
 
+def mutual_information(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResult:
+    """
+    Compute mutual information between audio channels.
+    
+    Mutual information measures the amount of information one channel
+    provides about another channel. High MI indicates dependency/correlation.
+    
+    Args:
+        context: Analysis context
+        params: num_bins (for histogram estimation)
+        
+    Returns:
+        AnalysisResult with mutual information matrix and visualization_data
+    """
+    num_bins = params.get('num_bins', 64)
+    
+    measurements = {}
+    
+    # Get channel names and data
+    channel_names = list(context.audio_data.keys())
+    
+    if len(channel_names) < 2:
+        logger.warning("Mutual information requires at least 2 channels")
+        return AnalysisResult(
+            method='mutual_information',
+            measurements={},
+            metrics={'error': 'insufficient_channels'}
+        )
+    
+    # Limit for performance
+    max_samples = 50000
+    channel_data = {}
+    for name, data in context.audio_data.items():
+        if len(data) > max_samples:
+            channel_data[name] = data[:max_samples]
+            logger.warning(f"Mutual information: using first {max_samples} samples")
+        else:
+            channel_data[name] = data
+    
+    # Ensure all channels have same length
+    min_length = min(len(d) for d in channel_data.values())
+    for name in channel_data:
+        channel_data[name] = channel_data[name][:min_length]
+    
+    # Compute MI for all pairs
+    mi_matrix = np.zeros((len(channel_names), len(channel_names)))
+    mi_pairs = {}
+    
+    for i, name1 in enumerate(channel_names):
+        for j, name2 in enumerate(channel_names):
+            if i == j:
+                # Self-MI is just the entropy
+                mi_matrix[i, j] = 0.0
+            elif i < j:
+                # Compute MI between channels
+                data1 = channel_data[name1]
+                data2 = channel_data[name2]
+                
+                # Normalize to [0, 1]
+                norm1 = (data1 - np.min(data1)) / (np.max(data1) - np.min(data1) + 1e-10)
+                norm2 = (data2 - np.min(data2)) / (np.max(data2) - np.min(data2) + 1e-10)
+                
+                # 2D histogram (joint distribution)
+                hist_2d, _, _ = np.histogram2d(norm1, norm2, bins=num_bins)
+                
+                # Normalize to probabilities
+                p_xy = hist_2d / (np.sum(hist_2d) + 1e-10)
+                
+                # Marginal distributions
+                p_x = np.sum(p_xy, axis=1)
+                p_y = np.sum(p_xy, axis=0)
+                
+                # Mutual information: sum over all bins
+                mi = 0.0
+                for ii in range(num_bins):
+                    for jj in range(num_bins):
+                        if p_xy[ii, jj] > 0:
+                            mi += p_xy[ii, jj] * np.log2(
+                                p_xy[ii, jj] / ((p_x[ii] * p_y[jj]) + 1e-10)
+                            )
+                
+                mi_matrix[i, j] = mi
+                mi_matrix[j, i] = mi  # Symmetric
+                
+                # Store pair result
+                pair_key = f"{name1}_vs_{name2}"
+                mi_pairs[pair_key] = float(mi)
+    
+    measurements['global'] = {
+        'num_channels': len(channel_names),
+        'channel_names': channel_names,
+        'mi_pairs': mi_pairs,
+        'mean_mi': float(np.mean(mi_matrix[mi_matrix > 0])) if np.any(mi_matrix > 0) else 0.0,
+        'max_mi': float(np.max(mi_matrix)),
+        'samples_analyzed': min_length
+    }
+    
+    # Visualization data
+    visualization_data = {
+        'channel_names': channel_names,
+        'mi_matrix': mi_matrix,
+        'mi_pairs': mi_pairs
+    }
+    
+    logger.info(f"Mutual information for {len(channel_names)} channels")
+    
+    return AnalysisResult(
+        method='mutual_information',
+        measurements=measurements,
+        metrics={'num_bins': num_bins},
+        visualization_data=visualization_data
+    )
+
+
 # Register methods
 register_method("shannon_entropy", "information", shannon_entropy, "Shannon entropy")
 register_method("local_entropy", "information", local_entropy, "Local windowed entropy")
 register_method("compression_ratio", "information", compression_ratio, "Compression ratio")
 register_method("approximate_complexity", "information", approximate_complexity, "Approximate complexity")
+register_method("mutual_information", "information", mutual_information, "Mutual information between channels")

@@ -5,6 +5,7 @@ Meta-analysis methods.
 from typing import Dict, Any
 import numpy as np
 from scipy.spatial.distance import euclidean, cosine
+from scipy import stats
 
 from ..engine.context import AnalysisContext
 from ..engine.results import AnalysisResult
@@ -218,6 +219,88 @@ def stability_scores(context: AnalysisContext, params: Dict[str, Any]) -> Analys
     )
 
 
+def high_order_statistics(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResult:
+    """
+    Compute high-order statistics (skewness, kurtosis).
+    
+    High-order statistics reveal information about the shape of the
+    amplitude distribution beyond mean and variance.
+    
+    Args:
+        context: Analysis context
+        params: num_bins (for histogram visualization)
+        
+    Returns:
+        AnalysisResult with statistical moments and visualization_data
+    """
+    num_bins = params.get('num_bins', 50)
+    
+    measurements = {}
+    visualization_data = {}
+    
+    for channel_name, audio_data in context.audio_data.items():
+        
+        # Limit for performance on histogram
+        max_samples = 200000
+        if len(audio_data) > max_samples:
+            audio_subset = audio_data[:max_samples]
+            logger.warning(f"High-order statistics: using first {max_samples} samples")
+        else:
+            audio_subset = audio_data
+        
+        # Basic statistics
+        mean = np.mean(audio_subset)
+        std = np.std(audio_subset)
+        variance = np.var(audio_subset)
+        
+        # High-order moments
+        skewness = stats.skew(audio_subset)
+        kurtosis = stats.kurtosis(audio_subset)
+        
+        # Peak statistics
+        peak_value = np.max(np.abs(audio_subset))
+        crest_factor = peak_value / (np.sqrt(np.mean(audio_subset ** 2)) + 1e-10)
+        
+        # Histogram for distribution analysis
+        hist, bin_edges = np.histogram(audio_subset, bins=num_bins, density=True)
+        bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+        
+        # Fit normal distribution for comparison
+        normal_dist = stats.norm.pdf(bin_centers, mean, std)
+        
+        measurements[channel_name] = {
+            'mean': float(mean),
+            'std': float(std),
+            'variance': float(variance),
+            'skewness': float(skewness),
+            'kurtosis': float(kurtosis),
+            'peak_value': float(peak_value),
+            'crest_factor': float(crest_factor),
+            'samples_analyzed': len(audio_subset)
+        }
+        
+        # Visualization data
+        visualization_data[channel_name] = {
+            'histogram': hist,
+            'bin_centers': bin_centers,
+            'normal_distribution': normal_dist,
+            'mean': mean,
+            'std': std,
+            'skewness': skewness,
+            'kurtosis': kurtosis
+        }
+    
+    logger.info(f"High-order statistics for {len(context.audio_data)} channels")
+    
+    return AnalysisResult(
+        method='high_order_statistics',
+        measurements=measurements,
+        metrics={'num_bins': num_bins},
+        visualization_data=visualization_data
+    )
+
+
 register_method("inter_segment_comparison", "meta_analysis", inter_segment_comparison, "Inter-segment comparison")
 register_method("segment_clustering", "meta_analysis", segment_clustering, "Segment clustering")
 register_method("stability_scores", "meta_analysis", stability_scores, "Temporal/spectral stability")
+register_method("high_order_statistics", "meta_analysis", high_order_statistics, "High-order statistical moments")

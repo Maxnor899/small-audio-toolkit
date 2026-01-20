@@ -541,6 +541,122 @@ class AnalysisRunner:
                         f"Stability Analysis - {channel}",
                     )
 
+
+        # ========================================
+        # SPECTRAL NEW
+        # ========================================
+        elif method == "spectral_rolloff":
+            for channel, data in viz_data.items():
+                if all(k in data for k in ["frequencies", "spectrum", "rolloff_frequency", "rolloff_percent"]):
+                    self.visualizer.plot_spectral_rolloff(
+                        np.asarray(data["frequencies"]),
+                        np.asarray(data["spectrum"]),
+                        float(data["rolloff_frequency"]),
+                        float(data["rolloff_percent"]),
+                        viz_dir / f"spectral_rolloff_{channel}",
+                        f"Spectral Rolloff - {channel}",
+                    )
+
+        elif method == "spectral_flux":
+            for channel, data in viz_data.items():
+                if all(k in data for k in ["times", "flux", "mean_flux"]):
+                    self.visualizer.plot_spectral_flux(
+                        np.asarray(data["times"]),
+                        np.asarray(data["flux"]),
+                        float(data["mean_flux"]),
+                        viz_dir / f"spectral_flux_{channel}",
+                        f"Spectral Flux - {channel}",
+                    )
+
+        # ========================================
+        # MODULATION (PHASE 3B)
+        # ========================================
+        elif method == "chirp_detection":
+            for channel, data in viz_data.items():
+                if all(k in data for k in ["times", "frequencies", "spectrogram", "chirps"]):
+                    self.visualizer.plot_chirp_detection(
+                        np.asarray(data["times"]),
+                        np.asarray(data["frequencies"]),
+                        np.asarray(data["spectrogram"]),
+                        list(data["chirps"]),
+                        viz_dir / f"chirp_detection_{channel}",
+                        f"Chirp Detection - {channel}",
+                    )
+
+        # ========================================
+        # INFORMATION (PHASE 3B)
+        # ========================================
+        elif method == "mutual_information":
+            # mutual_information has global data, not per-channel
+            if "channel_names" in viz_data and "mi_matrix" in viz_data and "mi_pairs" in viz_data:
+                self.visualizer.plot_mutual_information(
+                    list(viz_data["channel_names"]),
+                    np.asarray(viz_data["mi_matrix"]),
+                    dict(viz_data["mi_pairs"]),
+                    viz_dir / "mutual_information",
+                    "Mutual Information Between Channels",
+                )
+
+        # ========================================
+        # STEGANOGRAPHY (PHASES 3A+3B)
+        # ========================================
+        elif method == "lsb_analysis":
+            for channel, data in viz_data.items():
+                if all(k in data for k in ["lsb_bits", "zero_runs", "one_runs", "transition_rate"]):
+                    self.visualizer.plot_lsb_analysis(
+                        np.asarray(data["lsb_bits"]),
+                        np.asarray(data["zero_runs"]),
+                        np.asarray(data["one_runs"]),
+                        float(data["transition_rate"]),
+                        viz_dir / f"lsb_analysis_{channel}",
+                        f"LSB Analysis - {channel}",
+                    )
+
+        elif method == "parity_analysis":
+            for channel, data in viz_data.items():
+                if all(k in data for k in ["parity_bits", "run_lengths", "transition_rate", "expected_transition_rate"]):
+                    self.visualizer.plot_parity_analysis(
+                        np.asarray(data["parity_bits"]),
+                        np.asarray(data["run_lengths"]),
+                        float(data["transition_rate"]),
+                        float(data["expected_transition_rate"]),
+                        viz_dir / f"parity_analysis_{channel}",
+                        f"Parity Analysis - {channel}",
+                    )
+
+        elif method == "statistical_anomalies":
+            for channel, data in viz_data.items():
+                if all(k in data for k in ["histogram", "bin_centers", "normal_distribution", "outlier_indices", "outlier_values", "z_scores", "z_threshold"]):
+                    self.visualizer.plot_statistical_anomalies(
+                        np.asarray(data["histogram"]),
+                        np.asarray(data["bin_centers"]),
+                        np.asarray(data["normal_distribution"]),
+                        np.asarray(data["outlier_indices"]),
+                        np.asarray(data["outlier_values"]),
+                        np.asarray(data["z_scores"]),
+                        float(data["z_threshold"]),
+                        viz_dir / f"statistical_anomalies_{channel}",
+                        f"Statistical Anomalies - {channel}",
+                    )
+
+        # ========================================
+        # META_ANALYSIS (PHASE 3A)
+        # ========================================
+        elif method == "high_order_statistics":
+            for channel, data in viz_data.items():
+                if all(k in data for k in ["histogram", "bin_centers", "normal_distribution", "mean", "std", "skewness", "kurtosis"]):
+                    self.visualizer.plot_high_order_statistics(
+                        np.asarray(data["histogram"]),
+                        np.asarray(data["bin_centers"]),
+                        np.asarray(data["normal_distribution"]),
+                        float(data["mean"]),
+                        float(data["std"]),
+                        float(data["skewness"]),
+                        float(data["kurtosis"]),
+                        viz_dir / f"high_order_statistics_{channel}",
+                        f"High-Order Statistics - {channel}",
+                    )
+
     def _export_results(self, output_path: Path, audio_path: Path) -> None:
         """Export results and configuration."""
         output_config = self.config.get("output", {})

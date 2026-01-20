@@ -816,17 +816,6 @@ def plot_stability_dual(
     plt.close(fig)
 
 
-
-# ----------------------------
-# Visualizer wrapper (compat runner historique)
-# ----------------------------
-
-
-# ================================================================================
- NEW VISUALIZATION FUNCTIONS
-# ================================================================================
-
-
 def plot_spectral_rolloff(
     frequencies: np.ndarray,
     spectrum: np.ndarray,

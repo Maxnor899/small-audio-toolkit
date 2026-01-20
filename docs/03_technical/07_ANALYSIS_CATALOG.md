@@ -305,6 +305,58 @@ Spectral bandwidth
 **Visualization data:** *(none)*
 
 ---
+### spectral_rolloff
+**Registry identifier:** `spectral_rolloff`
+**Function:** `spectral_rolloff`
+
+#### Objective
+
+Spectral rolloff (energy percentile cutoff frequency)
+
+#### Parameters
+
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `rolloff_percent` | `0.85` | Percentile of cumulative spectral energy |
+
+#### Outputs
+
+**Measurements:** *(not enumerated here; see results JSON keys)*
+
+**Visualization data:**
+
+* `frequencies`
+* `rolloff_frequency`
+* `rolloff_percent`
+* `spectrum`
+
+---
+### spectral_flux
+**Registry identifier:** `spectral_flux`
+**Function:** `spectral_flux`
+
+#### Objective
+
+Spectral flux (frame-to-frame spectral change)
+
+#### Parameters
+
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `window_size` | `2048` | STFT window size for flux computation |
+| `hop_length` | `512` | Hop length for flux computation |
+
+#### Outputs
+
+**Measurements:** *(not enumerated here; see results JSON keys)*
+
+**Visualization data:**
+
+* `flux`
+* `mean_flux`
+* `times`
+
+---
 ## Time–Frequency Analyses (`analyses/time_frequency.py`)
 ### stft
 **Registry identifier:** `stft`
@@ -559,6 +611,34 @@ Modulation index
 **Visualization data:** *(none)*
 
 ---
+### chirp_detection
+**Registry identifier:** `chirp_detection`
+**Function:** `chirp_detection`
+
+#### Objective
+
+Chirp (frequency sweep) detection based on time–frequency structure
+
+#### Parameters
+
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `window_size` | `2048` |  |
+| `hop_length` | `512` |  |
+| `min_duration` | `0.1` | seconds |
+
+#### Outputs
+
+**Measurements:** *(not enumerated here; see results JSON keys)*
+
+**Visualization data:**
+
+* `chirps`
+* `frequencies`
+* `spectrogram`
+* `times`
+
+---
 ## Information Analyses (`analyses/information.py`)
 ### shannon_entropy
 **Registry identifier:** `shannon_entropy`
@@ -661,6 +741,31 @@ Approximate complexity
 * `tolerance`
 
 **Visualization data:** *(none)*
+
+---
+### mutual_information
+**Registry identifier:** `mutual_information`
+**Function:** `mutual_information`
+
+#### Objective
+
+Mutual information between channels (non-linear dependence)
+
+#### Parameters
+
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `num_bins` | `64` | Histogram bin count for estimation |
+
+#### Outputs
+
+**Measurements:** *(not enumerated here; see results JSON keys)*
+
+**Visualization data:**
+
+* `channel_names`
+* `mi_matrix`
+* `mi_pairs`
 
 ---
 ## Inter-Channel Analyses (`analyses/inter_channel.py`)
@@ -795,6 +900,56 @@ LSB analysis
 **Visualization data:** *(none)*
 
 ---
+### parity_analysis
+**Registry identifier:** `parity_analysis`
+**Function:** `parity_analysis`
+
+#### Objective
+
+Parity-bit statistics on a quantized view of the samples
+
+#### Outputs
+
+**Measurements:** *(not enumerated here; see results JSON keys)*
+
+**Visualization data:**
+
+* `expected_transition_rate`
+* `parity_bits`
+* `run_lengths`
+* `transition_rate`
+
+---
+### statistical_anomalies
+**Registry identifier:** `statistical_anomalies`
+**Function:** `statistical_anomalies`
+
+#### Objective
+
+Histogram-based deviation from a fitted normal model (z-score outliers)
+
+#### Parameters
+
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `num_bins` | `100` |  |
+| `z_threshold` | `3.0` |  |
+
+#### Outputs
+
+**Measurements:** *(not enumerated here; see results JSON keys)*
+
+**Visualization data:**
+
+* `bin_centers`
+* `histogram`
+* `normal_distribution`
+* `outlier_indices`
+* `outlier_values`
+* `z_scores`
+* `z_threshold`
+
+---
 ### quantization_noise
 **Registry identifier:** `quantization_noise`
 **Function:** `quantization_noise`
@@ -924,5 +1079,34 @@ Temporal/spectral stability
 * `spectral_stability`
 
 **Visualization data:** *(none)*
+
+---
+### high_order_statistics
+**Registry identifier:** `high_order_statistics`
+**Function:** `high_order_statistics`
+
+#### Objective
+
+High-order statistical descriptors (mean/std/skewness/kurtosis + histogram)
+
+#### Parameters
+
+| Name | Default (code) | Notes |
+|---|---:|---|
+| `num_bins` | `50` |  |
+
+#### Outputs
+
+**Measurements:** *(not enumerated here; see results JSON keys)*
+
+**Visualization data:**
+
+* `bin_centers`
+* `histogram`
+* `kurtosis`
+* `mean`
+* `normal_distribution`
+* `skewness`
+* `std`
 
 ---

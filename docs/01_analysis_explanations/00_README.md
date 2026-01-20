@@ -27,9 +27,11 @@ This tool performs **objective signal measurements** on audio data.
 It applies established signal-processing techniques to extract numerical observations describing:
 - temporal behavior,
 - spectral structure,
+- time-frequency behavior,
 - modulation characteristics,
 - information-related properties,
-- inter-channel relationships.
+- inter-channel relationships,
+- statistical distribution properties.
 
 The tool produces **measurements only**.
 
@@ -76,6 +78,6 @@ The remaining documents are organized to progressively deepen understanding:
 1. `01_METHODOLOGY.md` explains how measurements are produced and how they should be reasoned about.
 2. `02_CONTEXTUAL_REFERENCES.md` explains how comparative reference ranges are used without interpretation.
 3. `03_OBSERVATION_LIMITS.md` details the theoretical and practical limits of signal-based analysis.
-4. `families/*` documents describe each analysis family in detail.
+4. `families/*` documents describe each analysis family and the metrics they expose.
 
 Reading them in order is strongly recommended.

@@ -227,3 +227,28 @@ https://en.wikipedia.org/wiki/Exploratory_data_analysis
 ```
 
 These references provide methodological grounding, not interpretative guidance.
+
+
+---
+
+## 12. High-Order Statistical Descriptors
+
+### What it measures
+
+High-order statistics summarize **distribution shape** beyond mean and variance,
+including skewness and kurtosis.
+
+### Typical observations
+
+- Near-zero skewness for symmetric distributions.
+- Higher kurtosis for heavy-tailed distributions.
+
+### Commonly observed ranges (Category A/B)
+
+- Skewness is unbounded.
+- Kurtosis is typically ≥ 3 for many distributions (depending on definition).
+
+### Important limits
+
+- High-order statistics are sensitive to outliers.
+- They describe distributions, not signal mechanisms.

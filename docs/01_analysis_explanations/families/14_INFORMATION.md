@@ -239,3 +239,34 @@ https://mitpress.mit.edu/9780471241959/elements-of-information-theory/
 ```
 
 These references provide definitions and methodology, not interpretative guidance.
+
+
+---
+
+## 11. Mutual Information (Inter-Channel)
+
+### What it measures
+
+Mutual information quantifies **statistical dependence between channels**.
+Unlike correlation, it captures both linear and non-linear dependencies.
+
+### Typical observations
+
+- Low values indicate weak statistical dependence.
+- Higher values indicate shared structure or redundancy.
+
+### Commonly observed ranges (Category B/C)
+
+Mutual information:
+- is non-negative,
+- has no universal upper bound.
+
+Values depend on:
+- estimation method,
+- binning or kernel choices,
+- sample count.
+
+### Important limits
+
+- MI values are not directly comparable across implementations.
+- High MI does not imply intentional coupling.

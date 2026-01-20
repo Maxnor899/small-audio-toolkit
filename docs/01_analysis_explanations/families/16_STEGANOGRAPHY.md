@@ -258,3 +258,24 @@ https://en.wikipedia.org/wiki/Least_significant_bit
 ```
 
 These references provide methodological grounding, not interpretative guidance.
+
+
+---
+
+## 11. Parity and Statistical Anomaly Measures
+
+### What they measure
+
+Additional statistical descriptors examine:
+- parity patterns in quantized representations,
+- deviations from fitted distributions (e.g. via Z-scores).
+
+### Typical observations
+
+- Balanced parity for many natural signals.
+- Deviations due to processing, compression, or quantization artifacts.
+
+### Important limits
+
+- These measures are sensitive to preprocessing.
+- Statistical deviation is not evidence of hidden data.

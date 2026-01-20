@@ -315,3 +315,67 @@ https://www.ni.com/en/support/documentation/supplemental/06/fft-basics.html
 ```
 
 These references provide methodological grounding, not interpretative guidance.
+
+
+---
+
+## 14. Spectral Rolloff
+
+### What it measures
+
+Spectral rolloff identifies the frequency below which a given proportion
+(e.g. 85% or 95%) of the total spectral energy is contained.
+
+It provides a compact descriptor of how energy accumulates across frequency.
+
+### Typical observations
+
+- Low rolloff values indicate energy concentrated at low frequencies.
+- Higher rolloff values indicate significant high-frequency content.
+
+### Commonly observed ranges (Category A/B)
+
+**Bounds (established):**
+- Rolloff frequency lies between **0 Hz and the Nyquist frequency**.
+
+Exact values depend on:
+- chosen rolloff percentage,
+- spectral resolution,
+- signal bandwidth.
+
+### Important limits
+
+- Rolloff collapses spectral shape into a single percentile-based value.
+- Different spectra can share identical rolloff frequencies.
+- Rolloff does not indicate noise, structure, or intent.
+
+
+---
+
+## 15. Spectral Flux
+
+### What it measures
+
+Spectral flux quantifies **how much the spectrum changes between successive time frames**.
+It is a measure of spectral dynamics rather than static structure.
+
+### Typical observations
+
+- Low flux for steady, slowly varying signals.
+- Higher flux for transient-rich or rapidly changing signals.
+
+### Commonly observed ranges (Category C)
+
+Flux values are:
+- non-negative,
+- highly dependent on normalization and frame parameters.
+
+They are best interpreted via:
+- relative comparison over time,
+- contrast between segments or channels.
+
+### Important limits
+
+- Flux depends strongly on STFT parameters.
+- Absolute values are rarely comparable across configurations.
+- High flux does not imply modulation or encoding.

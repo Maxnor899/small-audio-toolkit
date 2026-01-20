@@ -168,3 +168,22 @@ Context files are reference tables, not decision engines.
 ---
 
 End of document.
+
+---
+
+## 8. Coverage of Analysis Families
+
+This schema applies uniformly to **all analysis families implemented in the project**, including:
+
+- temporal
+- spectral
+- time–frequency
+- modulation
+- information
+- inter-channel
+- steganography-oriented analyses
+- meta-analysis and cross-metric descriptors
+
+The addition of new analysis methods does **not** require changes to this schema,
+provided that all metrics respect the rules defined above.
+

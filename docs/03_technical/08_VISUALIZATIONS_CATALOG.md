@@ -256,3 +256,36 @@ All plotters save figures via `save_figure(fig, output_path, formats, dpi)`:
 
 **Notes:**
 - Colormap is currently fixed to `viridis` in the implementation.
+
+---
+## New visualizations (Phases 3A–3B)
+
+### plot_spectral_rolloff
+Inputs: `frequencies`, `spectrum`, `rolloff_frequency`, `rolloff_percent`.
+
+### plot_spectral_flux
+Inputs: `times`, `flux`, `mean_flux`.
+
+### plot_stability_dual
+Inputs: `times`, `energy`, `spectral_centroid`, `energy_mean`, `centroid_mean`.
+
+### plot_temporal_curve
+Inputs: `times`, `values`, `mean_level`.
+
+### plot_chirp_detection
+Inputs: `times`, `frequencies`, `spectrogram`, `chirps` (list of dicts with `start_time`, `end_time`, `start_freq`, `end_freq`).
+
+### plot_mutual_information
+Inputs: `channel_names`, `mi_matrix`, `mi_pairs`.
+
+### plot_lsb_analysis
+Inputs: `lsb_bits`, `zero_runs`, `one_runs`, `transition_rate`.
+
+### plot_parity_analysis
+Inputs: `parity_bits`, `run_lengths`, `transition_rate`, `expected_transition_rate`.
+
+### plot_statistical_anomalies
+Inputs: `histogram`, `bin_centers`, `normal_distribution`, `outlier_indices`, `outlier_values`, `z_scores`, `z_threshold`.
+
+### plot_high_order_statistics
+Inputs: `histogram`, `bin_centers`, `normal_distribution`, `mean`, `std`, `skewness`, `kurtosis`.

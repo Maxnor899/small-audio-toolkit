@@ -262,3 +262,32 @@ https://www.ni.com/en/support/documentation/supplemental/06/am-and-fm.html
 ```
 
 These references provide methodological grounding, not interpretative guidance.
+
+
+---
+
+## 12. Chirp Detection (Frequency-Sweep Modulation)
+
+### What it measures
+
+Chirp detection examines **systematic frequency sweeps** over time,
+which may be interpreted as a form of frequency modulation at a larger scale.
+
+### Typical observations
+
+- Continuous frequency increase or decrease.
+- Localized sweep events.
+
+### Commonly observed ranges (Category B/C)
+
+Sweep rates and durations depend on:
+- frequency range,
+- time resolution,
+- detection constraints.
+
+They are not bounded to universal numeric ranges.
+
+### Important limits
+
+- Chirps can arise from synthesis, effects, or physical processes.
+- Detection does not imply encoding or message structure.

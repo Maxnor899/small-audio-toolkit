@@ -262,3 +262,33 @@ https://www.ni.com/en/support/documentation/supplemental/06/spectrogram.html
 ```
 
 These references describe analytical tools, not interpretative frameworks.
+
+
+---
+
+## 12. Chirp Structures in Time–Frequency Representations
+
+### What it measures
+
+Chirp-related analyses identify **time-varying frequency trajectories**
+that appear as diagonal structures in time–frequency representations.
+
+### Typical observations
+
+- Linear or curved frequency sweeps over time.
+- Localized diagonal patterns in spectrograms.
+
+### Commonly observed ranges (Category B/C)
+
+Observed slopes and durations depend on:
+- time–frequency resolution,
+- signal bandwidth,
+- detection parameters.
+
+Chirp descriptors are inherently comparative.
+
+### Important limits
+
+- Diagonal patterns can arise from many non-communicative processes.
+- Detection is resolution-dependent.
+- Presence of chirps does not imply intentional signaling.

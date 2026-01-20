@@ -1,6 +1,6 @@
-# Configuration Reference 
+# Protocol Reference 
 
-This document defines the **configuration contract** as implemented by the current codebase.
+This document defines the **Protocol contract** as implemented by the current codebase.
 
 It documents:
 

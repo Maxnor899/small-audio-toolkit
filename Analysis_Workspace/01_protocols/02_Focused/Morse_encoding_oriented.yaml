@@ -4,7 +4,6 @@ channels:
   analyze: ["left", "right", "difference"]
 
 preprocessing:
-  # pas de normalisation implicite.
   normalize:
     enabled: false
   segmentation:
@@ -21,7 +20,6 @@ output:
   save_config: true
 
 analyses:
-  # 1) TEMPORAL (cœur Morse-like : E + Δ)
   temporal:
     enabled: true
     methods:
@@ -32,11 +30,8 @@ analyses:
       - name: "autocorrelation"
         params:
           max_lag: 5000
-          max_samples: 100000
           normalize: true
 
-      # Détection d'événements (E) : on sweep des seuils et min_distance.
-      # Objectif : détecter des "on/off" potentiels sans dépendre d’un seul réglage.
       - name: "pulse_detection"
         params:
           threshold: 0.2
@@ -62,10 +57,8 @@ analyses:
           threshold: 0.6
           min_distance: 500
 
-      # Durées/ratios (Δ) : indispensable pour "Morse-like"
       - name: "duration_ratios"
 
-  # 2) MODULATION (si Morse porté via AM lente, ou si carrier modulé)
   modulation:
     enabled: true
     methods:
@@ -79,7 +72,6 @@ analyses:
           hop_length: 512
           min_duration: 0.1
 
-  # 3) SPECTRAL (si le porteur est fréquentiel / tonal, ou si patterns stéga)
   spectral:
     enabled: true
     methods:
@@ -105,7 +97,6 @@ analyses:
           hop_length: 512
       - name: "spectral_flatness"
 
-  # 4) TIME-FREQUENCY (patterns TF, stabilité de bandes, etc.)
   time_frequency:
     enabled: true
     methods:
@@ -121,8 +112,6 @@ analyses:
           n_bins: 84
           bins_per_octave: 12
           hop_length: 512
-          max_time_frames: 500
-          max_samples: 200000
 
       - name: "wavelet"
         params:
@@ -140,7 +129,6 @@ analyses:
             - [2000, 8000]
             - [8000, 20000]
 
-  # 5) INFORMATION (entropie / compressibilité : utile pour stéga, pas pour "prouver" quoi que ce soit)
   information:
     enabled: true
     methods:
@@ -155,7 +143,6 @@ analyses:
         params:
           num_bins: 64
 
-  # 6) INTER-CHANNEL (si stéga/porteuse répartie entre canaux)
   inter_channel:
     enabled: true
     methods:
@@ -166,7 +153,6 @@ analyses:
       - name: "phase_difference"
       - name: "time_delay"
 
-  # 7) STEGANOGRAPHY (mesures “suspicion structurelle”, pas décodage)
   steganography:
     enabled: true
     methods:
@@ -179,7 +165,6 @@ analyses:
           num_bins: 100
       - name: "parity_analysis"
 
-  # 8) META-ANALYSIS (stabilité, clustering de segments… utile pour diagnostiquer “sous-contraint”)
   meta_analysis:
     enabled: true
     methods:

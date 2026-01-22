@@ -1,22 +1,29 @@
-version: "1.0"
-family: "meta_analysis"
-description: "Meta-analysis reference context."
+family: meta_analysis
+
+scope:
+  coverage: partial
+  objective: >
+    Identify excessive stability, repetition, or structural
+    consistency across signal segments.
+  rationale: >
+    Meta-analysis metrics summarize cross-segment behavior
+    without inferring signal origin.
+
+references:
+  - authors: "C. M. Bishop"
+    title: "Pattern Recognition and Machine Learning"
+    year: 2006
+    note: "Reference for similarity and structure in data."
 
 methods:
-  stability_analysis:
-    scope: "per_channel"
+  stability_scores:
     metrics:
-      stability_score:
-        unit: "ratio"
-        reference: { status: "B" }
-        notes:
-          - "Stability is relative and configuration-dependent."
+      overall_stability:
+        reference: { status: B, typical_range: [0.0, 1.0] }
+        notes: ["Aggregate stability score across segments."]
 
-  cross_metric_consistency:
-    scope: "single"
+  inter_segment_comparison:
     metrics:
-      consistency_score:
-        unit: "ratio"
-        reference: { status: "B" }
-        notes:
-          - "Consistency is comparative, not absolute."
+      similarity_score:
+        reference: { status: B, typical_range: [0.0, 1.0] }
+        notes: ["Similarity between consecutive segments."]

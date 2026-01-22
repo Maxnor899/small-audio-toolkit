@@ -1,31 +1,37 @@
-version: "1.0"
-family: "steganography"
-description: "Steganography-oriented analysis reference context."
+family: steganography
+
+scope:
+  coverage: partial
+  objective: >
+    Identify statistical alterations compatible with discrete
+    encoding or quantization-based manipulation.
+  rationale: >
+    Metrics target low-level statistical artifacts without
+    asserting the presence of hidden data.
+
+references:
+  - authors: "J. Fridrich"
+    title: "Steganography in Digital Media"
+    year: 2009
+    note: "Reference for LSB-based steganalysis and statistical artifacts."
+
+  - authors: "F. A. P. Petitcolas et al."
+    title: "Information Hiding Techniques"
+    year: 1999
+    note: "Foundational work on digital information hiding."
 
 methods:
   lsb_analysis:
-    scope: "per_channel"
     metrics:
       lsb_mean:
-        unit: "probability"
-        reference:
-          status: "A"
-          typical_range: [0.0, 1.0]
-        notes:
-          - "LSB mean is a Bernoulli probability."
+        reference: { status: A, typical_range: [0.4, 0.6] }
+        notes: ["Mean value of least significant bits."]
       transition_rate:
-        unit: "probability"
-        reference:
-          status: "A"
-          typical_range: [0.0, 1.0]
-        notes:
-          - "Transition rate is a probability."
+        reference: { status: B, typical_range: [0.3, 0.7] }
+        notes: ["Transition rate of the LSB sequence."]
 
   quantization_noise:
-    scope: "per_channel"
     metrics:
       noise_std:
-        unit: "amplitude"
-        reference: { status: "B" }
-        notes:
-          - "Noise level depends on quantization and scaling."
+        reference: { status: B, typical_range: [0.0, 0.01] }
+        notes: ["Standard deviation of quantization noise."]

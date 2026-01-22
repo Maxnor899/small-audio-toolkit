@@ -1,34 +1,43 @@
-version: "1.0"
-family: "spectral"
-description: "Spectral analysis reference context."
+family: spectral
+
+scope:
+  coverage: partial
+  objective: >
+    Identify spectral concentration, tonal structure, or non-diffuse
+    frequency distributions.
+  rationale: >
+    Focuses on global spectral organization rather than perceptual
+    or musical descriptors.
+
+references:
+  - authors: "J. G. Proakis & D. G. Manolakis"
+    title: "Digital Signal Processing"
+    year: 2007
+    note: "Foundational DSP reference for spectral analysis."
+
+  - authors: "J. O. Smith"
+    title: "Spectral Audio Signal Processing"
+    year: 2011
+    note: "Audio-oriented reference for spectral structure and flatness."
 
 methods:
   fft_global:
-    scope: "per_channel"
     metrics:
       peak_frequency:
-        unit: "Hz"
-        reference: { status: "B" }
-        notes:
-          - "Frequency depends on signal content and sampling rate."
-      spectral_centroid:
-        unit: "Hz"
-        reference: { status: "B" }
-        notes:
-          - "Centroid depends on spectral distribution."
-      spectral_flatness:
-        unit: "ratio"
-        reference:
-          status: "A"
-          typical_range: [0.0, 1.0]
-        notes:
-          - "Flatness is normalized in [0,1]."
+        reference: { status: A, typical_range: [0.0, 22050.0] }
+        notes: ["Frequency of the dominant spectral peak."]
+      spectral_energy:
+        reference: { status: A, typical_range: [0.0, 1.0] }
+        notes: ["Total normalized spectral energy."]
 
-  spectral_peaks:
-    scope: "per_channel"
+  peak_detection:
     metrics:
       num_peaks:
-        unit: "count"
-        reference: { status: "B" }
-        notes:
-          - "Depends on peak detection parameters."
+        reference: { status: B, typical_range: [0, 100] }
+        notes: ["Number of detected spectral peaks."]
+
+  spectral_flatness:
+    metrics:
+      spectral_flatness:
+        reference: { status: A, typical_range: [0.0, 1.0] }
+        notes: ["Noise-like versus tonal spectral indicator."]

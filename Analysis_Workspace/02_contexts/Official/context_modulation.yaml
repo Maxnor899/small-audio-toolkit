@@ -1,22 +1,43 @@
-version: "1.0"
-family: "modulation"
-description: "Modulation analysis reference context."
+family: modulation
+
+scope:
+  coverage: partial
+  objective: >
+    Identify the presence and stability of non-random amplitude or
+    frequency modulations.
+  rationale: >
+    This context targets scalar modulation indicators suitable for
+    forensic screening, not detailed demodulation.
+
+references:
+  - authors: "S. Haykin"
+    title: "Communication Systems"
+    year: 2001
+    note: "Canonical reference for AM/FM modulation and detection."
+
+  - authors: "L. L. Scharf"
+    title: "Statistical Signal Processing"
+    year: 1991
+    note: "Detection of structured signals in noise."
 
 methods:
-  am_analysis:
-    scope: "per_channel"
+  am_detection:
     metrics:
-      am_depth:
-        unit: "ratio"
-        reference: { status: "B" }
-        notes:
-          - "AM depth depends on modulation index and signal."
+      modulation_detected:
+        reference: { status: A, typical_range: [0, 1] }
+        notes: ["Binary indicator of detected amplitude modulation."]
+      modulation_depth:
+        reference: { status: B, typical_range: [0.0, 1.0] }
+        notes: ["Estimated modulation depth."]
+      dominant_modulation_freq:
+        reference: { status: B, typical_range: [0.1, 100.0] }
+        notes: ["Dominant modulation frequency."]
 
-  fm_analysis:
-    scope: "per_channel"
+  fm_detection:
     metrics:
-      fm_deviation:
-        unit: "Hz"
-        reference: { status: "B" }
-        notes:
-          - "FM deviation is signal- and configuration-dependent."
+      fm_detected:
+        reference: { status: A, typical_range: [0, 1] }
+        notes: ["Binary indicator of detected frequency modulation."]
+      frequency_deviation:
+        reference: { status: B, typical_range: [0.0, 1000.0] }
+        notes: ["Estimated frequency deviation."]

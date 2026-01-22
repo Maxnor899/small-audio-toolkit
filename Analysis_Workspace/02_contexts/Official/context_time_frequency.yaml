@@ -1,27 +1,33 @@
-version: "1.0"
-family: "time_frequency"
-description: "Time-frequency analysis reference context."
+family: time_frequency
+
+scope:
+  coverage: partial
+  objective: >
+    Identify stable or structured time–frequency organization
+    inconsistent with random variation.
+  rationale: >
+    Only scalar summaries of time–frequency behavior are contextualized.
+
+references:
+  - authors: "L. Cohen"
+    title: "Time-Frequency Analysis"
+    year: 1995
+    note: "Central reference for time–frequency representations."
+
+  - authors: "B. Boashash"
+    title: "Time-Frequency Signal Analysis"
+    year: 2003
+    note: "Applied reference for time–frequency structure detection."
 
 methods:
-  stft_energy:
-    scope: "per_channel"
+  stft:
     metrics:
-      mean_energy:
-        unit: "energy"
-        reference: { status: "C" }
-        notes:
-          - "Energy depends on windowing and normalization."
-      energy_std:
-        unit: "energy"
-        reference: { status: "C" }
-        notes:
-          - "Energy variability has no stable reference."
-
-  band_stability:
-    scope: "per_channel"
-    metrics:
-      stability_score:
-        unit: "ratio"
-        reference: { status: "B" }
-        notes:
-          - "Stability depends on segmentation and signal class."
+      temporal_stability:
+        reference: { status: B, typical_range: [0.0, 1.0] }
+        notes: ["Stability of spectral content over time."]
+      spectral_flux_mean:
+        reference: { status: B, typical_range: [0.0, 10.0] }
+        notes: ["Average spectral flux magnitude."]
+      dominant_freq_mean:
+        reference: { status: B, typical_range: [0.0, 22050.0] }
+        notes: ["Mean dominant frequency over time."]

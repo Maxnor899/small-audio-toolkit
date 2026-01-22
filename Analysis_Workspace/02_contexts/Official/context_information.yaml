@@ -1,20 +1,26 @@
-version: "1.0"
-family: "information"
-description: "Information-theoretic analysis reference context."
+family: information
+
+scope:
+  coverage: partial
+  objective: >
+    Position the global degree of randomness or organization
+    of the audio signal.
+  rationale: >
+    Information-theoretic metrics provide coarse indicators
+    without semantic interpretation.
+
+references:
+  - authors: "T. M. Cover & J. A. Thomas"
+    title: "Elements of Information Theory"
+    year: 2006
+    note: "Canonical reference for entropy and information measures."
 
 methods:
   shannon_entropy:
-    scope: "per_channel"
     metrics:
       shannon_entropy:
-        unit: "bits"
-        reference: { status: "B" }
-        notes:
-          - "Entropy depends on quantization and binning."
+        reference: { status: A, typical_range: [0.0, 16.0] }
+        notes: ["Shannon entropy of the signal."]
       normalized_entropy:
-        unit: "ratio"
-        reference:
-          status: "A"
-          typical_range: [0.0, 1.0]
-        notes:
-          - "Normalized entropy is bounded in [0,1]."
+        reference: { status: A, typical_range: [0.0, 1.0] }
+        notes: ["Entropy normalized by maximum possible entropy."]

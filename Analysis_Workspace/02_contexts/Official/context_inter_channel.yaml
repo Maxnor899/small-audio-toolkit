@@ -1,29 +1,43 @@
-version: "1.0"
-family: "inter_channel"
-description: "Inter-channel analysis reference context."
+family: inter_channel
+
+scope:
+  coverage: partial
+  objective: >
+    Identify inter-channel asymmetry, abnormal correlation, or structured
+    information carried in the differential (L−R) signal.
+  rationale: >
+    Metrics highlight structured inter-channel relationships rather than
+    perceptual stereo quality.
+
+references:
+  - authors: "J. Blauert"
+    title: "Spatial Hearing"
+    year: 1997
+    note: "Reference on binaural correlation and inter-channel structure."
+
+  - authors: "V. Pulkki & M. Karjalainen"
+    title: "Communication Acoustics"
+    year: 2015
+    note: "Foundations of stereo and multichannel signal relationships."
 
 methods:
   cross_correlation:
-    scope: "pair"
     metrics:
+      correlation_at_zero:
+        reference: { status: A, typical_range: [-1.0, 1.0] }
+        notes: ["Zero-lag normalized inter-channel correlation."]
       max_correlation:
-        unit: "normalized correlation"
-        reference:
-          status: "A"
-          typical_range: [-1.0, 1.0]
-        notes:
-          - "Normalized cross-correlation is bounded in [-1,1]."
+        reference: { status: A, typical_range: [-1.0, 1.0] }
+        notes: ["Maximum normalized cross-correlation."]
       peak_lag:
-        unit: "samples"
-        reference: { status: "B" }
-        notes:
-          - "Lag depends on geometry and processing."
+        reference: { status: B, typical_range: [-5000, 5000] }
+        notes: ["Lag at which maximum correlation occurs."]
 
   lr_difference:
-    scope: "single"
     metrics:
+      difference_energy:
+        reference: { status: A, typical_range: [0.0, 1.0] }
+        notes: ["Energy of the L−R differential signal."]
       energy_ratio:
-        unit: "ratio"
-        reference: { status: "B" }
-        notes:
-          - "Difference energy depends on stereo content."
+        reference: { status: A, typical_range: [0.0, 1.0] }
+        notes: ["Energy ratio between differential and summed channels."]

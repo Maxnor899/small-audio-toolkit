@@ -1,63 +1,44 @@
-version: "1.0"
-family: "temporal"
-description: "Temporal analysis reference context."
+family: temporal
+
+scope:
+  coverage: partial
+  objective: >
+    Identify periodicity, repetition, and non-random temporal structure
+    in audio signals.
+  rationale: >
+    This context focuses on stable scalar temporal metrics suitable for
+    high-level forensic screening. It does not aim to exhaustively cover
+    all temporal-domain measurements.
+
+references:
+  - authors: "A. V. Oppenheim & A. S. Willsky"
+    title: "Signals and Systems"
+    year: 2010
+    note: "Foundational reference for temporal analysis and autocorrelation."
+
+  - authors: "L. R. Rabiner & R. W. Schafer"
+    title: "Digital Processing of Speech Signals"
+    year: 1978
+    note: "Classic reference on temporal structure and periodicity in signals."
 
 methods:
-  envelope:
-    scope: "per_channel"
-    metrics:
-      envelope_mean:
-        unit: "amplitude"
-        reference: { status: "C" }
-        notes:
-          - "Envelope magnitude is scale-dependent; no stable numeric reference."
-      envelope_max:
-        unit: "amplitude"
-        reference: { status: "C" }
-        notes:
-          - "Envelope magnitude is scale-dependent; no stable numeric reference."
-      envelope_std:
-        unit: "amplitude"
-        reference: { status: "C" }
-        notes:
-          - "Envelope magnitude is scale-dependent; no stable numeric reference."
-      envelope_length:
-        unit: "samples"
-        reference: { status: "C" }
-        notes:
-          - "Length depends on analysis configuration; no reference range."
-
   autocorrelation:
-    scope: "per_channel"
     metrics:
       autocorr_max:
-        unit: "normalized correlation"
-        reference:
-          status: "A"
-          typical_range: [-1.0, 1.0]
-        notes:
-          - "Normalized autocorrelation is bounded in [-1, 1]."
-      autocorr_mean:
-        unit: "normalized correlation"
-        reference:
-          status: "A"
-          typical_range: [-1.0, 1.0]
-        notes:
-          - "Normalized autocorrelation is bounded in [-1, 1]."
+        reference: { status: A, typical_range: [0.0, 1.0] }
+        notes: ["Normalized maximum autocorrelation excluding zero lag."]
       first_peak_lag:
-        unit: "samples"
-        reference: { status: "B" }
-        notes:
-          - "Lag depends on sampling rate and signal class."
+        reference: { status: B, typical_range: [1, 5000] }
+        notes: ["Lag of first significant autocorrelation peak."]
       num_peaks:
-        unit: "count"
-        reference: { status: "B" }
-        notes:
-          - "Peak count depends on detector parameters."
+        reference: { status: B, typical_range: [0, 50] }
+        notes: ["Number of detected autocorrelation peaks."]
       periodicity_score:
-        unit: "normalized correlation"
-        reference:
-          status: "A"
-          typical_range: [-1.0, 1.0]
-        notes:
-          - "Derived from normalized autocorrelation."
+        reference: { status: A, typical_range: [0.0, 1.0] }
+        notes: ["Proxy for temporal periodicity strength."]
+
+  envelope:
+    metrics:
+      envelope_std:
+        reference: { status: B, typical_range: [0.0, 1.0] }
+        notes: ["Variability of the amplitude envelope."]

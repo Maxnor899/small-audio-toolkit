@@ -1,6 +1,6 @@
-# User Journey — Synthesis (Intent → Protocol → Results)
+# system design Journey — Synthesis (Intent → Protocol → Results)
 
-This document is a **synthetic recap** of the complete user journey design discussed so far.
+This document is a **synthetic recap** of the complete system design discussed so far.
 It is meant to be reused as a reference in other discussions, chats, or design reviews.
 
 It deliberately focuses on:

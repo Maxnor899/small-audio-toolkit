@@ -1,20 +1,44 @@
 version: "1.0"
-family: "XXXX"
-description: "Template context."
+family: "<FAMILY_NAME>"   # ex: temporal, modulation, inter_channel, spectral, etc.
+
+scope:
+  coverage: partial
+  objective: >
+    User-specific contextual ranges intended for project- or corpus-level
+    positioning of selected scalar metrics.
+  rationale: >
+    This user context defines reference ranges derived from an internal corpus
+    or project-specific assumptions. These ranges are not part of the official
+    SAT documentary references and may not generalize beyond their intended scope.
+
+references:
+  - authors: "Internal corpus"
+    title: "Project-specific baseline"
+    year: 2026
+    note: >
+      Ranges derived from an internal dataset or empirical observations.
+      No claim of general validity is made.
 
 methods:
-  shannon_entropy:
-    scope: "xxx"
+  <method_name>:
+    # Optional but recommended: clarifies how metrics are scoped
+    scope: "<global | per_channel | pair | per_segment>"
+
     metrics:
-      shannon_entropy:
-        unit: "xxx"
-        reference: { status: "x" }
-        notes:
-          - "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-      normalized_entropy:
-        unit: "xxx"
+      <metric_name>:
+        unit: "<optional_unit>"   # ex: ratio, Hz, samples, bits
         reference:
-          status: "x"
-          typical_range: xxxxxxx
+          status: "USER"
+          typical_user_range: [<min>, <max>]
         notes:
-          - "xxxxxxxxxxxxxxxx"
+          - "Explain how this range was derived (corpus size, protocol, etc.)."
+          - "Mention any dependency on analysis parameters if relevant."
+
+      <another_metric_name>:
+        reference:
+          status: "USER"
+          typical_user_range: [<min>, <max>]
+        notes:
+          - "Second example metric."
+
+# End of user context

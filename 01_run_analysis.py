@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import sys
 from pathlib import Path
 
@@ -7,63 +8,73 @@ from audio_toolkit.config.loader import ConfigLoader
 from audio_toolkit.engine.runner import AnalysisRunner
 
 
-def _find_default_config(project_root: Path) -> Path:
-    candidates = [
-        project_root / "config_complete.yaml",
-        project_root / "examples" / "config_example.yaml",
-    ]
-    for p in candidates:
-        if p.exists():
-            return p
+def resolve_path(p: Path, project_root: Path) -> Path:
+    if p.is_absolute():
+        return p
+
+    cwd_candidate = (Path.cwd() / p).resolve()
+    if cwd_candidate.exists():
+        return cwd_candidate
+
+    return (project_root / p).resolve()
+
+
+def find_default_config(project_root: Path) -> Path:
+    baseline = (
+        project_root
+        / "Analysis_Workspace"
+        / "01_protocols"
+        / "01_Baseline"
+        / "protocol_baseline_full.yaml"
+    )
+
+    if baseline.exists():
+        return baseline
+
     raise FileNotFoundError(
-        "No default config found. Expected one of: "
-        "config_complete.yaml or examples/config_example.yaml"
+        "No default protocol found.\n"
+        "Expected:\n"
+        f"  {baseline}\n"
+        "Provide --config <path/to/protocol.yaml>."
     )
 
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: python run_analysis.py <audio_file> [--config path/to/config.yaml] [--output path/to/output_dir]")
-        sys.exit(1)
-
-    audio_file = Path(sys.argv[1])
-    if not audio_file.exists():
-        print(f"File not found: {audio_file}")
-        sys.exit(1)
-
-    # Parse optional args (simple, no external deps)
+def main(argv=None) -> int:
     project_root = Path(__file__).resolve().parent
-    config_path = None
-    output_dir = None
 
-    args = sys.argv[2:]
-    i = 0
-    while i < len(args):
-        if args[i] == "--config" and i + 1 < len(args):
-            config_path = Path(args[i + 1])
-            i += 2
-        elif args[i] == "--output" and i + 1 < len(args):
-            output_dir = Path(args[i + 1])
-            i += 2
-        else:
-            print(f"Unknown argument: {args[i]}")
-            sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description="Run SAT analysis on an audio file using a protocol YAML."
+    )
+    parser.add_argument("audio_file", type=Path, help="Input audio file")
+    parser.add_argument("--config", type=Path, help="Protocol YAML file")
+    parser.add_argument("--output", type=Path, help="Output directory")
+    args = parser.parse_args(argv)
 
-    if config_path is None:
-        config_path = _find_default_config(project_root)
+    audio_file = resolve_path(args.audio_file, project_root)
+    if not audio_file.exists():
+        print(f"Audio file not found: {audio_file}", file=sys.stderr)
+        return 1
 
-    if not config_path.is_absolute():
-        config_path = (project_root / config_path).resolve()
+    if args.config is None:
+        config_path = find_default_config(project_root)
+    else:
+        config_path = resolve_path(args.config, project_root)
 
-    config = ConfigLoader.load(config_path)
+    if not config_path.exists():
+        print(f"Config file not found: {config_path}", file=sys.stderr)
+        return 1
 
-    runner = AnalysisRunner(config)
-
+    output_dir = args.output
     if output_dir is None:
         output_dir = project_root / "output" / audio_file.stem
+    output_dir = resolve_path(output_dir, project_root)
 
+    config = ConfigLoader.load(config_path)
+    runner = AnalysisRunner(config)
     runner.run(audio_file, output_dir)
+
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

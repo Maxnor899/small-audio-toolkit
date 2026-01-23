@@ -1,0 +1,1023 @@
+{
+  "channels": {
+    "mono": {
+      "applicability": {
+        "amplitude_modulation_am": {
+          "diagnostics": [],
+          "family": "modulation",
+          "label": "Amplitude modulation (AM)",
+          "method_id": "amplitude_modulation_am",
+          "missing_inputs": {},
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "modulation.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "Δ",
+            "V"
+          ],
+          "status": "applicable",
+          "unstable_inputs": {}
+        },
+        "clock_plus_data_temporal_encoding": {
+          "diagnostics": [],
+          "family": "time_domain",
+          "label": "Clock + data temporal encoding",
+          "method_id": "clock_plus_data_temporal_encoding",
+          "missing_inputs": {},
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "time_domain.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "E",
+            "Δ"
+          ],
+          "status": "applicable",
+          "unstable_inputs": {}
+        },
+        "duration_based_morse_like": {
+          "diagnostics": [],
+          "family": "time_domain",
+          "label": "Duration-based (Morse-like)",
+          "method_id": "duration_based_morse_like",
+          "missing_inputs": {},
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "time_domain.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "E",
+            "Δ"
+          ],
+          "status": "applicable",
+          "unstable_inputs": {}
+        },
+        "entropy_based_encoding": {
+          "diagnostics": [],
+          "family": "statistical",
+          "label": "Entropy-based encoding",
+          "method_id": "entropy_based_encoding",
+          "missing_inputs": {},
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "statistical.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "V"
+          ],
+          "status": "applicable",
+          "unstable_inputs": {}
+        },
+        "frame_based_temporal_encoding": {
+          "diagnostics": [],
+          "family": "time_domain",
+          "label": "Frame-based temporal encoding",
+          "method_id": "frame_based_temporal_encoding",
+          "missing_inputs": {},
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "time_domain.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "E",
+            "Δ"
+          ],
+          "status": "applicable",
+          "unstable_inputs": {}
+        },
+        "frequency_displacement": {
+          "diagnostics": [],
+          "family": "frequency_domain",
+          "label": "Frequency displacement",
+          "method_id": "frequency_displacement",
+          "missing_inputs": {},
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "frequency_domain.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "V"
+          ],
+          "status": "applicable",
+          "unstable_inputs": {}
+        },
+        "frequency_modulation_fm": {
+          "diagnostics": [],
+          "family": "modulation",
+          "label": "Frequency modulation (FM)",
+          "method_id": "frequency_modulation_fm",
+          "missing_inputs": {},
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "modulation.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "Δ",
+            "V"
+          ],
+          "status": "applicable",
+          "unstable_inputs": {}
+        },
+        "frequency_presence_fsk_like": {
+          "diagnostics": [],
+          "family": "frequency_domain",
+          "label": "Frequency presence (FSK-like)",
+          "method_id": "frequency_presence_fsk_like",
+          "missing_inputs": {},
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "frequency_domain.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "V"
+          ],
+          "status": "applicable",
+          "unstable_inputs": {}
+        },
+        "harmonic_structure_encoding": {
+          "diagnostics": [],
+          "family": "frequency_domain",
+          "label": "Harmonic structure encoding",
+          "method_id": "harmonic_structure_encoding",
+          "missing_inputs": {},
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "frequency_domain.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "V"
+          ],
+          "status": "applicable",
+          "unstable_inputs": {}
+        },
+        "inter_channel_phase_encoding": {
+          "diagnostics": [
+            "R: no inter-channel analyses in SAT results"
+          ],
+          "family": "inter_channel",
+          "label": "Inter-channel phase encoding",
+          "method_id": "inter_channel_phase_encoding",
+          "missing_inputs": {
+            "R": "no inter-channel analyses in SAT results"
+          },
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "inter_channel.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "R"
+          ],
+          "status": "missing_inputs",
+          "unstable_inputs": {}
+        },
+        "inter_channel_time_delay": {
+          "diagnostics": [
+            "R: no inter-channel analyses in SAT results"
+          ],
+          "family": "inter_channel",
+          "label": "Inter-channel time delay",
+          "method_id": "inter_channel_time_delay",
+          "missing_inputs": {
+            "R": "no inter-channel analyses in SAT results"
+          },
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "inter_channel.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "E",
+            "Δ",
+            "R"
+          ],
+          "status": "missing_inputs",
+          "unstable_inputs": {}
+        },
+        "left_right_difference_encoding": {
+          "diagnostics": [
+            "R: no inter-channel analyses in SAT results"
+          ],
+          "family": "inter_channel",
+          "label": "Left–right difference encoding",
+          "method_id": "left_right_difference_encoding",
+          "missing_inputs": {
+            "R": "no inter-channel analyses in SAT results"
+          },
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "inter_channel.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "V",
+            "R"
+          ],
+          "status": "missing_inputs",
+          "unstable_inputs": {}
+        },
+        "multi_band_temporal_encoding": {
+          "diagnostics": [],
+          "family": "time_frequency",
+          "label": "Multi-band temporal encoding",
+          "method_id": "multi_band_temporal_encoding",
+          "missing_inputs": {},
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "time_frequency.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "E",
+            "Δ",
+            "V"
+          ],
+          "status": "applicable",
+          "unstable_inputs": {}
+        },
+        "multi_scale_wavelet_encoding": {
+          "diagnostics": [
+            "M: using proxies only (set accept_matrix_proxies=True to allow)"
+          ],
+          "family": "time_frequency",
+          "label": "Multi-scale (wavelet) encoding",
+          "method_id": "multi_scale_wavelet_encoding",
+          "missing_inputs": {},
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "time_frequency.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "M"
+          ],
+          "status": "underconstrained",
+          "unstable_inputs": {
+            "M": "using proxies only (set accept_matrix_proxies=True to allow)"
+          }
+        },
+        "phase_modulation": {
+          "diagnostics": [
+            "R: no inter-channel analyses in SAT results"
+          ],
+          "family": "modulation",
+          "label": "Phase modulation",
+          "method_id": "phase_modulation",
+          "missing_inputs": {
+            "R": "no inter-channel analyses in SAT results"
+          },
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "modulation.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "V",
+            "R"
+          ],
+          "status": "missing_inputs",
+          "unstable_inputs": {}
+        },
+        "pulse_duration_binary": {
+          "diagnostics": [],
+          "family": "time_domain",
+          "label": "Pulse duration binary",
+          "method_id": "pulse_duration_binary",
+          "missing_inputs": {},
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "time_domain.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "E",
+            "Δ",
+            "S"
+          ],
+          "status": "applicable",
+          "unstable_inputs": {}
+        },
+        "pulse_presence_absence": {
+          "diagnostics": [],
+          "family": "time_domain",
+          "label": "Pulse presence / absence",
+          "method_id": "pulse_presence_absence",
+          "missing_inputs": {},
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "time_domain.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "E",
+            "S"
+          ],
+          "status": "applicable",
+          "unstable_inputs": {}
+        },
+        "redundancy_compressibility_encoding": {
+          "diagnostics": [],
+          "family": "statistical",
+          "label": "Redundancy / compressibility encoding",
+          "method_id": "redundancy_compressibility_encoding",
+          "missing_inputs": {},
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "statistical.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "V"
+          ],
+          "status": "applicable",
+          "unstable_inputs": {}
+        },
+        "residual_noise_floor_encoding": {
+          "diagnostics": [],
+          "family": "statistical",
+          "label": "Residual / noise-floor encoding",
+          "method_id": "residual_noise_floor_encoding",
+          "missing_inputs": {},
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "statistical.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [],
+          "status": "applicable",
+          "unstable_inputs": {}
+        },
+        "spectral_stability_encoding": {
+          "diagnostics": [
+            "M: using proxies only (set accept_matrix_proxies=True to allow)"
+          ],
+          "family": "frequency_domain",
+          "label": "Spectral stability encoding",
+          "method_id": "spectral_stability_encoding",
+          "missing_inputs": {},
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "frequency_domain.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "V",
+            "M"
+          ],
+          "status": "underconstrained",
+          "unstable_inputs": {
+            "M": "using proxies only (set accept_matrix_proxies=True to allow)"
+          }
+        },
+        "stft_pattern_encoding": {
+          "diagnostics": [
+            "M: using proxies only (set accept_matrix_proxies=True to allow)"
+          ],
+          "family": "time_frequency",
+          "label": "STFT pattern encoding",
+          "method_id": "stft_pattern_encoding",
+          "missing_inputs": {},
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "time_frequency.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "M"
+          ],
+          "status": "underconstrained",
+          "unstable_inputs": {
+            "M": "using proxies only (set accept_matrix_proxies=True to allow)"
+          }
+        },
+        "temporal_ratio_encoding": {
+          "diagnostics": [],
+          "family": "time_domain",
+          "label": "Temporal ratio encoding",
+          "method_id": "temporal_ratio_encoding",
+          "missing_inputs": {},
+          "provenance": {
+            "bundle_channel": "mono",
+            "method_source": "time_domain.yaml",
+            "params_version": "1.0.0",
+            "thresholds": {
+              "accept_matrix_proxies": false,
+              "max_cv": 1.0,
+              "min_regularity": 0.1,
+              "min_relation_types": 1,
+              "min_symbol_balance": 0.2,
+              "min_vector_sources": 3
+            }
+          },
+          "required_inputs": [
+            "E",
+            "Δ"
+          ],
+          "status": "applicable",
+          "unstable_inputs": {}
+        }
+      },
+      "channel": "mono",
+      "experiments": {
+        "amplitude_modulation_am": {
+          "artifacts": {},
+          "decoder_version": "registry",
+          "diagnostics": [
+            "Decoder not implemented for method_id 'amplitude_modulation_am'."
+          ],
+          "inputs_provenance": {},
+          "method_id": "amplitude_modulation_am",
+          "parameters_used": {},
+          "sensitivity": null,
+          "status": "refused"
+        },
+        "clock_plus_data_temporal_encoding": {
+          "artifacts": {},
+          "decoder_version": "registry",
+          "diagnostics": [
+            "Decoder not implemented for method_id 'clock_plus_data_temporal_encoding'."
+          ],
+          "inputs_provenance": {},
+          "method_id": "clock_plus_data_temporal_encoding",
+          "parameters_used": {},
+          "sensitivity": null,
+          "status": "refused"
+        },
+        "duration_based_morse_like": {
+          "artifacts": {
+            "bitstream": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "symbol_stream": [
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-",
+              "-"
+            ]
+          },
+          "decoder_version": "0.1.0",
+          "diagnostics": [
+            "Intervals transformed: 99",
+            "dot_max=0.12, dash_min=0.2, letter_gap_min=None, word_gap_min=None",
+            "symbol counts: dot=0, dash=99, ambiguous=0, letter_sep=0, word_sep=0",
+            "bitstream mapping: dot_bit=0, dash_bit=1",
+            "bitstream counts: bits=99, none=0 (ambiguous + separators map to None)"
+          ],
+          "inputs_provenance": {
+            "Δ": {
+              "metrics": {
+                "coefficient_of_variation": 0.19916351113457625,
+                "interval_max": 1768.0,
+                "interval_mean": 1435.5757575757575,
+                "interval_min": 1002.0,
+                "interval_std": 285.9143083784671,
+                "num_intervals": 99.0
+              },
+              "provenance": {
+                "builder_version": "1.0.0",
+                "sat_methods": [
+                  "pulse_detection"
+                ],
+                "sat_params": {
+                  "pulse_detection": {
+                    "min_distance": 1000,
+                    "threshold": 0.5
+                  }
+                },
+                "timestamp": "2026-01-23T10:35:01.093767Z"
+              }
+            }
+          },
+          "method_id": "duration_based_morse_like",
+          "parameters_used": {
+            "dash_bit": 1,
+            "dash_min": 0.2,
+            "dot_bit": 0,
+            "dot_max": 0.12,
+            "letter_gap_min": null,
+            "word_gap_min": null
+          },
+          "sensitivity": null,
+          "status": "success"
+        },
+        "entropy_based_encoding": {
+          "artifacts": {},
+          "decoder_version": "registry",
+          "diagnostics": [
+            "Decoder not implemented for method_id 'entropy_based_encoding'."
+          ],
+          "inputs_provenance": {},
+          "method_id": "entropy_based_encoding",
+          "parameters_used": {},
+          "sensitivity": null,
+          "status": "refused"
+        },
+        "frame_based_temporal_encoding": {
+          "artifacts": {},
+          "decoder_version": "registry",
+          "diagnostics": [
+            "Decoder not implemented for method_id 'frame_based_temporal_encoding'."
+          ],
+          "inputs_provenance": {},
+          "method_id": "frame_based_temporal_encoding",
+          "parameters_used": {},
+          "sensitivity": null,
+          "status": "refused"
+        },
+        "frequency_displacement": {
+          "artifacts": {},
+          "decoder_version": "registry",
+          "diagnostics": [
+            "Decoder not implemented for method_id 'frequency_displacement'."
+          ],
+          "inputs_provenance": {},
+          "method_id": "frequency_displacement",
+          "parameters_used": {},
+          "sensitivity": null,
+          "status": "refused"
+        },
+        "frequency_modulation_fm": {
+          "artifacts": {},
+          "decoder_version": "registry",
+          "diagnostics": [
+            "Decoder not implemented for method_id 'frequency_modulation_fm'."
+          ],
+          "inputs_provenance": {},
+          "method_id": "frequency_modulation_fm",
+          "parameters_used": {},
+          "sensitivity": null,
+          "status": "refused"
+        },
+        "frequency_presence_fsk_like": {
+          "artifacts": {},
+          "decoder_version": "registry",
+          "diagnostics": [
+            "Decoder not implemented for method_id 'frequency_presence_fsk_like'."
+          ],
+          "inputs_provenance": {},
+          "method_id": "frequency_presence_fsk_like",
+          "parameters_used": {},
+          "sensitivity": null,
+          "status": "refused"
+        },
+        "harmonic_structure_encoding": {
+          "artifacts": {},
+          "decoder_version": "registry",
+          "diagnostics": [
+            "Decoder not implemented for method_id 'harmonic_structure_encoding'."
+          ],
+          "inputs_provenance": {},
+          "method_id": "harmonic_structure_encoding",
+          "parameters_used": {},
+          "sensitivity": null,
+          "status": "refused"
+        },
+        "multi_band_temporal_encoding": {
+          "artifacts": {},
+          "decoder_version": "registry",
+          "diagnostics": [
+            "Decoder not implemented for method_id 'multi_band_temporal_encoding'."
+          ],
+          "inputs_provenance": {},
+          "method_id": "multi_band_temporal_encoding",
+          "parameters_used": {},
+          "sensitivity": null,
+          "status": "refused"
+        },
+        "pulse_duration_binary": {
+          "artifacts": {},
+          "decoder_version": "registry",
+          "diagnostics": [
+            "Decoder not implemented for method_id 'pulse_duration_binary'."
+          ],
+          "inputs_provenance": {},
+          "method_id": "pulse_duration_binary",
+          "parameters_used": {},
+          "sensitivity": null,
+          "status": "refused"
+        },
+        "pulse_presence_absence": {
+          "artifacts": {},
+          "decoder_version": "registry",
+          "diagnostics": [
+            "Decoder not implemented for method_id 'pulse_presence_absence'."
+          ],
+          "inputs_provenance": {},
+          "method_id": "pulse_presence_absence",
+          "parameters_used": {},
+          "sensitivity": null,
+          "status": "refused"
+        },
+        "redundancy_compressibility_encoding": {
+          "artifacts": {},
+          "decoder_version": "registry",
+          "diagnostics": [
+            "Decoder not implemented for method_id 'redundancy_compressibility_encoding'."
+          ],
+          "inputs_provenance": {},
+          "method_id": "redundancy_compressibility_encoding",
+          "parameters_used": {},
+          "sensitivity": null,
+          "status": "refused"
+        },
+        "residual_noise_floor_encoding": {
+          "artifacts": {},
+          "decoder_version": "registry",
+          "diagnostics": [
+            "Decoder not implemented for method_id 'residual_noise_floor_encoding'."
+          ],
+          "inputs_provenance": {},
+          "method_id": "residual_noise_floor_encoding",
+          "parameters_used": {},
+          "sensitivity": null,
+          "status": "refused"
+        },
+        "temporal_ratio_encoding": {
+          "artifacts": {},
+          "decoder_version": "registry",
+          "diagnostics": [
+            "Decoder not implemented for method_id 'temporal_ratio_encoding'."
+          ],
+          "inputs_provenance": {},
+          "method_id": "temporal_ratio_encoding",
+          "parameters_used": {},
+          "sensitivity": null,
+          "status": "refused"
+        }
+      }
+    }
+  },
+  "matrix_schema_version": "1.0",
+  "sat_source": "C:\\MORSE_AM\\results.json"
+}

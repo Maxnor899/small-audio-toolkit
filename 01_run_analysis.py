@@ -2,6 +2,7 @@
 
 import argparse
 import sys
+import shutil
 from pathlib import Path
 
 from audio_toolkit.config.loader import ConfigLoader
@@ -75,7 +76,7 @@ def main(argv=None) -> int:
     # Archive the protocol used for this run (traceability only)
     protocol_dst = output_dir / "analysis_protocol_used.yaml"
     shutil.copy2(config_path, protocol_dst)
-    
+
     config = ConfigLoader.load(config_path)
     runner = AnalysisRunner(config)
     runner.run(audio_file, output_dir)

@@ -69,6 +69,13 @@ def main(argv=None) -> int:
         output_dir = project_root / "output" / audio_file.stem
     output_dir = resolve_path(output_dir, project_root)
 
+    # Ensure output dir exists
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Archive the protocol used for this run (traceability only)
+    protocol_dst = output_dir / "analysis_protocol_used.yaml"
+    shutil.copy2(config_path, protocol_dst)
+    
     config = ConfigLoader.load(config_path)
     runner = AnalysisRunner(config)
     runner.run(audio_file, output_dir)

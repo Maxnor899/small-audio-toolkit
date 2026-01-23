@@ -1,0 +1,117 @@
+version: "1.0"
+
+channels:
+  analyze:
+    - mono
+
+preprocessing:
+  normalize:
+    enabled: true
+    method: rms
+    target_level: -20.0
+
+  segmentation:
+    enabled: false
+
+analyses:
+  time_frequency:
+    enabled: true
+    methods:
+      - name: stft
+        params:
+          n_fft: 2048
+          hop_length: 64
+          window: hann
+
+      - name: band_stability
+        params:
+          bands:
+            - [8000, 16000]
+            - [4000, 8000]
+            - [2000, 4000]
+            - [1000, 2000]
+            - [500, 1000]
+
+  spectral:
+    enabled: true
+    methods:
+      - name: fft_global
+        params:
+          window: hann
+
+      - name: peak_detection
+        params:
+          prominence: 0.05
+          distance: 50
+
+      - name: spectral_centroid
+      - name: spectral_bandwidth
+      - name: spectral_flatness
+
+  temporal:
+    enabled: true
+    methods:
+      - name: envelope
+        params:
+          method: hilbert
+
+      - name: autocorrelation
+        params:
+          max_lag: 5000
+          normalize: true
+          max_samples: 100000
+
+      - name: pulse_detection
+        params:
+          threshold: 0.5
+          min_distance: 1000
+
+  modulation:
+    enabled: true
+    methods:
+      - name: am_detection
+      - name: fm_detection
+      - name: phase_analysis
+
+  information:
+    enabled: true
+    methods:
+      - name: shannon_entropy
+        params:
+          num_bins: 256
+
+      - name: local_entropy
+        params:
+          window_size: 4096
+          hop_length: 1024
+          num_bins: 64
+
+  steganography:
+    enabled: true
+    methods:
+      - name: lsb_analysis
+      - name: quantization_noise
+      - name: signal_residual
+        params:
+          cutoff_freq: 1000
+      - name: statistical_anomalies
+        params:
+          z_threshold: 3.0
+          num_bins: 100
+      - name: parity_analysis
+
+  inter_channel:
+    enabled: false
+
+  meta_analysis:
+    enabled: false
+
+visualization:
+  enabled: true
+  formats: ["png"]
+  dpi: 150
+  figsize: [14, 10]
+
+output:
+  save_raw_data: true
+  save_config: true

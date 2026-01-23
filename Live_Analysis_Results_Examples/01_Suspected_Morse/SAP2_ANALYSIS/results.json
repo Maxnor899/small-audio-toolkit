@@ -1,0 +1,555 @@
+{
+  "timestamp": "2026-01-23T11:16:32.449349",
+  "metadata": {
+    "audio_file": "C:\\Autres_Devs\\small-audio-toolkit\\Analysis_Workspace\\04_input_sounds\\morse_hidden_am.wav",
+    "audio_info": {
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration": 15.0,
+      "frames": 330750,
+      "format": "WAV",
+      "subtype": "PCM_16"
+    },
+    "sample_rate": 22050,
+    "channels": [
+      "mono"
+    ],
+    "preprocessing": {
+      "normalize": {
+        "enabled": true,
+        "method": "rms",
+        "target_level": -20.0
+      },
+      "segmentation": {
+        "enabled": false
+      }
+    },
+    "config_version": "1.0"
+  },
+  "results": {
+    "time_frequency": [
+      {
+        "method": "stft",
+        "measurements": {
+          "mono": {
+            "num_time_frames": 5169,
+            "num_freq_bins": 1025,
+            "frequency_resolution": 10.7666015625,
+            "time_resolution": 0.0029024943310657567,
+            "mean_magnitude": 0.00016391844837926328,
+            "max_magnitude": 0.07171870768070221,
+            "dominant_freq_mean": 4995.703125,
+            "dominant_freq_std": 0.0,
+            "spectral_flux_mean": 0.00069080526009202,
+            "spectral_flux_max": 0.0064562358893454075,
+            "temporal_stability": 0.808703601360321
+          }
+        },
+        "metrics": {
+          "window_size": 2048,
+          "hop_length": 64,
+          "window_type": "hann"
+        },
+        "anomaly_score": null
+      },
+      {
+        "method": "band_stability",
+        "measurements": {
+          "mono": {
+            "8000-16000Hz": {
+              "mean_energy": 0.0015680321957916021,
+              "stability_score": 0.0,
+              "variation_coefficient": 1.3280423879623413
+            },
+            "4000-8000Hz": {
+              "mean_energy": 0.1631368100643158,
+              "stability_score": 0.8319956064224243,
+              "variation_coefficient": 0.1680043637752533
+            },
+            "2000-4000Hz": {
+              "mean_energy": 0.0022368913050740957,
+              "stability_score": 0.0,
+              "variation_coefficient": 1.3396906852722168
+            },
+            "1000-2000Hz": {
+              "mean_energy": 0.0006915003177709877,
+              "stability_score": 0.0,
+              "variation_coefficient": 1.3316386938095093
+            },
+            "500-1000Hz": {
+              "mean_energy": 0.000314761622576043,
+              "stability_score": 0.0,
+              "variation_coefficient": 1.325590968132019
+            }
+          }
+        },
+        "metrics": {
+          "num_bands": 5,
+          "bands": [
+            [
+              8000,
+              16000
+            ],
+            [
+              4000,
+              8000
+            ],
+            [
+              2000,
+              4000
+            ],
+            [
+              1000,
+              2000
+            ],
+            [
+              500,
+              1000
+            ]
+          ]
+        },
+        "anomaly_score": null
+      }
+    ],
+    "spectral": [
+      {
+        "method": "fft_global",
+        "measurements": {
+          "mono": {
+            "n_fft": 330750,
+            "frequency_resolution": 0.06666666666666667,
+            "peak_frequency": 5000.0,
+            "peak_magnitude": 11610.32938367877,
+            "spectral_energy": 205136793.77904138
+          }
+        },
+        "metrics": {
+          "window": "hann",
+          "sample_rate": 22050
+        },
+        "anomaly_score": null
+      },
+      {
+        "method": "peak_detection",
+        "measurements": {
+          "mono": {
+            "num_peaks": 2645,
+            "peak_frequencies": [
+              2.7333333333333334,
+              6.266666666666667,
+              10.933333333333334,
+              14.533333333333333,
+              18.733333333333334,
+              22.266666666666666,
+              27.733333333333334,
+              31.266666666666666,
+              35.93333333333333,
+              39.53333333333333,
+              43.733333333333334,
+              47.266666666666666,
+              52.733333333333334,
+              56.266666666666666,
+              60.93333333333333,
+              64.53333333333333,
+              68.73333333333333,
+              72.26666666666667,
+              77.73333333333333,
+              81.26666666666667
+            ],
+            "peak_magnitudes": [
+              0.2971762418746948,
+              1.8584715127944946,
+              0.2746685743331909,
+              0.27023252844810486,
+              1.857487440109253,
+              0.29691585898399353,
+              0.2967190146446228,
+              1.8545202016830444,
+              0.27375274896621704,
+              0.26888349652290344,
+              1.8400856256484985,
+              0.2898881733417511,
+              0.30500245094299316,
+              1.8802419900894165,
+              0.2764982581138611,
+              0.27153563499450684,
+              1.8637861013412476,
+              0.297637939453125,
+              0.29702532291412354,
+              1.8545281887054443
+            ],
+            "dominant_frequency": 2.7333333333333334,
+            "frequency_spread": 3183.244315750439
+          }
+        },
+        "metrics": {
+          "prominence": 0.05,
+          "distance": 50
+        },
+        "anomaly_score": null
+      },
+      {
+        "method": "spectral_centroid",
+        "measurements": {
+          "mono": {
+            "spectral_centroid": 5031.469495775186,
+            "normalized_centroid": 0.45636911526305546
+          }
+        },
+        "metrics": null,
+        "anomaly_score": null
+      },
+      {
+        "method": "spectral_bandwidth",
+        "measurements": {
+          "mono": {
+            "spectral_bandwidth": 13.033883663293114,
+            "spectral_centroid_Hz": 4999.997170154755
+          }
+        },
+        "metrics": null,
+        "anomaly_score": null
+      },
+      {
+        "method": "spectral_flatness",
+        "measurements": {
+          "mono": {
+            "spectral_flatness": 0.18641670048236847,
+            "tonality": 0.8135833144187927
+          }
+        },
+        "metrics": null,
+        "anomaly_score": null
+      }
+    ],
+    "temporal": [
+      {
+        "method": "envelope",
+        "measurements": {
+          "mono": {
+            "envelope_mean": 0.14022549986839294,
+            "envelope_max": 0.16397123038768768,
+            "envelope_std": 0.018352655693888664,
+            "envelope_length": 330750
+          }
+        },
+        "metrics": {
+          "method": "hilbert"
+        },
+        "anomaly_score": null
+      },
+      {
+        "method": "autocorrelation",
+        "measurements": {
+          "mono": {
+            "autocorr_max": 0.9974296689033508,
+            "autocorr_mean": -2.481238880136516e-05,
+            "first_peak_lag": 4,
+            "num_peaks": 1133,
+            "periodicity_score": 0.9974296689033508
+          }
+        },
+        "metrics": {
+          "max_lag": 5000,
+          "normalized": true,
+          "max_samples": 100000
+        },
+        "anomaly_score": null
+      },
+      {
+        "method": "pulse_detection",
+        "measurements": {
+          "mono": {
+            "num_pulses": 228,
+            "pulse_positions": [
+              2,
+              1004,
+              2402,
+              3650,
+              5290,
+              6932,
+              8436,
+              9578,
+              10586,
+              12346,
+              14114,
+              15874,
+              17642,
+              19402,
+              21170,
+              22930,
+              24572,
+              26076,
+              27218,
+              28226,
+              29986,
+              31754,
+              32756,
+              34154,
+              35402,
+              37042,
+              38684,
+              40188,
+              41330,
+              42338,
+              43340,
+              44738,
+              45986,
+              47626,
+              49394,
+              51154,
+              52796,
+              54300,
+              55442,
+              56450,
+              57452,
+              58850,
+              60098,
+              61738,
+              63506,
+              65266,
+              67034,
+              68036,
+              69434,
+              70682,
+              72322,
+              73964,
+              75728,
+              77125,
+              78374,
+              80138,
+              81146,
+              82148,
+              83546,
+              84794,
+              86434,
+              88202,
+              89962,
+              91730,
+              92732,
+              94130,
+              95378,
+              97018,
+              98786,
+              99788,
+              101186,
+              102434,
+              104074,
+              105716,
+              107220,
+              108362,
+              109370,
+              110372,
+              111770,
+              113018,
+              114658,
+              116426,
+              117428,
+              118826,
+              120074,
+              121714,
+              123482,
+              124484,
+              125882,
+              127130,
+              128770,
+              130412,
+              131916,
+              133058,
+              134066,
+              135826,
+              137594,
+              139354,
+              141122,
+              142124
+            ],
+            "interval_mean": 1453.1453744493392,
+            "interval_std": 285.4084653301799,
+            "regularity_score": 0.8035926271737857
+          }
+        },
+        "metrics": {
+          "threshold": 0.5,
+          "min_distance": 1000
+        },
+        "anomaly_score": null
+      }
+    ],
+    "modulation": [
+      {
+        "method": "am_detection",
+        "measurements": {
+          "mono": {
+            "modulation_detected": false,
+            "num_modulation_frequencies": 0,
+            "modulation_frequencies": [],
+            "modulation_magnitudes": [],
+            "dominant_modulation_freq": 0.0,
+            "modulation_depth": 0.330886572599411,
+            "modulation_index": 0.13087958097457886,
+            "envelope_mean": 0.14022549986839294,
+            "envelope_std": 0.018352655693888664
+          }
+        },
+        "metrics": null,
+        "anomaly_score": null
+      },
+      {
+        "method": "fm_detection",
+        "measurements": {
+          "mono": {
+            "fm_detected": "False",
+            "carrier_frequency_mean": 4998.56982421875,
+            "frequency_deviation": 37.99153137207031,
+            "frequency_range": 137.0849609375,
+            "frequency_std": 37.99153137207031,
+            "num_fm_components": 0,
+            "fm_modulation_frequencies": [],
+            "modulation_index_fm": 0.0076004802249372005
+          }
+        },
+        "metrics": null,
+        "anomaly_score": null
+      },
+      {
+        "method": "phase_analysis",
+        "measurements": {
+          "mono": {
+            "phase_mean": -0.003560908604413271,
+            "phase_std": 1.8138560056686401,
+            "phase_range": 6.269561767578125,
+            "unwrapped_phase_total": 471102.5,
+            "phase_coherence": 0.9923995137214661,
+            "num_phase_jumps": 75000,
+            "phase_jump_rate": 5000.0
+          }
+        },
+        "metrics": null,
+        "anomaly_score": null
+      }
+    ],
+    "information": [
+      {
+        "method": "shannon_entropy",
+        "measurements": {
+          "mono": {
+            "shannon_entropy": 7.793355553380963,
+            "max_entropy": 8.0,
+            "normalized_entropy": 0.9741694441726204,
+            "num_bins": 256
+          }
+        },
+        "metrics": {
+          "num_bins": 256
+        },
+        "anomaly_score": null
+      },
+      {
+        "method": "local_entropy",
+        "measurements": {
+          "mono": {
+            "mean_entropy": 5.793566073368228,
+            "std_entropy": 0.07974365679194066,
+            "min_entropy": 5.483340263583434,
+            "max_entropy": 5.862786069674545,
+            "num_windows": 192,
+            "entropy_variation": 0.013764174910704585
+          }
+        },
+        "metrics": {
+          "window_size": 4096,
+          "hop_length": 1024,
+          "num_bins": 64
+        },
+        "anomaly_score": null
+      }
+    ],
+    "steganography": [
+      {
+        "method": "lsb_analysis",
+        "measurements": {
+          "mono": {
+            "lsb_mean": 0.49781,
+            "lsb_std": 0.49999520387699725,
+            "transition_rate": 0.47946,
+            "mean_zero_run": 2.094731573019647,
+            "mean_one_run": 2.0765444458348976,
+            "samples_analyzed": 100000
+          }
+        },
+        "metrics": null,
+        "anomaly_score": null
+      },
+      {
+        "method": "quantization_noise",
+        "measurements": {
+          "mono": {
+            "noise_power": 7.866256535038474e-10,
+            "noise_std": 2.8046850275131874e-05,
+            "autocorr_peak": 0.9794288873672485,
+            "spectral_flatness": 0.2569355070590973,
+            "samples_analyzed": 50000
+          }
+        },
+        "metrics": null,
+        "anomaly_score": null
+      },
+      {
+        "method": "signal_residual",
+        "measurements": {
+          "mono": {
+            "signal_power": 1.4906111479250875e-08,
+            "residual_power": 0.010198285128085256,
+            "snr_db": -58.35162789362286,
+            "residual_peak_freq": 5000.058,
+            "energy_ratio": 679608.7808748151,
+            "samples_analyzed": 100000
+          }
+        },
+        "metrics": {
+          "cutoff_freq": 1000
+        },
+        "anomaly_score": null
+      },
+      {
+        "method": "statistical_anomalies",
+        "measurements": {
+          "mono": {
+            "num_outliers": 0,
+            "outlier_rate": 0.0,
+            "max_z_score": 1.575815200805664,
+            "mean_z_score": 0.8928558826446533,
+            "chi2_statistic": 99304.39389866598,
+            "chi2_pvalue": 0.0,
+            "normality_test": "False",
+            "samples_analyzed": 100000
+          }
+        },
+        "metrics": {
+          "z_threshold": 3.0,
+          "num_bins": 100
+        },
+        "anomaly_score": null
+      },
+      {
+        "method": "parity_analysis",
+        "measurements": {
+          "mono": {
+            "parity_mean": 0.49781,
+            "parity_std": 0.49999520387699725,
+            "transition_rate": 0.4794647946479465,
+            "transition_anomaly": 0.0205352053520535,
+            "mean_run_length": 2.0856362233299266,
+            "std_run_length": 1.4334637758621662,
+            "chi2_statistic": 1.91844,
+            "chi2_pvalue": 0.16602873582203959,
+            "appears_random": "True",
+            "samples_analyzed": 100000
+          }
+        },
+        "metrics": null,
+        "anomaly_score": null
+      }
+    ]
+  }
+}

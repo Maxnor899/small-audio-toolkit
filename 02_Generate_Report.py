@@ -92,31 +92,23 @@ def try_load_family_context(contexts_dir: Path, family: str) -> Tuple[Optional[d
 
 
 def iter_result_methods(results: dict):
-    """Yield (family, method_dict) for each method result present in results.json."""
-    analyses = results.get("analyses")
-    if isinstance(analyses, list):
-        for entry in analyses:
-            if not isinstance(entry, dict):
-                continue
-            fam = entry.get("family")
-            if not isinstance(fam, str):
-                fam = "unknown"
-            yield fam, entry
+    """Yield (family, method_dict) for each method result present in results.json.
+    
+    The actual structure produced by ResultsAggregator is:
+    results["results"][category] = [list of method dicts]
+    """
+    results_data = results.get("results")
+    if not isinstance(results_data, dict):
         return
-
-    families = results.get("families")
-    if isinstance(families, dict):
-        for fam, fam_data in families.items():
-            if not isinstance(fam, str):
-                continue
-            if not isinstance(fam_data, dict):
-                continue
-            methods = fam_data.get("methods")
-            if isinstance(methods, list):
-                for m in methods:
-                    if isinstance(m, dict):
-                        yield fam, m
-        return
+    
+    # results_data is a dict with keys = categories/families (e.g., "temporal", "spectral")
+    # and values = lists of method result dicts
+    for family, methods_list in results_data.items():
+        if not isinstance(methods_list, list):
+            continue
+        for method_dict in methods_list:
+            if isinstance(method_dict, dict):
+                yield family, method_dict
 
 
 def format_value(v: Any) -> str:
@@ -133,39 +125,63 @@ def format_value(v: Any) -> str:
 
 def _header_lines(results: dict, title: str) -> List[str]:
     md = [f"# {title}", ""]
-    meta = results.get("meta")
-    if isinstance(meta, dict):
-        src = meta.get("source_file")
-        if src:
-            md.append(f"- Source: `{src}`")
-        ts = meta.get("timestamp")
-        if ts:
-            md.append(f"- Timestamp: `{ts}`")
-        md.append("")
+    
+    # Timestamp is at root level
+    ts = results.get("timestamp")
+    if ts:
+        md.append(f"- Timestamp: `{ts}`")
+    
+    # Source file is in metadata.audio_file
+    metadata = results.get("metadata", {})
+    if isinstance(metadata, dict):
+        audio_file = metadata.get("audio_file")
+        if audio_file:
+            md.append(f"- Source: `{audio_file}`")
+    
+    md.append("")
     return md
 
 
 def _file_information_lines(results: dict) -> List[str]:
     md: List[str] = []
-    info = results.get("file")
-    if isinstance(info, dict):
+    metadata = results.get("metadata", {})
+    if not isinstance(metadata, dict):
+        return md
+    
+    audio_info = metadata.get("audio_info")
+    if isinstance(audio_info, dict):
         md.append("## File Information")
         md.append("")
-        for k in ["path", "format", "sample_rate", "channels", "duration_seconds"]:
-            if k in info:
-                md.append(f"- {k}: `{info[k]}`")
+        # Map to actual fields in audio_info (from AudioLoader.get_audio_info)
+        for k in ["format", "subtype", "sample_rate", "channels", "duration", "frames"]:
+            if k in audio_info:
+                md.append(f"- {k}: `{audio_info[k]}`")
         md.append("")
     return md
 
 
 def _preprocessing_lines(results: dict) -> List[str]:
     md: List[str] = []
-    pre = results.get("preprocessing")
+    metadata = results.get("metadata", {})
+    if not isinstance(metadata, dict):
+        return md
+    
+    pre = metadata.get("preprocessing")
     if isinstance(pre, dict):
         md.append("## Preprocessing")
         md.append("")
-        for k, v in pre.items():
-            md.append(f"- {k}: `{v}`")
+        # Structure is nested: {"normalize": {"enabled": bool}, "segmentation": {"enabled": bool}}
+        for key, value in pre.items():
+            if isinstance(value, dict):
+                # Extract enabled status or other nested fields
+                enabled = value.get("enabled")
+                if enabled is not None:
+                    md.append(f"- {key}: enabled={enabled}")
+                else:
+                    # If other nested structure, display as-is
+                    md.append(f"- {key}: `{value}`")
+            else:
+                md.append(f"- {key}: `{value}`")
         md.append("")
     return md
 
@@ -177,21 +193,28 @@ def _extract_scalar_metrics(measurements: Any) -> List[Tuple[str, str, Any]]:
     Returns list of (scope_key, metric_name, value) where:
     - scope_key is e.g. "global", "L", "R", "L-R", "L/R", etc.
     - metric_name is the scalar key
-    - value is the scalar
+    - value is the scalar (with string "True"/"False" normalized to bool)
     """
     out: List[Tuple[str, str, Any]] = []
     if not isinstance(measurements, dict):
         return out
 
+    def _normalize_value(v: Any) -> Any:
+        """Normalize string booleans to actual booleans."""
+        if isinstance(v, str) and v in ("True", "False"):
+            return (v == "True")
+        return v
+
     for scope_key, scope_val in measurements.items():
         if isinstance(scope_val, dict):
             for metric_name, v in scope_val.items():
+                # Accept only actual scalar types (no lists or dicts)
                 if isinstance(v, (int, float, str, bool)) or v is None:
-                    if isinstance(v, (list, dict)):
-                        continue
+                    v = _normalize_value(v)
                     out.append((str(scope_key), str(metric_name), v))
         else:
             if isinstance(scope_val, (int, float, str, bool)) or scope_val is None:
+                scope_val = _normalize_value(scope_val)
                 out.append(("global", str(scope_key), scope_val))
     return out
 

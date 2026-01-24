@@ -1,6 +1,6 @@
-# SAP² Analysis Report
+# SAP² Analysis Report (draft - in progress)
 
-- SAT source: `C:\MORSE_AM\results.json`
+- SAT source: `..\MORSE_AM\results.json`
 - Matrix schema_version: `1.0`
 
 ## Channel: mono

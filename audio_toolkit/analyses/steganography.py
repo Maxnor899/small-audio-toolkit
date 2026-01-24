@@ -91,6 +91,7 @@ def quantization_noise(context: AnalysisContext, params: Dict[str, Any]) -> Anal
     Quantization noise structure analysis.
     """
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -128,12 +129,20 @@ def quantization_noise(context: AnalysisContext, params: Dict[str, Any]) -> Anal
             'spectral_flatness': float(flatness),
             'samples_analyzed': len(audio_subset)
         }
+        freqs = np.fft.rfftfreq(len(noise), 1 / context.sample_rate)
+        max_autocorr = min(len(autocorr), 1000)
+        visualization_data[channel_name] = {
+            'autocorrelation': autocorr[:max_autocorr],
+            'frequencies': freqs,
+            'spectrum': noise_spectrum
+        }
     
     logger.info(f"Quantization noise for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='quantization_noise',
-        measurements=measurements
+        measurements=measurements,
+        visualization_data=visualization_data
     )
 
 
@@ -146,6 +155,7 @@ def signal_residual(context: AnalysisContext, params: Dict[str, Any]) -> Analysi
     cutoff_freq = params.get('cutoff_freq', 1000)
     
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -189,13 +199,20 @@ def signal_residual(context: AnalysisContext, params: Dict[str, Any]) -> Analysi
             'energy_ratio': float(residual_power / (signal_power + 1e-10)),
             'samples_analyzed': len(audio_subset)
         }
+        max_waveform = min(len(residual), 100000)
+        visualization_data[channel_name] = {
+            'residual_waveform': residual[:max_waveform],
+            'residual_spectrum': residual_spectrum,
+            'frequencies': freqs
+        }
     
     logger.info(f"Signal residual for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='signal_residual',
         measurements=measurements,
-        metrics={'cutoff_freq': cutoff_freq}
+        metrics={'cutoff_freq': cutoff_freq},
+        visualization_data=visualization_data
     )
 
 

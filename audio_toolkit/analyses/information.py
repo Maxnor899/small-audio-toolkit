@@ -22,6 +22,7 @@ def shannon_entropy(context: AnalysisContext, params: Dict[str, Any]) -> Analysi
     num_bins = params.get('num_bins', 256)
     
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -52,13 +53,19 @@ def shannon_entropy(context: AnalysisContext, params: Dict[str, Any]) -> Analysi
             'normalized_entropy': float(normalized_entropy),
             'num_bins': num_bins
         }
+        visualization_data[channel_name] = {
+            'shannon_entropy': float(entropy),
+            'max_entropy': float(max_entropy),
+            'normalized_entropy': float(normalized_entropy)
+        }
     
     logger.info(f"Shannon entropy for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='shannon_entropy',
         measurements=measurements,
-        metrics={'num_bins': num_bins}
+        metrics={'num_bins': num_bins},
+        visualization_data=visualization_data
     )
 
 
@@ -142,6 +149,7 @@ def compression_ratio(context: AnalysisContext, params: Dict[str, Any]) -> Analy
     Estimate compression ratio (gzip).
     """
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -173,12 +181,18 @@ def compression_ratio(context: AnalysisContext, params: Dict[str, Any]) -> Analy
             'compression_ratio': float(ratio),
             'samples_analyzed': len(audio_subset)
         }
+        visualization_data[channel_name] = {
+            'compression_ratio': float(ratio),
+            'original_size': original_size,
+            'compressed_size': compressed_size
+        }
     
     logger.info(f"Compression ratio for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='compression_ratio',
-        measurements=measurements
+        measurements=measurements,
+        visualization_data=visualization_data
     )
 
 
@@ -190,6 +204,7 @@ def approximate_complexity(context: AnalysisContext, params: Dict[str, Any]) -> 
     r_factor = params.get('r_factor', 0.2)  # Tolerance factor
     
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -238,13 +253,19 @@ def approximate_complexity(context: AnalysisContext, params: Dict[str, Any]) -> 
             'tolerance': float(r),
             'samples_analyzed': len(audio_subset)
         }
+        visualization_data[channel_name] = {
+            'approximate_complexity': float(complexity),
+            'pattern_length': m,
+            'tolerance': float(r)
+        }
     
     logger.info(f"Approximate complexity for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='approximate_complexity',
         measurements=measurements,
-        metrics={'m': m, 'r_factor': r_factor}
+        metrics={'m': m, 'r_factor': r_factor},
+        visualization_data=visualization_data
     )
 
 

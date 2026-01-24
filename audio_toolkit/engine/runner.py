@@ -315,6 +315,15 @@ class AnalysisRunner:
                         f"Pulse Detection - {channel}",
                     )
 
+        elif method == "duration_ratios":
+            for channel, data in viz_data.items():
+                if "ratios" in data:
+                    self.visualizer.plot_duration_ratios(
+                        np.asarray(data["ratios"]),
+                        viz_dir / f"duration_ratios_{channel}",
+                        f"Duration Ratios - {channel}",
+                    )
+
         # ========================================
         # SPECTRAL
         # ========================================
@@ -384,6 +393,19 @@ class AnalysisRunner:
                         float(data["upper_bound"]),
                         viz_dir / f"spectral_bandwidth_{channel}",
                         f"Spectral Bandwidth - {channel}",
+                    )
+
+        elif method == "spectral_flatness":
+            for channel, data in viz_data.items():
+                if all(k in data for k in ["spectral_flatness", "tonality"]):
+                    self.visualizer.plot_metric_bars(
+                        {
+                            "Flatness": float(data["spectral_flatness"]),
+                            "Tonality": float(data["tonality"]),
+                        },
+                        viz_dir / f"spectral_flatness_{channel}",
+                        f"Spectral Flatness - {channel}",
+                        "Value",
                     )
 
         # ========================================
@@ -510,6 +532,27 @@ class AnalysisRunner:
                         "L-R Difference Spectrum",
                     )
 
+        elif method == "phase_difference":
+            for pair_key, data in viz_data.items():
+                if all(k in data for k in ["times", "phase_difference"]):
+                    self.visualizer.plot_phase_difference(
+                        np.asarray(data["times"]),
+                        np.asarray(data["phase_difference"]),
+                        viz_dir / f"phase_difference_{pair_key}",
+                        f"Phase Difference - {pair_key}",
+                    )
+
+        elif method == "time_delay":
+            for pair_key, data in viz_data.items():
+                if all(k in data for k in ["lags", "correlation", "delay_samples"]):
+                    self.visualizer.plot_time_delay(
+                        np.asarray(data["lags"]),
+                        np.asarray(data["correlation"]),
+                        int(data["delay_samples"]),
+                        viz_dir / f"time_delay_{pair_key}",
+                        f"Time Delay - {pair_key}",
+                    )
+
         # ========================================
         # INFORMATION
         # ========================================
@@ -523,6 +566,39 @@ class AnalysisRunner:
                         viz_dir / f"local_entropy_{channel}",
                         f"Local Entropy Evolution - {channel}",
                         "Entropy (bits)",
+                    )
+
+        elif method == "shannon_entropy":
+            for channel, data in viz_data.items():
+                if all(k in data for k in ["shannon_entropy", "normalized_entropy"]):
+                    self.visualizer.plot_metric_bars(
+                        {
+                            "Entropy": float(data["shannon_entropy"]),
+                            "Normalized": float(data["normalized_entropy"]),
+                        },
+                        viz_dir / f"shannon_entropy_{channel}",
+                        f"Shannon Entropy - {channel}",
+                        "Entropy (bits)",
+                    )
+
+        elif method == "compression_ratio":
+            for channel, data in viz_data.items():
+                if "compression_ratio" in data:
+                    self.visualizer.plot_metric_bars(
+                        {"Ratio": float(data["compression_ratio"])},
+                        viz_dir / f"compression_ratio_{channel}",
+                        f"Compression Ratio - {channel}",
+                        "Ratio",
+                    )
+
+        elif method == "approximate_complexity":
+            for channel, data in viz_data.items():
+                if "approximate_complexity" in data:
+                    self.visualizer.plot_metric_bars(
+                        {"Complexity": float(data["approximate_complexity"])},
+                        viz_dir / f"approximate_complexity_{channel}",
+                        f"Approximate Complexity - {channel}",
+                        "Value",
                     )
 
         # ========================================
@@ -539,6 +615,24 @@ class AnalysisRunner:
                         float(data["centroid_mean"]),
                         viz_dir / f"stability_scores_{channel}",
                         f"Stability Analysis - {channel}",
+                    )
+
+        elif method == "inter_segment_comparison":
+            for channel, data in viz_data.items():
+                if "distance_matrix" in data:
+                    self.visualizer.plot_distance_heatmap(
+                        np.asarray(data["distance_matrix"]),
+                        viz_dir / f"inter_segment_comparison_{channel}",
+                        f"Inter-Segment Distances - {channel}",
+                    )
+
+        elif method == "segment_clustering":
+            for channel, data in viz_data.items():
+                if "distance_matrix" in data:
+                    self.visualizer.plot_distance_heatmap(
+                        np.asarray(data["distance_matrix"]),
+                        viz_dir / f"segment_clustering_{channel}",
+                        f"Segment Clustering Distances - {channel}",
                     )
 
 
@@ -637,6 +731,29 @@ class AnalysisRunner:
                         float(data["z_threshold"]),
                         viz_dir / f"statistical_anomalies_{channel}",
                         f"Statistical Anomalies - {channel}",
+                    )
+
+        elif method == "quantization_noise":
+            for channel, data in viz_data.items():
+                if all(k in data for k in ["autocorrelation", "frequencies", "spectrum"]):
+                    self.visualizer.plot_quantization_noise(
+                        np.asarray(data["autocorrelation"]),
+                        np.asarray(data["frequencies"]),
+                        np.asarray(data["spectrum"]),
+                        viz_dir / f"quantization_noise_{channel}",
+                        f"Quantization Noise - {channel}",
+                    )
+
+        elif method == "signal_residual":
+            for channel, data in viz_data.items():
+                if all(k in data for k in ["residual_waveform", "frequencies", "residual_spectrum"]):
+                    self.visualizer.plot_signal_residual(
+                        np.asarray(data["residual_waveform"]),
+                        self.context.sample_rate,
+                        np.asarray(data["frequencies"]),
+                        np.asarray(data["residual_spectrum"]),
+                        viz_dir / f"signal_residual_{channel}",
+                        f"Signal Residual - {channel}",
                     )
 
         # ========================================

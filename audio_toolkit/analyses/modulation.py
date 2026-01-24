@@ -237,6 +237,7 @@ def modulation_index(context: AnalysisContext, params: Dict[str, Any]) -> Analys
         AnalysisResult with modulation index
     """
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -259,12 +260,17 @@ def modulation_index(context: AnalysisContext, params: Dict[str, Any]) -> Analys
             'dc_component': float(dc),
             'peak_to_average_ratio': float(np.max(envelope) / (np.mean(envelope) + 1e-10))
         }
+        visualization_data[channel_name] = {
+            'modulation_index': float(mod_index),
+            'modulation_depth': float(mod_depth)
+        }
     
     logger.info(f"Modulation index for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='modulation_index',
-        measurements=measurements
+        measurements=measurements,
+        visualization_data=visualization_data
     )
 
 

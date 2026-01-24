@@ -1284,6 +1284,182 @@ def plot_mutual_information(
     save_figure(fig, output_path, formats, dpi)
     plt.close(fig)
 
+
+def plot_metric_bars(
+    metrics: Dict[str, float],
+    output_path: Path,
+    title: str,
+    ylabel: str,
+    figsize: tuple = (6, 4),
+    dpi: int = 150,
+    formats: list = ["png"],
+) -> None:
+    """Plot a simple bar chart of scalar metrics."""
+    if not metrics:
+        return
+    fig, ax = plt.subplots(figsize=figsize)
+    labels = list(metrics.keys())
+    values = [metrics[label] for label in labels]
+    ax.bar(labels, values, color="slateblue", alpha=0.8)
+    ax.set_title(title)
+    ax.set_ylabel(ylabel)
+    ax.grid(True, axis="y", alpha=0.25)
+    plt.xticks(rotation=20, ha="right")
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
+def plot_duration_ratios(
+    ratios: np.ndarray,
+    output_path: Path,
+    title: str,
+    figsize: tuple = (10, 5),
+    dpi: int = 150,
+    formats: list = ["png"],
+) -> None:
+    """Plot duration ratios over event index and histogram."""
+    if len(ratios) == 0:
+        return
+    fig, axes = plt.subplots(1, 2, figsize=figsize)
+    axes[0].plot(np.arange(len(ratios)), ratios, color="teal", linewidth=1.0)
+    axes[0].set_title("Ratios by event index")
+    axes[0].set_xlabel("Event index")
+    axes[0].set_ylabel("Interval ratio")
+    axes[0].grid(True, alpha=0.25)
+    axes[1].hist(ratios, bins=20, color="orange", alpha=0.8)
+    axes[1].set_title("Ratio distribution")
+    axes[1].set_xlabel("Interval ratio")
+    axes[1].set_ylabel("Count")
+    fig.suptitle(title)
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
+def plot_distance_heatmap(
+    distance_matrix: np.ndarray,
+    output_path: Path,
+    title: str,
+    figsize: tuple = (6, 5),
+    dpi: int = 150,
+    formats: list = ["png"],
+) -> None:
+    """Plot a distance matrix heatmap."""
+    fig, ax = plt.subplots(figsize=figsize)
+    im = ax.imshow(distance_matrix, cmap="viridis", aspect="auto")
+    ax.set_title(title)
+    ax.set_xlabel("Segment index")
+    ax.set_ylabel("Segment index")
+    fig.colorbar(im, ax=ax, shrink=0.8)
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
+def plot_phase_difference(
+    times: np.ndarray,
+    phase_difference: np.ndarray,
+    output_path: Path,
+    title: str,
+    figsize: tuple = (10, 4),
+    dpi: int = 150,
+    formats: list = ["png"],
+) -> None:
+    """Plot phase difference over time."""
+    fig, ax = plt.subplots(figsize=figsize)
+    ax.plot(times, phase_difference, color="purple", linewidth=0.8)
+    ax.set_title(title)
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("Phase difference (rad)")
+    ax.grid(True, alpha=0.25)
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
+def plot_time_delay(
+    lags: np.ndarray,
+    correlation: np.ndarray,
+    delay_samples: int,
+    output_path: Path,
+    title: str,
+    figsize: tuple = (10, 4),
+    dpi: int = 150,
+    formats: list = ["png"],
+) -> None:
+    """Plot cross-correlation around detected delay."""
+    fig, ax = plt.subplots(figsize=figsize)
+    ax.plot(lags, correlation, color="navy", linewidth=0.9)
+    ax.axvline(delay_samples, color="red", linestyle="--", label=f"Delay: {delay_samples} samples")
+    ax.set_title(title)
+    ax.set_xlabel("Lag (samples)")
+    ax.set_ylabel("Correlation")
+    ax.legend()
+    ax.grid(True, alpha=0.25)
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
+def plot_quantization_noise(
+    autocorrelation: np.ndarray,
+    frequencies: np.ndarray,
+    spectrum: np.ndarray,
+    output_path: Path,
+    title: str,
+    figsize: tuple = (10, 5),
+    dpi: int = 150,
+    formats: list = ["png"],
+) -> None:
+    """Plot quantization noise autocorrelation and spectrum."""
+    fig, axes = plt.subplots(1, 2, figsize=figsize)
+    axes[0].plot(autocorrelation, color="darkgreen", linewidth=0.9)
+    axes[0].set_title("Noise autocorrelation")
+    axes[0].set_xlabel("Lag")
+    axes[0].set_ylabel("Correlation")
+    axes[0].grid(True, alpha=0.25)
+    axes[1].plot(frequencies, 20 * np.log10(np.maximum(spectrum, 1e-12)), color="darkorange", linewidth=0.9)
+    axes[1].set_title("Noise spectrum (dB)")
+    axes[1].set_xlabel("Frequency (Hz)")
+    axes[1].set_ylabel("Magnitude (dB)")
+    axes[1].grid(True, alpha=0.25)
+    fig.suptitle(title)
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
+def plot_signal_residual(
+    residual_waveform: np.ndarray,
+    sample_rate: int,
+    frequencies: np.ndarray,
+    residual_spectrum: np.ndarray,
+    output_path: Path,
+    title: str,
+    figsize: tuple = (10, 5),
+    dpi: int = 150,
+    formats: list = ["png"],
+) -> None:
+    """Plot residual waveform and spectrum."""
+    fig, axes = plt.subplots(1, 2, figsize=figsize)
+    times = np.arange(len(residual_waveform)) / float(sample_rate)
+    axes[0].plot(times, residual_waveform, color="crimson", linewidth=0.8)
+    axes[0].set_title("Residual waveform")
+    axes[0].set_xlabel("Time (s)")
+    axes[0].set_ylabel("Amplitude")
+    axes[0].grid(True, alpha=0.25)
+    axes[1].plot(frequencies, 20 * np.log10(np.maximum(residual_spectrum, 1e-12)), color="teal", linewidth=0.9)
+    axes[1].set_title("Residual spectrum (dB)")
+    axes[1].set_xlabel("Frequency (Hz)")
+    axes[1].set_ylabel("Magnitude (dB)")
+    axes[1].grid(True, alpha=0.25)
+    fig.suptitle(title)
+    fig.tight_layout()
+    save_figure(fig, output_path, formats, dpi)
+    plt.close(fig)
+
+
 class Visualizer:
     """
     Lightweight wrapper around functional plotters.
@@ -1383,6 +1559,7 @@ class Visualizer:
 
     def plot_stability_dual(self, times, energy, spectral_centroid, energy_mean, centroid_mean, output_path, title="Stability Analysis"):
         plot_stability_dual(times, energy, spectral_centroid, energy_mean, centroid_mean, output_path, title, self.figsize, self.dpi, self.formats)
+
     def plot_spectral_rolloff(self, frequencies, spectrum, rolloff_frequency, rolloff_percent, output_path, title="Spectral Rolloff"):
         plot_spectral_rolloff(frequencies, spectrum, rolloff_frequency, rolloff_percent, output_path, title, self.figsize, self.dpi, self.formats)
 
@@ -1406,3 +1583,24 @@ class Visualizer:
 
     def plot_mutual_information(self, channel_names, mi_matrix, mi_pairs, output_path, title="Mutual Information"):
         plot_mutual_information(channel_names, mi_matrix, mi_pairs, output_path, title, self.figsize, self.dpi, self.formats)
+
+    def plot_metric_bars(self, metrics, output_path, title, ylabel):
+        plot_metric_bars(metrics, output_path, title, ylabel, self.figsize, self.dpi, self.formats)
+
+    def plot_duration_ratios(self, ratios, output_path, title):
+        plot_duration_ratios(ratios, output_path, title, self.figsize, self.dpi, self.formats)
+
+    def plot_distance_heatmap(self, distance_matrix, output_path, title):
+        plot_distance_heatmap(distance_matrix, output_path, title, self.figsize, self.dpi, self.formats)
+
+    def plot_phase_difference(self, times, phase_difference, output_path, title):
+        plot_phase_difference(times, phase_difference, output_path, title, self.figsize, self.dpi, self.formats)
+
+    def plot_time_delay(self, lags, correlation, delay_samples, output_path, title):
+        plot_time_delay(lags, correlation, delay_samples, output_path, title, self.figsize, self.dpi, self.formats)
+
+    def plot_quantization_noise(self, autocorrelation, frequencies, spectrum, output_path, title):
+        plot_quantization_noise(autocorrelation, frequencies, spectrum, output_path, title, self.figsize, self.dpi, self.formats)
+
+    def plot_signal_residual(self, residual_waveform, sample_rate, frequencies, residual_spectrum, output_path, title):
+        plot_signal_residual(residual_waveform, sample_rate, frequencies, residual_spectrum, output_path, title, self.figsize, self.dpi, self.formats)

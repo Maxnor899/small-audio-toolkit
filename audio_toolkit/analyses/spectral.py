@@ -255,6 +255,7 @@ def spectral_flatness(context: AnalysisContext, params: Dict[str, Any]) -> Analy
         AnalysisResult with flatness values
     """
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -271,12 +272,17 @@ def spectral_flatness(context: AnalysisContext, params: Dict[str, Any]) -> Analy
             'spectral_flatness': float(flatness),
             'tonality': float(1.0 - flatness)
         }
+        visualization_data[channel_name] = {
+            'spectral_flatness': float(flatness),
+            'tonality': float(1.0 - flatness)
+        }
     
     logger.info(f"Computed spectral flatness for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='spectral_flatness',
-        measurements=measurements
+        measurements=measurements,
+        visualization_data=visualization_data
     )
 
 

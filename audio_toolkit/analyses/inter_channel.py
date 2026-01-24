@@ -172,6 +172,7 @@ def phase_difference(context: AnalysisContext, params: Dict[str, Any]) -> Analys
         AnalysisResult with phase difference data
     """
     measurements = {}
+    visualization_data = {}
     
     channels = list(context.audio_data.keys())
     if len(channels) < 2:
@@ -220,12 +221,23 @@ def phase_difference(context: AnalysisContext, params: Dict[str, Any]) -> Analys
                 'in_phase': abs(phase_diff_mean) < np.pi / 4,
                 'out_of_phase': abs(abs(phase_diff_mean) - np.pi) < np.pi / 4
             }
+            max_samples = 100000
+            if len(phase_diff) > max_samples:
+                phase_subset = phase_diff[:max_samples]
+            else:
+                phase_subset = phase_diff
+            times = np.arange(len(phase_subset)) / context.sample_rate
+            visualization_data[pair_key] = {
+                'times': times,
+                'phase_difference': phase_subset
+            }
     
     logger.info(f"Phase difference for {len(measurements)} channel pairs")
     
     return AnalysisResult(
         method='phase_difference',
-        measurements=measurements
+        measurements=measurements,
+        visualization_data=visualization_data
     )
 
 
@@ -244,6 +256,7 @@ def time_delay(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResu
     max_samples = params.get('max_samples', 50000)  # CRITICAL: limit samples for performance
     
     measurements = {}
+    visualization_data = {}
     
     channels = list(context.audio_data.keys())
     if len(channels) < 2:
@@ -289,13 +302,20 @@ def time_delay(context: AnalysisContext, params: Dict[str, Any]) -> AnalysisResu
                 'correlation_at_delay': float(local_corr[peak_idx]),
                 'is_synchronized': abs(delay_samples) < 5
             }
+            lags = np.arange(-max_delay, max_delay)
+            visualization_data[pair_key] = {
+                'lags': lags,
+                'correlation': local_corr,
+                'delay_samples': int(delay_samples)
+            }
     
     logger.info(f"Time delay for {len(measurements)} channel pairs")
     
     return AnalysisResult(
         method='time_delay',
         measurements=measurements,
-        metrics={'max_delay': max_delay, 'max_samples': max_samples}
+        metrics={'max_delay': max_delay, 'max_samples': max_samples},
+        visualization_data=visualization_data
     )
 
 

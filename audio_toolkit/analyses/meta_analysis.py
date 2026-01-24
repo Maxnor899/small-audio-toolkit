@@ -22,6 +22,7 @@ def inter_segment_comparison(context: AnalysisContext, params: Dict[str, Any]) -
     num_segments = params.get('num_segments', 10)
     
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -46,11 +47,16 @@ def inter_segment_comparison(context: AnalysisContext, params: Dict[str, Any]) -
         
         features = np.array(features)
         
+        distance_matrix = np.zeros((len(features), len(features)))
         distances = []
         for i in range(len(features)):
-            for j in range(i+1, len(features)):
+            for j in range(len(features)):
+                if i == j:
+                    continue
                 dist = euclidean(features[i], features[j])
-                distances.append(dist)
+                distance_matrix[i, j] = dist
+                if j > i:
+                    distances.append(dist)
         
         distances = np.array(distances)
         
@@ -69,13 +75,18 @@ def inter_segment_comparison(context: AnalysisContext, params: Dict[str, Any]) -
             'max_distance': float(max_distance),
             'similarity_score': float(similarity_score)
         }
+        visualization_data[channel_name] = {
+            'distance_matrix': distance_matrix,
+            'num_segments': num_segments
+        }
     
     logger.info(f"Inter-segment comparison for {len(measurements)} channels")
     
     return AnalysisResult(
         method='inter_segment_comparison',
         measurements=measurements,
-        metrics={'num_segments': num_segments}
+        metrics={'num_segments': num_segments},
+        visualization_data=visualization_data
     )
 
 
@@ -86,6 +97,7 @@ def segment_clustering(context: AnalysisContext, params: Dict[str, Any]) -> Anal
     num_segments = params.get('num_segments', 20)
     
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -133,13 +145,18 @@ def segment_clustering(context: AnalysisContext, params: Dict[str, Any]) -> Anal
             'unique_segments': unique_segments,
             'repetition_rate': float(1.0 - unique_segments / num_segments)
         }
+        visualization_data[channel_name] = {
+            'distance_matrix': distance_matrix,
+            'num_segments': num_segments
+        }
     
     logger.info(f"Segment clustering for {len(measurements)} channels")
     
     return AnalysisResult(
         method='segment_clustering',
         measurements=measurements,
-        metrics={'num_segments': num_segments}
+        metrics={'num_segments': num_segments},
+        visualization_data=visualization_data
     )
 
 

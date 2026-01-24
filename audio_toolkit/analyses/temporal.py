@@ -210,6 +210,7 @@ def duration_ratios(context: AnalysisContext, params: Dict[str, Any]) -> Analysi
     min_distance = params.get('min_distance', 100)
     
     measurements = {}
+    visualization_data = {}
     
     for channel_name, audio_data in context.audio_data.items():
         
@@ -228,6 +229,9 @@ def duration_ratios(context: AnalysisContext, params: Dict[str, Any]) -> Analysi
                 'ratio_mean': 0.0,
                 'ratio_std': 0.0
             }
+            visualization_data[channel_name] = {
+                'ratios': []
+            }
             continue
         
         intervals = np.diff(peaks)
@@ -245,13 +249,17 @@ def duration_ratios(context: AnalysisContext, params: Dict[str, Any]) -> Analysi
             'ratio_mean': float(np.mean(ratios)) if ratios else 0.0,
             'ratio_std': float(np.std(ratios)) if ratios else 0.0
         }
+        visualization_data[channel_name] = {
+            'ratios': ratios
+        }
     
     logger.info(f"Computed duration ratios for {len(context.audio_data)} channels")
     
     return AnalysisResult(
         method='duration_ratios',
         measurements=measurements,
-        metrics={'threshold': threshold}
+        metrics={'threshold': threshold},
+        visualization_data=visualization_data
     )
 
 
